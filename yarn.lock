@@ -32,7 +32,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@oada/client@npm:^3.0.7, @oada/client@npm:^3.1.2":
+"@oada/client@npm:^3.0.7":
   version: 3.1.2
   resolution: "@oada/client@npm:3.1.2"
   dependencies:
@@ -60,6 +60,37 @@ __metadata:
     utf-8-validate: ^5.0.8
     ws: ^8.4.2
   checksum: 32bf2ba4fa811e2894bc41ccf33c8b7a31383b290a75a8dcbec07a7628bc3c9ee425f99aef869acd75868cf371f97f9c3287b075e856402bc165c2c8b54db5ba
+  languageName: node
+  linkType: hard
+
+"@oada/client@npm:^3.1.3":
+  version: 3.1.3
+  resolution: "@oada/client@npm:3.1.3"
+  dependencies:
+    "@oada/types": ^1.8.1
+    buffer: ^6.0.3
+    bufferutil: ^4.0.6
+    cross-fetch: ^3.1.4
+    debug: ^4.3.3
+    deep-clone: ^3.0.3
+    encoding: ^0.1.13
+    event-iterator: ^2.0.0
+    eventemitter3: ^4.0.7
+    fetch-h2: ^3.0.1
+    file-type: ^16.5.3
+    isomorphic-timers-promises: ^1.0.1
+    isomorphic-ws: ^4.0.1
+    ksuid: ^3.0.0
+    node-abort-controller: ^3.0.1
+    p-queue: ^6.6.2
+    reconnecting-websocket: ^4.4.0
+    resolve-alpn: ^1.2.1
+    supports-color: ^9.2.1
+    tslib: ^2.3.1
+    type-is: ^1.6.18
+    utf-8-validate: ^5.0.8
+    ws: ^8.4.2
+  checksum: 7ccb779078799cadd77423e28db299f8f943c8b5b2c1f01f0d4f9d97f1a215e0f146fa53d1247e002e487973101ffcffc3486d989367befebf477714d5933547
   languageName: node
   linkType: hard
 
@@ -737,7 +768,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "indot_activity@workspace:."
   dependencies:
-    "@oada/client": ^3.1.2
+    "@oada/client": ^3.1.3
     "@oada/jobs": ^3.0.2
     "@tsconfig/node16": ^1.0.2
     "@types/debug": ^4.1.7
