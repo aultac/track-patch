@@ -37,6 +37,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageDependencies": [
             ["@oada/client", "npm:3.1.3"],
             ["@oada/jobs", "npm:3.0.2"],
+            ["@overleaf/o-error", "npm:3.4.0"],
             ["@tsconfig/node16", "npm:1.0.2"],
             ["@types/debug", "npm:4.1.7"],
             ["debug", "virtual:e5e72b8ce4b39c9ab6a47d8d08d725dccb716bd95217c12bbc98e5d3a6b7a9c0525366241540ebcfaa8e5f425c3ad207e651c3544a3bc8b2bdf38c619d2d3045#npm:4.3.3"],
@@ -181,6 +182,15 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["ajv", "npm:8.10.0"],
             ["ajv-formats", "virtual:dabd96754847abe18d0ede34f44937dd069fcc6adc34c76344b5c7015bb5e12e84ccfcefbf6c98951f9a06dbc3b7dfd07b9cff23f8e8c2cfdd19612a9bc3ba5f#npm:2.1.1"],
             ["ajv-formats-draft2019", "virtual:dabd96754847abe18d0ede34f44937dd069fcc6adc34c76344b5c7015bb5e12e84ccfcefbf6c98951f9a06dbc3b7dfd07b9cff23f8e8c2cfdd19612a9bc3ba5f#npm:1.6.1"]
+          ],
+          "linkType": "HARD",
+        }]
+      ]],
+      ["@overleaf/o-error", [
+        ["npm:3.4.0", {
+          "packageLocation": "./.yarn/cache/@overleaf-o-error-npm-3.4.0-eadf5e054d-c710f69437.zip/node_modules/@overleaf/o-error/",
+          "packageDependencies": [
+            ["@overleaf/o-error", "npm:3.4.0"]
           ],
           "linkType": "HARD",
         }]
@@ -974,6 +984,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["indot_activity", "workspace:."],
             ["@oada/client", "npm:3.1.3"],
             ["@oada/jobs", "npm:3.0.2"],
+            ["@overleaf/o-error", "npm:3.4.0"],
             ["@tsconfig/node16", "npm:1.0.2"],
             ["@types/debug", "npm:4.1.7"],
             ["debug", "virtual:e5e72b8ce4b39c9ab6a47d8d08d725dccb716bd95217c12bbc98e5d3a6b7a9c0525366241540ebcfaa8e5f425c3ad207e651c3544a3bc8b2bdf38c619d2d3045#npm:4.3.3"],
