@@ -1,5 +1,4 @@
 {
-  "extends": "@tsconfig/node16",
   "compilerOptions": {
     "stripInternal": true,
     "importHelpers": true,
@@ -17,12 +16,8 @@
     "declaration": true,
     "forceConsistentCasingInFileNames": true,
     "allowJs": true,
-
     "target": "esnext",
     "module": "esnext",
-    "moduleResolution": "node",
-    "rootDir": "src",
-    "outDir": "dist"
-  },
-  "include": [ "src" ]
+    "moduleResolution": "node"
+  }
 }

@@ -1,22 +1,12 @@
 {
   "name": "indot_activity",
-  "packageManager": "yarn@3.1.1",
-  "type": "module",
-  "scripts": {
-    "build": "tsc -b",
-    "dev": "tsc -b -w",
-    "start": "DEBUG=\"*info*,*warn*,*error*,-*client:errors:trace\" node --enable-source-maps dist/index.js"
-  },
+  "packageManager": "yarn@3.2.0",
+  "private": true,
+  "workspaces": [
+    "cli",
+    "app"
+  ],
   "dependencies": {
-    "@oada/client": "^3.1.3",
-    "@oada/jobs": "^3.0.2",
-    "@overleaf/o-error": "^3.4.0",
-    "debug": "^4.3.3",
-    "tslib": "^2.3.1"
-  },
-  "devDependencies": {
-    "@tsconfig/node16": "^1.0.2",
-    "@types/debug": "^4.1.7",
-    "typescript": "^4.5.5"
+    "@tsconfig/node16": "^1.0.2"
   }
 }
