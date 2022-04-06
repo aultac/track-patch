@@ -2,13 +2,20 @@ import { createReadStream } from 'fs';
 import { parse } from 'csv-parse';
 import debug from 'debug';
 import dayjs from 'dayjs';
+import { access, writeFile } from 'fs/promises';
 import fs from 'fs';
-import type { DayTracks } from './types';
+import type { DayTracks, Track } from './types';
 
 const info = debug('indot/cli#load:info');
 const warn = debug('indot/cli#load:warn');
 
 export async function loadFromJSON(): Promise<DayTracks> {
+  try {
+    await access('./data.json', fs.constants.R_OK);
+  } catch(e: any) {
+    warn('./data.json does not exist or is not readable.  You need to run this program with the "tojson" option first.');
+    throw new Error('./data.json does not exist.  Run tojson first.');
+  }
   return (JSON.parse(fs.readFileSync('./data.json').toString()) as DayTracks);
 }
 
@@ -64,19 +71,26 @@ export async function csvToDayTracksJSON(filepath: string): Promise<DayTracks> {
         warn('The VehicleDayTrack had no points or was empty: ', vdt);
         continue;
       }
+      // A track is just the points array indexed by time
+      const trk: Track = {};
       for (const point of vdt.points) {
-        const starttime = vdt.points[0]!.time.unix();
-        vdt.tracks[starttime] = point; // We are just using all the points as a single track for now
+        const time = point.time.unix();
+        trk[time] = point; // We are just using all the points as a single track for now
       }
+
+      // store the track at the start time:
+      const starttime = vdt.points[0]!.time.unix();
+      vdt.tracks[starttime] = trk;
+      delete vdt.points; // don't need points array anymore
     }
   }
 
   return days;
 }
 
-export function writeToJSON(dt: DayTracks) {
+export async function writeToJSON(dt: DayTracks) {
   info('Writing in-memory data to json');
-  fs.writeFileSync('./data.json', JSON.stringify(dt, null, '  '));
+  await writeFile('./data.json', JSON.stringify(dt, null, '  '));
 }
 
 
