@@ -1,7 +1,7 @@
 import debug from 'debug';
 import { Command } from 'commander';
 import { csvToDayTracksJSON, writeToJSON, loadFromJSON } from './load.js';
-import { writeDaysToOADA } from './oada.ts';
+//import { writeDaysToOADA } from './oada.ts';
 
 const info = debug('indot/cli:info');
 const warn = debug('indot/cli:warn');
@@ -48,12 +48,12 @@ program.command('tooada')
   .description('Write all data to oada at /bookmarks/indot-activity/locations/day-index')
   .option('-t, --token <token>', 'Token for OADA')
   .option('-d, --domain <domain>', 'OADA domain', 'localhost')
-  .action(async ({ domain, token }) => {
+  .action(async (/*{ domain, token }*/) => {
     info(`Loading data from json...`);
     const days = loadFromJSON();
-    info(`Writing to OADA...`);
-    writeDaysToOADA(days, { domain, token });
-    info(`Done!`);
+    info(`Writing to OADA NOT YET COMPLETED...`);
+//    writeDaysToOADA(days, { domain, token });
+//    info(`Done!`);
   });
 
 
