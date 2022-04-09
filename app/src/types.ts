@@ -51,3 +51,14 @@ export const DaysTree = {
   }
 };
 
+export type GeoJSONLineProps = {
+  vehicleid: string,
+  maxspeed: number,
+  minspeed: number,
+};
+export type GeoJSONVehicleFeature = GeoJSON.Feature<GeoJSON.MultiLineString, GeoJSONLineProps>;
+export type GeoJSONAllVehicles = {
+  type: 'FeatureCollection',
+  features: GeoJSONVehicleFeature[],
+};
+

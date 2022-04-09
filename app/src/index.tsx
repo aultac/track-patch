@@ -2,12 +2,13 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import './index.css';
-import App from './App';
+import { context, initialContext } from './state';
+import { App } from './App';
 
 ReactDOM.render(
-  <React.StrictMode>
+  <context.Provider value={initialContext}>
     <App />
-  </React.StrictMode>,
+  </context.Provider>,
   document.getElementById('root')
 );
 
