@@ -19,6 +19,7 @@ export async function loadFromJSON(): Promise<DayTracks> {
   return (JSON.parse(fs.readFileSync('./data.json').toString()) as DayTracks);
 }
 
+const kphToMph = (kph: number) => kph * 0.6213712;
 export async function csvToDayTracksJSON(filepath: string): Promise<DayTracks> {
   const days: DayTracks = {};
   // Initialize the parser
@@ -58,7 +59,7 @@ export async function csvToDayTracksJSON(filepath: string): Promise<DayTracks> {
       lat: +(record['geo.Lat']),
       lon: +(record['geo.Long']),
       time: date,
-      speed: +(record['speedkph']),
+      speed: kphToMph(+(record['speedkph'])),
     });
     if (!(count++ % 1000)) info('Finished reading record ', count);
   }
@@ -89,8 +90,8 @@ export async function csvToDayTracksJSON(filepath: string): Promise<DayTracks> {
 }
 
 export async function writeToJSON(dt: DayTracks) {
-  info('Writing in-memory data to json');
-  await writeFile('./data.json', JSON.stringify(dt, null, '  '));
+  info('Writing in-memory data to json at dist/data.json');
+  await writeFile('./dist/data.json', JSON.stringify(dt, null, '  '));
 }
 
 
