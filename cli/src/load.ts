@@ -9,14 +9,15 @@ import type { DayTracks, Track } from './types';
 const info = debug('indot/cli#load:info');
 const warn = debug('indot/cli#load:warn');
 
+const datafilepath = './dist/data.json';
 export async function loadFromJSON(): Promise<DayTracks> {
   try {
-    await access('./data.json', fs.constants.R_OK);
+    await access(datafilepath, fs.constants.R_OK);
   } catch(e: any) {
-    warn('./data.json does not exist or is not readable.  You need to run this program with the "tojson" option first.');
-    throw new Error('./data.json does not exist.  Run tojson first.');
+    warn(`${datafilepath} does not exist or is not readable.  You need to run this program with the "tojson" option first.`);
+    throw new Error(`${datafilepath} does not exist.  Run tojson first.`);
   }
-  return (JSON.parse(fs.readFileSync('./data.json').toString()) as DayTracks);
+  return (JSON.parse(fs.readFileSync(datafilepath).toString()) as DayTracks);
 }
 
 const kphToMph = (kph: number) => kph * 0.6213712;
@@ -91,7 +92,7 @@ export async function csvToDayTracksJSON(filepath: string): Promise<DayTracks> {
 
 export async function writeToJSON(dt: DayTracks) {
   info('Writing in-memory data to json at dist/data.json');
-  await writeFile('./dist/data.json', JSON.stringify(dt, null, '  '));
+  await writeFile(datafilepath, JSON.stringify(dt, null, '  '));
 }
 
 

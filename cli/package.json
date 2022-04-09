@@ -7,7 +7,9 @@
   "scripts": {
     "build": "tsc -b",
     "dev": "tsc -b -w",
-    "cli": "node dist/index.js"
+    "cli": "node dist/index.js",
+    "summary": "yarn cli summary",
+    "tojson": "yarn cli tojson"
   },
   "dependencies": {
     "@oada/client": "^3.1.5",

@@ -1,0 +1,19 @@
+node_modules/
+.env
+
+.history
+.dccache
+
+# ts build stuff
+dist/
+dist-browser/
+*.tsbuildinfo
+
+# yarn 2 stuff
+/.yarn/*
+!/.yarn/releases/
+!/.yarn/plugins/
+!/.yarn/versions/
+.pnp.*
+# ignore sdk stuff
+.vim

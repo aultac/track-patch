@@ -3089,6 +3089,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["@types/node", "npm:16.11.26"],\
             ["@types/react", "npm:17.0.44"],\
             ["@types/react-dom", "npm:17.0.15"],\
+            ["dayjs", "npm:1.11.0"],\
             ["debug", "virtual:b86a9fb34323a98c6519528ed55faa0d9b44ca8879307c0b29aa384bde47ff59a7d0c9051b31246f14521dfb71ba3c5d6d0b35c29fffc17bf875aa6ad977d9e8#npm:4.3.4"],\
             ["mapbox-gl", "npm:2.8.0"],\
             ["react", "npm:18.0.0"],\
@@ -16610,7 +16611,8 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["@types/mapbox-gl", "npm:2.6.3"],\
             ["@types/react", "npm:17.0.44"],\
             ["mapbox-gl", "npm:2.8.0"],\
-            ["react", "npm:18.0.0"]\
+            ["react", "npm:18.0.0"],\
+            ["react-dom", "virtual:c0a6042cb198e21dee2f2818f61c34d2e3c7ea229ff167d910ef1ac4a6efff9944ec815fe2535762335b13e5d337ac06302ec24f339bbdd64074d5c6a8c4abce#npm:18.0.0"]\
           ],\
           "packagePeers": [\
             "@types/mapbox-gl",\
