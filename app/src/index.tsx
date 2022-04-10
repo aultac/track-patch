@@ -1,15 +1,15 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
+import pkg from '../package.json';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import './index.css';
 import { context, initialContext } from './state';
 import { App } from './App';
 
-ReactDOM.render(
+document.title = `INDOT Patching - v${pkg.version}`;
+createRoot(document.getElementById('root')!).render(
   <context.Provider value={initialContext}>
     <App />
   </context.Provider>,
-  document.getElementById('root')
 );
-
 
