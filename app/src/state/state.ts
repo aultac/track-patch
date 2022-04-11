@@ -19,6 +19,7 @@ export type State = {
   date: string | null,
   days: BigData,
   geojson: BigData,
+  vehicleColors: { [vehicleid: string]: string },
 };
 
 export const state = observable<State>({
@@ -27,6 +28,7 @@ export const state = observable<State>({
   date: null,
   days: { rev: 0 },
   geojson: { rev: 0 },
+  vehicleColors: {},
 });
 
 

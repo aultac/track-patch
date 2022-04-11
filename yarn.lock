@@ -1730,6 +1730,7 @@ __metadata:
     react-scripts: 5.0.0
     tslib: ^2.3.1
     typescript: ^4.6.3
+    uniqolor: ^1.0.2
     web-vitals: ^2.1.4
   languageName: unknown
   linkType: soft
@@ -14904,6 +14905,13 @@ __metadata:
     is-extendable: ^0.1.1
     set-value: ^2.0.1
   checksum: a3464097d3f27f6aa90cf103ed9387541bccfc006517559381a10e0dffa62f465a9d9a09c9b9c3d26d0f4cbe61d4d010e2fbd710fd4bf1267a768ba8a774b0ba
+  languageName: node
+  linkType: hard
+
+"uniqolor@npm:^1.0.2":
+  version: 1.0.2
+  resolution: "uniqolor@npm:1.0.2"
+  checksum: ee6797b32ef15d2313a5bbb652136089ed9ec78f5870f077bedac10b0ef99bf1ee5938400f652cc9e47529d4baf724f5233cdfe58e69dd5c75ba619b11981cab
   languageName: node
   linkType: hard
 

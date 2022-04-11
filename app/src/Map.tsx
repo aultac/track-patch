@@ -30,6 +30,9 @@ export const Map = observer(function Map() {
     );
   }
 
+
+  // A good intro to Mapbox styling expressions is: https://docs.mapbox.com/help/tutorials/mapbox-gl-js-expressions/
+
   return (
     <ReactMapGl
       mapboxAccessToken={MAPBOX_TOKEN}
@@ -42,7 +45,19 @@ export const Map = observer(function Map() {
       mapStyle="mapbox://styles/mapbox/satellite-streets-v11"
     >
       <Source type="geojson" data={geojson}>
-        <Layer id="data" type="line" paint={{ 'line-width': 10, 'line-color': '#FF0000' }} />
+        <Layer id="data" type="line" paint={{
+          'line-color': [ 'get', 'color' ],
+          'line-width': [
+            'interpolate', // this is the "operator" 
+            ['linear'], // arg1 to the 'interpolate' operator
+            ['zoom'], 
+            10,
+            ['/', ['-', 100, ['number', ['get', 'maxspeed']]], 10],
+            13,
+            ['/', ['-', 100, ['number', ['get', 'maxspeed']]], 20],
+          ],
+        }} />
+
       </Source>
     </ReactMapGl>
   );

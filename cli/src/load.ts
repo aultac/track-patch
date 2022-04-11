@@ -20,7 +20,7 @@ export async function loadFromJSON(): Promise<DayTracks> {
   return (JSON.parse(fs.readFileSync(datafilepath).toString()) as DayTracks);
 }
 
-const kphToMph = (kph: number) => kph * 0.6213712;
+const kphToMph = (kph: number) => kph / 0.6213712;
 export async function csvToDayTracksJSON(filepath: string): Promise<DayTracks> {
   const days: DayTracks = {};
   // Initialize the parser

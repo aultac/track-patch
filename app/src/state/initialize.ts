@@ -5,6 +5,7 @@ import debug from 'debug';
 import type { DayTracks } from '@indot-activity/lib';
 import { activity } from './actions';
 import type { GeoJSONVehicleFeature } from '../types';
+import uniqolor from 'uniqolor';
   
 const info = debug("@indot-activity/app#initialize:info");
 const warn = debug("@indot-activity/app#initialize:warn");
@@ -49,6 +50,10 @@ export const initialize = action('initialize', async () => {
   let allfeatures: GeoJSONVehicleFeature[] = [];
   for (const [vehicleid, vehicledaytracks] of Object.entries(day)) {
     info(`Creating track for vehicle ${vehicleid}`);
+
+    // Compute a color for this vehicleid:
+    const { color } = uniqolor(vehicleid);
+
     // Each speed bucket will be a MultiLineString "feature" (since it will be colored/extruded the same).
     // A MultiLineString is just an array of lines, so each line will represet a continuous segment of same-vehicle-same-speedbucket
     
@@ -58,7 +63,7 @@ export const initialize = action('initialize', async () => {
       let minspeed = (i === 0 ? 0 : state.speedbuckets[i-1]!);
       features[i] = {
         type: 'Feature',
-        properties: { vehicleid, maxspeed, minspeed },
+        properties: { vehicleid, maxspeed, minspeed, color },
         geometry: {
           type: 'MultiLineString',
           coordinates: [ 

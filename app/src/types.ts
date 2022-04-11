@@ -55,6 +55,7 @@ export type GeoJSONLineProps = {
   vehicleid: string,
   maxspeed: number,
   minspeed: number,
+  color: string,
 };
 export type GeoJSONVehicleFeature = GeoJSON.Feature<GeoJSON.MultiLineString, GeoJSONLineProps>;
 export type GeoJSONAllVehicles = {

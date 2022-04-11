@@ -3164,6 +3164,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["react-scripts", "virtual:c0a6042cb198e21dee2f2818f61c34d2e3c7ea229ff167d910ef1ac4a6efff9944ec815fe2535762335b13e5d337ac06302ec24f339bbdd64074d5c6a8c4abce#npm:5.0.0"],\
             ["tslib", "npm:2.3.1"],\
             ["typescript", "patch:typescript@npm%3A4.6.3#~builtin<compat/typescript>::version=4.6.3&hash=bda367"],\
+            ["uniqolor", "npm:1.0.2"],\
             ["web-vitals", "npm:2.1.4"]\
           ],\
           "linkType": "SOFT"\
@@ -19629,6 +19630,15 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["get-value", "npm:2.0.6"],\
             ["is-extendable", "npm:0.1.1"],\
             ["set-value", "npm:2.0.1"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["uniqolor", [\
+        ["npm:1.0.2", {\
+          "packageLocation": "./.yarn/cache/uniqolor-npm-1.0.2-e495d12a9f-ee6797b32e.zip/node_modules/uniqolor/",\
+          "packageDependencies": [\
+            ["uniqolor", "npm:1.0.2"]\
           ],\
           "linkType": "HARD"\
         }]\
