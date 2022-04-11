@@ -1,5 +1,6 @@
 {
   "name": "@indot-activity/app",
+  "homepage": "https://aultac.github.io/indot_activity",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
