@@ -1,0 +1,43 @@
+import debug from 'debug';
+import oerror from '@overleaf/o-error';
+import pMap from 'p-map';
+import { tree, DayTracks } from '@indot-activity/lib';
+import { connect } from '@oada/client';
+
+
+const info = debug('@indot-activity/cli#oada:info');
+const warn = debug('@indot-activity/cli#oada:info');
+
+export async function writeDaysToOADA(days: DayTracks, { domain, token }: { domain: string, token: string }): Promise<void> {
+
+  let oada: Awaited<ReturnType<typeof connect>>;
+  try {
+    oada = await connect({ domain, token });
+  } catch(e: any) {
+    warn('WARNING: could not connect to OADA, error was: ', e);
+    throw oerror.tag(e, 'Could not connect to OADA.');
+  }
+  info('Connected to OADA at ', domain);
+
+  let count = 0;
+  const keys = Object.keys(days);
+  await pMap(Object.entries(days), async ([day, vehicles]) =>  {
+    const start = +(new Date());
+    const thisone = count++;
+    const path = `/bookmarks/indot-activity/locations/day-index/${day}`;
+    info('Starting '+thisone+' of ', keys.length, ': ', day);
+    try {
+      await oada.put({
+        path,
+        data: vehicles,
+        tree
+      });
+    } catch(e: any) {
+      info('ERROR: OADA failed to put to path ' , path, '.  Error was: ', e);
+      throw oerror.tag(e, 'Failed to put to path '+path);
+    }
+    info(day, ': Finished ', thisone, ' of ', keys.length, ' in ', +(new Date()) - start, ' ms');
+  }, { concurrency: 1 });
+
+  info('Finished uploading ', keys.length, ' days of data to OADA');
+}

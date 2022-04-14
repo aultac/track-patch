@@ -34,7 +34,7 @@ export type DayTracks = {
 };
 
 // /bookmarks/indot-activity/locations
-export const DaysTree = {
+export const tree = {
   bookmarks: {
     _type: "application/vnd.oada.bookmarks.1+json",
     "indot-activity": {

@@ -6,6 +6,10 @@ import debug from 'debug';
 const warn = debug("accounts#actions:warn");
 const info = debug("accounts#actions:info");
 
+export const page = action('page', (page: typeof state.page): void  => {
+  state.page = page;
+});
+
 export const activity = action('activity', (msg: string | string[] | ActivityMessage | ActivityMessage[], type: ActivityMessage['type'] = 'good') => {
   if (!Array.isArray(msg)) {
     msg = [ msg ] as string[] | ActivityMessage[];

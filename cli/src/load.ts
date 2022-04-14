@@ -4,7 +4,7 @@ import debug from 'debug';
 import dayjs from 'dayjs';
 import { access, writeFile } from 'fs/promises';
 import fs from 'fs';
-import type { DayTracks, Track } from './types';
+import type { DayTracks, Track } from '@indot-activity/lib';
 
 const info = debug('indot/cli#load:info');
 const warn = debug('indot/cli#load:warn');

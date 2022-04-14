@@ -3,7 +3,7 @@ import { Command } from 'commander';
 import { csvToDayTracksJSON, writeToJSON, loadFromJSON } from './load.js';
 import 'dotenv/config'; // loads all environment variables found in .env in project root
  
-//import { writeDaysToOADA } from './oada.ts';
+import { writeDaysToOADA } from './oada.js';
 
 const info = debug('indot/cli:info');
 const warn = debug('indot/cli:warn');
@@ -53,10 +53,9 @@ program.command('tooada')
       throw new Error('ERROR: you did not pass a token in .env or as -t on command line. tooada needs a token');
     }
     info(`Loading data from json...`);
-    const days = loadFromJSON();
-    info(`Writing to OADA NOT YET COMPLETED..., domain = `, domain);
-//    writeDaysToOADA(days, { domain, token });
-//    info(`Done!`);
+    const days = await loadFromJSON();
+    writeDaysToOADA(days, { domain, token });
+    info(`Done!`);
   });
 
 

@@ -14,6 +14,11 @@ export type ActivityMessage = {
 export type BigData = { rev: number };
 
 export type State = {
+  page: 'login' | 'map',
+  oada: {
+    domain: string | null,
+    token: string | null,
+  },
   activityLog: ActivityMessage[],
   speedbuckets: number[],
   date: string | null,
@@ -23,6 +28,11 @@ export type State = {
 };
 
 export const state = observable<State>({
+  page: 'login',
+  oada: {
+    domain: null,
+    token: null,
+  },
   activityLog: [],
   speedbuckets: [ 10, 20, 30, 40 ],
   date: null,

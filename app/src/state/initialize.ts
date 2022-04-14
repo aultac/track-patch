@@ -6,6 +6,8 @@ import type { DayTracks } from '@indot-activity/lib';
 import { activity } from './actions';
 import type { GeoJSONVehicleFeature } from '../types';
 import uniqolor from 'uniqolor';
+import { connect } from '@oada/client';
+import oadaIdClient from '@oada/oada-id-client';
   
 const info = debug("@indot-activity/app#initialize:info");
 const warn = debug("@indot-activity/app#initialize:warn");
@@ -20,15 +22,30 @@ function whichBucket(mph: number): number { // returns array index of which buck
 }
 
 
+const initializeOADA = action('initializeOADA', async () => {
+  const token = state.oada.domain || localStorage.getItem('token');
+  const domain = state.oada.token || localStorage.getItem('domain');
+
+  if (!domain || !token) {
+    state.page = 'login';
+    info('No domain or no token, showing login screen');
+    return;
+  }
+
+  // Otherwise, we can go ahead and connect
+
+});
+
 
 export const initialize = action('initialize', async () => {
   // Hard-code date for now:
   state.date = '2021-04-21';
 
+  await initializeOADA();
+
   // Load the days:
   activity(`Fetching location data for date ${state.date}`);
   try {
-    info('Fetching....');
     const response = await fetch('data.json');
     if (response.status >= 400) throw new Error('Failed to fetch data');
     actions.days(await response.json() as unknown as DayTracks);
