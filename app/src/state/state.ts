@@ -14,7 +14,7 @@ export type ActivityMessage = {
 export type BigData = { rev: number };
 
 export type State = {
-  page: 'login' | 'map',
+  page: 'get-domain' | 'login' | 'map',
   oada: {
     domain: string | null,
     token: string | null,
@@ -28,7 +28,7 @@ export type State = {
 };
 
 export const state = observable<State>({
-  page: 'login',
+  page: 'map',
   oada: {
     domain: null,
     token: null,

@@ -7,11 +7,9 @@ import { activity } from './actions';
 import type { GeoJSONVehicleFeature } from '../types';
 import uniqolor from 'uniqolor';
 import { connect } from '@oada/client';
-import oadaIdClient from '@oada/oada-id-client';
   
 const info = debug("@indot-activity/app#initialize:info");
 const warn = debug("@indot-activity/app#initialize:warn");
-
 
 // Segment lines by "speed buckets": 0-10, 10-20, 20-30, 30-40, 40+
 function whichBucket(mph: number): number { // returns array index of which bucket this mph falls within
@@ -22,31 +20,19 @@ function whichBucket(mph: number): number { // returns array index of which buck
 }
 
 
-const initializeOADA = action('initializeOADA', async () => {
-  const token = state.oada.domain || localStorage.getItem('token');
-  const domain = state.oada.token || localStorage.getItem('domain');
-
-  if (!domain || !token) {
-    state.page = 'login';
-    info('No domain or no token, showing login screen');
-    return;
-  }
-
-  // Otherwise, we can go ahead and connect
-
-});
-
 
 export const initialize = action('initialize', async () => {
   // Hard-code date for now:
   state.date = '2021-04-21';
 
-  await initializeOADA();
+  const token = localStorage.getItem('token');
+  const domain = localStorage.getItem('domain');
+  //await actions.initializeOADA({ token, domain });
 
   // Load the days:
   activity(`Fetching location data for date ${state.date}`);
   try {
-    const response = await fetch('data.json');
+    const response = await fetch('indot_activity/data.json');
     if (response.status >= 400) throw new Error('Failed to fetch data');
     actions.days(await response.json() as unknown as DayTracks);
     activity(`Location data loaded, creating GeoJSON`);
@@ -117,11 +103,10 @@ export const initialize = action('initialize', async () => {
           curline.push(geojson_point);
           curbucket = bkt;
           // Create a new empty line for the next segment
-          curMultiLineCoords().push([]); // empty array to add points to
+          curMultiLineCoords().push([]); // start the new line where the old line left off
           // And now update the current line segment variable here
           curline = curLineSegment();
         }
-        
         // Just add this point to the end of the current line segment (which could be the first point if the line is empty).
         // This duplicates the point at the end of the prior segment and at the start of the next so they are connected.
         curline.push(geojson_point); 

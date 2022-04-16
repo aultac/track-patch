@@ -11,13 +11,23 @@ const warn = debug('indot/app#App:warn');
 
 
 export const App = observer(function App() {
-  const { state } = React.useContext(context);
+  const { state, actions } = React.useContext(context);
   switch(state.page) {
-    case 'login': return (
+
+    case 'get-domain': return (
       <div className="App">
-        Login...
+        OADA Domain: 
+        <input type="text" onChange={evt => { state.oada.domain = evt.target.value; }} value={state.oada.domain || 'https://localhost'} />
+        <button onClick={() => { /*actions.initializeOADA()*/ info('not implemented') }}>Login</button>
       </div>
     );
+
+    case 'login': return (
+      <div className="App">
+        Logging in to {state.oada.domain}...
+      </div>
+    );
+
     case 'map': return (
       <div className="App">
         { /* NavBar */ }
