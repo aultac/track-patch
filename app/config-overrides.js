@@ -1,8 +1,10 @@
 const webpack = require('webpack');
+const dotenv = require('dotenv-webpack');
 
 module.exports = function override(config) {
-  // I needed this at one time to get id-client working, but Alex fixed it.
 
+
+/*
   const fallback = config.resolve.fallback || {};
   Object.assign(fallback, {
     "crypto": require.resolve("crypto-browserify"),
@@ -12,10 +14,13 @@ module.exports = function override(config) {
     "string_decoder": require.resolve("string_decoder/"),
     "util": require.resolve("util/"),
     "url": require.resolve('url/'),
+    "path": require.resolve('path-browserify'),
   })
   config.resolve.fallback = fallback;
 
+*/
   const plugins = config.plugins || [];
+/*
   plugins.push(
     new webpack.NormalModuleReplacementPlugin(
       /node:/,
@@ -24,6 +29,9 @@ module.exports = function override(config) {
       }
     )
   );
+*/
+  plugins.push(new dotenv());
   config.plugins = plugins;
+
   return config;
 }

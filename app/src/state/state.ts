@@ -14,7 +14,7 @@ export type ActivityMessage = {
 export type BigData = { rev: number };
 
 export type State = {
-  page: 'get-domain' | 'login' | 'map',
+  page: 'get-domain' | 'get-token' | 'login' | 'map',
   oada: {
     domain: string | null,
     token: string | null,
@@ -22,7 +22,7 @@ export type State = {
   activityLog: ActivityMessage[],
   speedbuckets: number[],
   date: string | null,
-  days: BigData,
+  daytracks: BigData,
   geojson: BigData,
   vehicleColors: { [vehicleid: string]: string },
 };
@@ -30,15 +30,15 @@ export type State = {
 export const state = observable<State>({
   page: 'map',
   oada: {
-    domain: null,
-    token: null,
+    // Default domain to environment, or load from localstorage if we have it, or it's just empty
+    domain: (process.env.DOMAIN as unknown as string) || localStorage.getItem('domain') || null,
+    token: (process.env.TOKEN as unknown as string) || localStorage.getItem('token') || null,
   },
   activityLog: [],
   speedbuckets: [ 10, 20, 30, 40 ],
   date: null,
-  days: { rev: 0 },
+  daytracks: { rev: 0 },
   geojson: { rev: 0 },
   vehicleColors: {},
 });
-
 

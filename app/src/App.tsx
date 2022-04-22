@@ -18,13 +18,23 @@ export const App = observer(function App() {
       <div className="App">
         OADA Domain: 
         <input type="text" onChange={evt => { state.oada.domain = evt.target.value; }} value={state.oada.domain || 'https://localhost'} />
-        <button onClick={() => { /*actions.initializeOADA()*/ info('not implemented') }}>Login</button>
+        <button onClick={() => { actions.authorize() }}>Go</button>
+        <button onClick={() => { actions.deauthorize() }}>Clear token</button>
+      </div>
+    );
+
+    case 'get-token': return (
+      <div className="App">
+        Logging in to {state.oada.domain} coming soon.
+        For now, please supply a token here:
+        <input type="text" onChange={evt => { state.oada.domain = evt.target.value; }} value={state.oada.token || ''} />
+        <button onClick={() => { actions.authorize() }}>Login</button>
       </div>
     );
 
     case 'login': return (
       <div className="App">
-        Logging in to {state.oada.domain}...
+        Login page not yet implemented.
       </div>
     );
 
