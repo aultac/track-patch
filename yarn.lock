@@ -1707,7 +1707,7 @@ __metadata:
     "@indot-activity/lib": "workspace:^"
     "@mui/icons-material": ^5.6.0
     "@mui/material": ^5.6.0
-    "@oada/client": ^4.0.0
+    "@oada/client": ^4.0.1
     "@oada/id-client": ^2.0.8
     "@oada/types": ^2.0.1
     "@testing-library/jest-dom": ^5.16.4
@@ -1756,7 +1756,7 @@ __metadata:
   resolution: "@indot-activity/cli@workspace:cli"
   dependencies:
     "@indot-activity/lib": "workspace:^"
-    "@oada/client": ^4.0.0
+    "@oada/client": ^4.0.1
     "@overleaf/o-error": ^3.4.0
     "@tsconfig/node16": ^1.0.2
     "@types/debug": ^4.1.7
@@ -2357,9 +2357,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@oada/client@npm:^4.0.0":
-  version: 4.0.0
-  resolution: "@oada/client@npm:4.0.0"
+"@oada/client@npm:^4.0.1":
+  version: 4.0.1
+  resolution: "@oada/client@npm:4.0.1"
   dependencies:
     "@oada/types": ^2.0.1
     abort-controller: ^3.0.0
@@ -2380,11 +2380,11 @@ __metadata:
     reconnecting-websocket: ^4.4.0
     resolve-alpn: ^1.2.1
     supports-color: ^9.2.2
-    tslib: ^2.3.1
+    tslib: ^2.4.0
     utf-8-validate: ^5.0.9
     ws: ^8.5.0
-    xksuid: ^0.0.2
-  checksum: 9f568703c703fa1f11d853e241aaf7b8ab52c9b48293a5dc48b463e76463f515df84c47c9f1f35231ccb28feea57b73476f5e01485a651a82b0db7ae5d2f7497
+    xksuid: "https://github.com/qlever-llc/xksuid.git#commit=5b2761792b1b1b59ea71ab48df1252fcb851e502"
+  checksum: a2af3b5212d13e91078047f2080972bfcaaa0221505341089d2003a06dd9423baf3982a6d261605e8eeaee33daed318f5c34a59884370645f55990907b5e2d12
   languageName: node
   linkType: hard
 
@@ -15766,6 +15766,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"tslib@npm:^2.4.0":
+  version: 2.4.0
+  resolution: "tslib@npm:2.4.0"
+  checksum: 8c4aa6a3c5a754bf76aefc38026134180c053b7bd2f81338cb5e5ebf96fefa0f417bff221592bf801077f5bf990562f6264fecbc42cd3309b33872cb6fc3b113
+  languageName: node
+  linkType: hard
+
 "tsutils@npm:^3.21.0":
   version: 3.21.0
   resolution: "tsutils@npm:3.21.0"
@@ -16853,10 +16860,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"xksuid@npm:^0.0.2":
+"xksuid@https://github.com/qlever-llc/xksuid.git#commit=5b2761792b1b1b59ea71ab48df1252fcb851e502":
   version: 0.0.2
-  resolution: "xksuid@npm:0.0.2"
-  checksum: 0c13c935194b34341a0f504af37c13c8ae4762b51312f7df8bad005258e088b19d218608e459914ad20d8ae1933a60f46f5056aa852bdbfd3bfb50a3b3591bef
+  resolution: "xksuid@https://github.com/qlever-llc/xksuid.git#commit=5b2761792b1b1b59ea71ab48df1252fcb851e502"
+  checksum: 4dd7228bb490ddbbe49da9b916eae09de0bdcd7131a4e04589ae2b4820b8759925085302ca883d73588e568f61a9e2b401c4110487ab84c5c848377e14c35c4b
   languageName: node
   linkType: hard
 
