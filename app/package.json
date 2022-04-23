@@ -56,7 +56,6 @@
   },
   "scripts": {
     "cert": "mkcert -cert-file ./localhost/fullchain.pem -key-file ./localhost/privkey.pem localhost",
-    "predeploy": "yarn run build",
     "deploy": "gh-pages -d build",
     "start": "react-app-rewired start",
     "build": "react-app-rewired build",
