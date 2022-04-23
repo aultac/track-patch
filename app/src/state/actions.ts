@@ -3,7 +3,7 @@ import { state, ActivityMessage } from './state';
 import type { VehicleDayTracks, DayTracks, GeoJSONAllVehicles, GeoJSONVehicleFeature } from '../types';
 import uniqolor from 'uniqolor';
 import debug from 'debug';
-//import { connect } from '@oada/client';
+import { connect } from '@oada/client';
 //import { getAccessToken } from '@oada/id-client';
 
 const warn = debug("accounts#actions:warn");
@@ -13,7 +13,6 @@ const info = debug("accounts#actions:info");
 // OADA functions (authorize, connection)
 //--------------------------------------------------------------------
 
-/*
 // Handy function to ensure we have an oada to make TS happy:
 type OADAType = Awaited<ReturnType<typeof connect>>;
 let _oada: OADAType | null = null;
@@ -22,7 +21,7 @@ export function oada(newoada?: OADAType): OADAType {
   if (!_oada) throw new Error('oada connection was never initialized');
   return _oada;
 }
-*/
+
 
 export const deauthorize = action('deauthorize', () => {
   state.oada.token = '';
@@ -49,7 +48,7 @@ export const authorize = action('authorize', async () => {
     });
     */
   }
-/*
+
   // Otherwise, we can go ahead and connect
   try {
     oada(await connect({domain, token}));
@@ -61,7 +60,7 @@ export const authorize = action('authorize', async () => {
     alert('Failed to connec to OADA');
     return;
   }
-*/
+
   // Make sure everybody has the now-successful stuff for future reference:
   state.oada.domain = domain;
   state.oada.token = token;
