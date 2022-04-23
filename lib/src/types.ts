@@ -43,7 +43,7 @@ export const tree = {
         _type: "application/vnd.oats.indot.locations.1+json",
         'day-index': {
           '*': { // Day's 
-            _type: "applicaiton/vnd.oats.indot.locations.1+json",
+            _type: "application/vnd.oats.indot.locations.1+json",
           }
         }
       }

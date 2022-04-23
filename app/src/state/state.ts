@@ -31,8 +31,8 @@ export const state = observable<State>({
   page: 'map',
   oada: {
     // Default domain to environment, or load from localstorage if we have it, or it's just empty
-    domain: (process.env.DOMAIN as unknown as string) || localStorage.getItem('domain') || null,
-    token: (process.env.TOKEN as unknown as string) || localStorage.getItem('token') || null,
+    domain: '',
+    token: '',
   },
   activityLog: [],
   speedbuckets: [ 10, 20, 30, 40 ],

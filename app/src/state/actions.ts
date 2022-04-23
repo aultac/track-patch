@@ -6,8 +6,8 @@ import debug from 'debug';
 import { connect } from '@oada/client';
 //import { getAccessToken } from '@oada/id-client';
 
-const warn = debug("accounts#actions:warn");
-const info = debug("accounts#actions:info");
+const warn = debug("@indot/app#actions:warn");
+const info = debug("@indot/app#actions:info");
 
 //--------------------------------------------------------------------
 // OADA functions (authorize, connection)
@@ -28,18 +28,18 @@ export const deauthorize = action('deauthorize', () => {
   localStorage.setItem('oada:token', '');
 });
 export const authorize = action('authorize', async () => {
-  let domain = state.oada.domain || localStorage.getItem('oada:domain') || '';
-  let token = state.oada.token || localStorage.getItem('oada:token') || '';
-
-  if (!domain) {
+  let _domain = state.oada.domain || localStorage.getItem('oada:domain') || '';
+  let _token = state.oada.token || localStorage.getItem('oada:token') || '';
+info('Using domain = ', _domain, ', token = ', _token);
+  if (!_domain) {
     state.page = 'get-domain';
     info('No domain or no token, showing login screen');
     return;
   }
 
-  if (!token) {
+  if (!_token) {
     state.page = 'get-token';
-    info('Have a domain of ', domain, ', but no token so starting login process');
+    info('Have a domain of ', _domain, ', but no token so starting login process');
     return;
     /*
     const redirect = window.location.origin + '/handleOAuthRedirect.html';
@@ -51,9 +51,7 @@ export const authorize = action('authorize', async () => {
 
   // Otherwise, we can go ahead and connect
   try {
-    oada(await connect({domain, token}));
-    localStorage.setItem('domain', domain);
-    localStorage.setItem('token', token);
+    oada(await connect({domain: _domain, token: _token}));
   } catch(e: any) {
     activity('Failed to connect to oada');
     warn('Failed to connect to OADA, error was: ', e);
@@ -62,11 +60,25 @@ export const authorize = action('authorize', async () => {
   }
 
   // Make sure everybody has the now-successful stuff for future reference:
-  state.oada.domain = domain;
-  state.oada.token = token;
-  localStorage.setItem('token', token);
-  localStorage.setItem('domain', domain);
+  domain(_domain);
+  token(_token);
 
+  // If we have a date already, go ahead and load it, and show activity:
+  state.page = 'map';
+  if (state.date) {
+    activity('Loading selected date...');
+    selectedDate(state.date);
+  }
+});
+export const domain = action('domain', (domain?: string): void | string | null => {
+  if (!domain) return state.oada.domain;
+  state.oada.domain = domain;
+  localStorage.setItem('oada:domain', domain);
+});
+export const token = action('token', (token?: string): void | string | null => {
+  if (!token) return state.oada.token;
+  state.oada.token = token;
+  localStorage.setItem('oada:token', token);
 });
 
 
@@ -113,11 +125,14 @@ export const selectedDate = action('selectedDate', async (date: string): Promise
   // Grab the tracks for this date
   activity(`Fetching location data for date ${state.date}`);
   try {
-    const dt = await loadDayFromDataFile(state.date);
-    /*
+    //const dt = await loadDayFromDataFile(state.date);
     const path = `/bookmarks/indot-activity/locations/day-index/${state.date}`;
-    const dt = await oada().get({ path }).then(r=>r.data) as any as VehicleDayTracks; // should probably assert this...
-    */
+    let { data } = await oada().get({ path });
+    // remove any oada keys from data:
+    for (const k of Object.keys(data as any)) {
+      if (k.match(/^_/)) delete (data as any)[k];
+    }
+    const dt = data as any as VehicleDayTracks; // should probably assert this...
     daytracks(dt);
     activity(`Location data loaded, creating GeoJSON tracks for the map`);
   } catch(e: any) {
@@ -154,38 +169,40 @@ export const selectedDate = action('selectedDate', async (date: string): Promise
 
     // Now loop over all the tracks for that vehicle (keyed by starttime),
     // then use the speed buckets to break the big track into smaller tracks
-    for (const starttime of Object.keys(vehicledaytracks.tracks).sort()) {
-      const track = vehicledaytracks.tracks[starttime]!;
-      const times = Object.keys(track).sort(); // put sample times in order
-      // initialize curbucket to the first point's speed bucket
-      let curbucket = whichBucket(track[times[0]!]!.speed);
+    if (vehicledaytracks && vehicledaytracks.tracks) {
+      for (const starttime of Object.keys(vehicledaytracks.tracks).sort()) {
+        const track = vehicledaytracks.tracks[starttime]!;
+        const times = Object.keys(track).sort(); // put sample times in order
+        // initialize curbucket to the first point's speed bucket
+        let curbucket = whichBucket(track[times[0]!]!.speed);
 
-      const curMultiLineCoords = (): GeoJSON.Position[][] => features[curbucket]!.geometry.coordinates;
-      // Handy function to get the last line segment for the current speed bucket's feature
-      const curLineSegment = (): GeoJSON.Position[] => { // Position[] is how they represent a line
-        const coords = curMultiLineCoords();
-        return coords[coords.length-1]!;
-      };
+        const curMultiLineCoords = (): GeoJSON.Position[][] => features[curbucket]!.geometry.coordinates;
+        // Handy function to get the last line segment for the current speed bucket's feature
+        const curLineSegment = (): GeoJSON.Position[] => { // Position[] is how they represent a line
+          const coords = curMultiLineCoords();
+          return coords[coords.length-1]!;
+        };
 
-      // Now walk all the points in order
-      for (const time of times) {
-        const point = track[time]!;
-        const geojson_point = [ point.lon, point.lat ];
-        const bkt = whichBucket(point.speed);
+        // Now walk all the points in order
+        for (const time of times) {
+          const point = track[time]!;
+          const geojson_point = [ point.lon, point.lat ];
+          const bkt = whichBucket(point.speed);
 
-        // If this point would switch us to a new bucket, end the previous line here
-        let curline = curLineSegment();
-        if (bkt !== curbucket) {
-          curline.push(geojson_point);
-          curbucket = bkt;
-          // Create a new empty line for the next segment
-          curMultiLineCoords().push([]); // start the new line where the old line left off
-          // And now update the current line segment variable here
-          curline = curLineSegment();
+          // If this point would switch us to a new bucket, end the previous line here
+          let curline = curLineSegment();
+          if (bkt !== curbucket) {
+            curline.push(geojson_point);
+            curbucket = bkt;
+            // Create a new empty line for the next segment
+            curMultiLineCoords().push([]); // start the new line where the old line left off
+            // And now update the current line segment variable here
+            curline = curLineSegment();
+          }
+          // Just add this point to the end of the current line segment (which could be the first point if the line is empty).
+          // This duplicates the point at the end of the prior segment and at the start of the next so they are connected.
+          curline.push(geojson_point); 
         }
-        // Just add this point to the end of the current line segment (which could be the first point if the line is empty).
-        // This duplicates the point at the end of the prior segment and at the start of the next so they are connected.
-        curline.push(geojson_point); 
       }
     }
 

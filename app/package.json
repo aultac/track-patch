@@ -6,8 +6,8 @@
   "dependencies": {
     "@indot-activity/cli": "workspace:^",
     "@indot-activity/lib": "workspace:^",
-    "@mui/icons-material": "^5.6.0",
-    "@mui/material": "^5.6.0",
+    "@mui/icons-material": "^5.6.2",
+    "@mui/material": "^5.6.2",
     "@oada/client": "^4.0.1",
     "@oada/id-client": "^2.0.8",
     "@oada/types": "^2.0.1",
@@ -53,6 +53,7 @@
     "webpack": "^5.72.0"
   },
   "scripts": {
+    "cert": "mkcert -cert-file ./localhost/fullchain.pem -key-file ./localhost/privkey.pem localhost",
     "start": "react-app-rewired start",
     "build": "react-app-rewired build",
     "test": "react-app-rewired test",
