@@ -20,7 +20,6 @@ module.exports = function override(config) {
 
 */
   const plugins = config.plugins || [];
-/*
   plugins.push(
     new webpack.NormalModuleReplacementPlugin(
       /node:/,
@@ -29,7 +28,6 @@ module.exports = function override(config) {
       }
     )
   );
-*/
   plugins.push(new dotenv());
   config.plugins = plugins;
 

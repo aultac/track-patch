@@ -8,7 +8,7 @@
     "@indot-activity/lib": "workspace:^",
     "@mui/icons-material": "^5.6.0",
     "@mui/material": "^5.6.0",
-    "@oada/client": "^4.0.0",
+    "@oada/client": "^4.0.1",
     "@oada/id-client": "^2.0.8",
     "@oada/types": "^2.0.1",
     "@testing-library/jest-dom": "^5.16.4",

@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "@indot-activity/lib": "workspace:^",
-    "@oada/client": "^4.0.0",
+    "@oada/client": "^4.0.1",
     "@overleaf/o-error": "^3.4.0",
     "@tsconfig/node16": "^1.0.2",
     "@types/debug": "^4.1.7",
