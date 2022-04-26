@@ -5,11 +5,11 @@ import 'dotenv/config'; // loads all environment variables found in .env in proj
  
 import { writeDaysToOADA } from './oada.js';
 
-const info = debug('indot/cli:info');
-const warn = debug('indot/cli:warn');
+const info = debug('trackpatch/cli:info');
+const warn = debug('trackpatch/cli:warn');
 
 const program = new Command();
-program.name('INDOT Activity CLI');
+program.name('Track-Patch Command-line Interface');
 
 program.command('tojson')
   .description('Create ./data.json from given csv file')
@@ -44,7 +44,7 @@ program.command('summary')
   });
 
 program.command('tooada')
-  .description('Write all data to oada at /bookmarks/indot-activity/locations/day-index')
+  .description('Write all data to oada at /bookmarks/track-patch/locations/day-index')
   .option('-t, --token <token>', 'Token for OADA', process.env.TOKEN || 'notokenfound')
   .option('-d, --domain <domain>', 'OADA domain', process.env.DOMAIN || 'localhost')
   .action(async ({ domain, token }) => {

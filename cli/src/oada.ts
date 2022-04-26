@@ -1,12 +1,12 @@
 import debug from 'debug';
 import oerror from '@overleaf/o-error';
 import pMap from 'p-map';
-import { tree, DayTracks } from '@indot-activity/lib';
+import { tree, DayTracks } from '@track-patch/lib';
 import { connect } from '@oada/client';
 
 
-const info = debug('@indot-activity/cli#oada:info');
-const warn = debug('@indot-activity/cli#oada:info');
+const info = debug('@track-patch/cli#oada:info');
+const warn = debug('@track-patch/cli#oada:info');
 
 export async function writeDaysToOADA(days: DayTracks, { domain, token }: { domain: string, token: string }): Promise<void> {
 
@@ -24,7 +24,7 @@ export async function writeDaysToOADA(days: DayTracks, { domain, token }: { doma
   await pMap(Object.entries(days), async ([day, vehicles]) =>  {
     const start = +(new Date());
     const thisone = count++;
-    const path = `/bookmarks/indot-activity/locations/day-index/${day}`;
+    const path = `/bookmarks/track-patch/locations/day-index/${day}`;
     info('Starting '+thisone+' of ', keys.length, ': ', day);
     try {
       await oada.put({

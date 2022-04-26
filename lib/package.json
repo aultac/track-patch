@@ -1,7 +1,7 @@
 {
-  "name": "@indot-activity/lib",
+  "name": "@track-patch/lib",
   "version": "0.0.1",
-  "description": "Shared libraries for indot-activity",
+  "description": "Shared libraries for track-patch",
   "type": "module",
   "comment1": "dist/node/index.js is normal output of tsc, used for node",
   "main": "dist/node/index.js",

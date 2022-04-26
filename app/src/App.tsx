@@ -8,8 +8,8 @@ import TextField from '@mui/material/TextField';
 
 import { Map } from './Map';
 
-const info = debug('indot/app#App:info');
-const warn = debug('indot/app#App:warn');
+const info = debug('trackpatch/app#App:info');
+const warn = debug('trackpatch/app#App:warn');
 
 export const App = observer(function App() {
   const { state, actions } = React.useContext(context);

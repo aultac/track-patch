@@ -5,8 +5,8 @@ import debug from 'debug';
 import ReactMapGl, { Source, Layer } from 'react-map-gl';
 import { context } from './state';
 
-const info = debug('indot/app#App:info');
-const warn = debug('indot/app#App:warn');
+const info = debug('trackpatch/app#App:info');
+const warn = debug('trackpatch/app#App:warn');
 
 const MAPBOX_TOKEN = 'pk.eyJ1IjoiYXVsdGFjIiwiYSI6ImNsMXA4MzU3NTAzbzUzZW55ajhiM2FsOGwifQ.8Umhtpm98ty92vbos4kM3Q';
 

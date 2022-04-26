@@ -1,5 +1,5 @@
 {
-  "name": "indot_activity",
+  "name": "track-patch",
   "packageManager": "yarn@3.2.0",
   "private": true,
   "workspaces": [

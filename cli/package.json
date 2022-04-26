@@ -1,5 +1,5 @@
 {
-  "name": "@indot-activity/cli",
+  "name": "@track-patch/cli",
   "packageManager": "yarn@3.1.1",
   "type": "module",
   "main": "dist/index.js",
@@ -12,7 +12,7 @@
     "tojson": "yarn cli tojson"
   },
   "dependencies": {
-    "@indot-activity/lib": "workspace:^",
+    "@track-patch/lib": "workspace:^",
     "@oada/client": "^4.0.1",
     "@overleaf/o-error": "^3.4.0",
     "@tsconfig/node16": "^1.0.2",

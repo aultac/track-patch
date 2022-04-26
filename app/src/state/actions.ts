@@ -6,8 +6,8 @@ import debug from 'debug';
 import { connect } from '@oada/client';
 //import { getAccessToken } from '@oada/id-client';
 
-const warn = debug("@indot/app#actions:warn");
-const info = debug("@indot/app#actions:info");
+const warn = debug("@trackpatch/app#actions:warn");
+const info = debug("@trackpatch/app#actions:info");
 
 //--------------------------------------------------------------------
 // OADA functions (authorize, connection)
@@ -92,7 +92,7 @@ let _daysFromDataJson: DayTracks | null = null;
 async function loadDayFromDataFile(date: string) {
   if (!_daysFromDataJson) {
     try {
-      const response = await fetch('indot_activity/data.json');
+      const response = await fetch('track-patch/data.json');
       if (response.status >= 400) throw new Error('Failed to fetch data');
       _daysFromDataJson = await response.json() as unknown as DayTracks;
     } catch(e: any) {
@@ -126,7 +126,7 @@ export const selectedDate = action('selectedDate', async (date: string): Promise
   activity(`Fetching location data for date ${state.date}`);
   try {
     //const dt = await loadDayFromDataFile(state.date);
-    const path = `/bookmarks/indot-activity/locations/day-index/${state.date}`;
+    const path = `/bookmarks/track-patch/locations/day-index/${state.date}`;
     let { data } = await oada().get({ path });
     // remove any oada keys from data:
     for (const k of Object.keys(data as any)) {

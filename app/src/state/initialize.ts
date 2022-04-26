@@ -5,8 +5,8 @@ import debug from 'debug';
 import { activity, oada } from './actions';
 import { connect } from '@oada/client';
   
-const info = debug("@indot-activity/app#initialize:info");
-const warn = debug("@indot-activity/app#initialize:warn");
+const info = debug("@track-patch/app#initialize:info");
+const warn = debug("@track-patch/app#initialize:warn");
 
 
 export const initialize = action('initialize', async () => {

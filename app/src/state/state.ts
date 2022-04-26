@@ -1,10 +1,10 @@
 import { observable, autorun } from 'mobx';
 import debug from 'debug';
-import type { DayTracks } from '@indot-activity/lib';
+import type { DayTracks } from '@track-patch/lib';
 import type GeoJSON from 'geojson';
 
-const warn = debug('@indot-activity/app#state:warn');
-const info = debug('@indot-activity/app#state:info');
+const warn = debug('@track-patch/app#state:warn');
+const info = debug('@track-patch/app#state:info');
 
 export type ActivityMessage = {
   msg: string,

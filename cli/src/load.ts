@@ -4,10 +4,10 @@ import debug from 'debug';
 import dayjs from 'dayjs';
 import { access, writeFile } from 'fs/promises';
 import fs from 'fs';
-import type { DayTracks, Track } from '@indot-activity/lib';
+import type { DayTracks, Track } from '@track-patch/lib';
 
-const info = debug('indot/cli#load:info');
-const warn = debug('indot/cli#load:warn');
+const info = debug('trackpatch/cli#load:info');
+const warn = debug('trackpatch/cli#load:warn');
 
 const datafilepath = './dist/data.json';
 export async function loadFromJSON(): Promise<DayTracks> {

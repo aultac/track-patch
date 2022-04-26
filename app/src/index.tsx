@@ -6,7 +6,7 @@ import './index.css';
 import { context, initialContext } from './state';
 import { App } from './App';
 
-document.title = `INDOT Patching - v${pkg.version}`;
+document.title = `Track-Patch - v${pkg.version}`;
 createRoot(document.getElementById('root')!).render(
   <context.Provider value={initialContext}>
     <App />
