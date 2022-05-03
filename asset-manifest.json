@@ -1,0 +1,15 @@
+{
+  "files": {
+    "main.css": "/track-patch/static/css/main.a5236db4.css",
+    "main.js": "/track-patch/static/js/main.c032ba4e.js",
+    "static/js/0.863c930e.chunk.js": "/track-patch/static/js/0.863c930e.chunk.js",
+    "index.html": "/track-patch/index.html",
+    "main.a5236db4.css.map": "/track-patch/static/css/main.a5236db4.css.map",
+    "main.c032ba4e.js.map": "/track-patch/static/js/main.c032ba4e.js.map",
+    "0.863c930e.chunk.js.map": "/track-patch/static/js/0.863c930e.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.a5236db4.css",
+    "static/js/main.c032ba4e.js"
+  ]
+}
