@@ -1,11 +1,10 @@
 {
   "name": "@track-patch/app",
   "homepage": "https://aultac.github.io/track-patch",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "private": true,
   "dependencies": {
-    "@track-patch/cli": "workspace:^",
-    "@track-patch/lib": "workspace:^",
+    "@fontsource/oleo-script": "^4.5.5",
     "@mui/icons-material": "^5.6.2",
     "@mui/material": "^5.6.2",
     "@oada/client": "^4.0.1",
@@ -14,6 +13,8 @@
     "@testing-library/jest-dom": "^5.16.4",
     "@testing-library/react": "^12.1.4",
     "@testing-library/user-event": "^13.5.0",
+    "@track-patch/cli": "workspace:^",
+    "@track-patch/lib": "workspace:^",
     "@types/geojson": "^7946.0.8",
     "@types/jest": "^27.4.1",
     "@types/node": "^16.11.26",
@@ -56,6 +57,7 @@
   },
   "scripts": {
     "cert": "mkcert -cert-file ./localhost/fullchain.pem -key-file ./localhost/privkey.pem localhost",
+    "predeploy": "yarn run build",
     "deploy": "gh-pages -d build",
     "start": "react-app-rewired start",
     "build": "react-app-rewired build",
@@ -72,6 +74,10 @@
     "production": [
       ">0.2%",
       "not dead",
+      "not ie 11",
+      "not chrome < 51",
+      "not safari < 10",
+      "not android < 51",
       "not op_mini all"
     ],
     "development": [

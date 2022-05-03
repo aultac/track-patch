@@ -47,14 +47,15 @@ program.command('tooada')
   .description('Write all data to oada at /bookmarks/track-patch/locations/day-index')
   .option('-t, --token <token>', 'Token for OADA', process.env.TOKEN || 'notokenfound')
   .option('-d, --domain <domain>', 'OADA domain', process.env.DOMAIN || 'localhost')
-  .action(async ({ domain, token }) => {
+  .option('-s, --start <YYYY-MM-DD>', 'Start putting data from this date forward', '')
+  .action(async ({ domain, token, start }) => {
     if (token === 'notokenfound') { 
       warn('WARNING: you did not pass a token');
       throw new Error('ERROR: you did not pass a token in .env or as -t on command line. tooada needs a token');
     }
     info(`Loading data from json...`);
     const days = await loadFromJSON();
-    writeDaysToOADA(days, { domain, token });
+    writeDaysToOADA(days, { domain, token, start });
     info(`Done!`);
   });
 

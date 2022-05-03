@@ -33,17 +33,17 @@ export type DayTracks = {
   [day: string]: VehicleDayTracks,
 };
 
-// /bookmarks/indot-activity/locations
+// /bookmarks/track-patch/locations
 export const tree = {
   bookmarks: {
     _type: "application/vnd.oada.bookmarks.1+json",
-    "indot-activity": {
-      _type: "application/vnd.oats.indot.days.1+json",
+    "track-patch": {
+      _type: "application/vnd.oats.track-patch.days.1+json",
       "locations": {
-        _type: "application/vnd.oats.indot.locations.1+json",
+        _type: "application/vnd.oats.track-patch.locations.1+json",
         'day-index': {
           '*': { // Day's 
-            _type: "application/vnd.oats.indot.locations.1+json",
+            _type: "application/vnd.oats.track-patch.locations.1+json",
           }
         }
       }

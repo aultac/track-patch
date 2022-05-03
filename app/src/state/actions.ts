@@ -121,6 +121,9 @@ function whichBucket(mph: number): number { // returns array index of which buck
 
 
 export const selectedDate = action('selectedDate', async (date: string): Promise<void> => {
+  // Show the loading page with the activity
+  geojson(null);
+
   state.date = date;
   // Grab the tracks for this date
   activity(`Fetching location data for date ${state.date}`);
@@ -256,10 +259,15 @@ export const daytracks = action('daytracks', (daytracks?: typeof _daytracks): ty
 });
 
 let _geojson: GeoJSONAllVehicles | null = null;
-export const geojson = action('geojson', (geojson?: GeoJSONAllVehicles): typeof _geojson | void => {
+export const geojson = action('geojson', (geojson?: GeoJSONAllVehicles | null): typeof _geojson | void => {
   if (typeof geojson === 'undefined') return _geojson;
   _geojson = geojson;
   state.geojson.rev++;
 });
+
+
+//-------------------------------------------------------------------
+// Basic View interaction
+//-------------------------------------------------------------------
 
 

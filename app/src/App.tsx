@@ -7,6 +7,7 @@ import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 
 import { Map } from './Map';
+import { NavBar } from './NavBar';
 
 const info = debug('trackpatch/app#App:info');
 const warn = debug('trackpatch/app#App:warn');
@@ -46,7 +47,7 @@ export const App = observer(function App() {
 
     case 'map': return (
       <div className="App">
-        { /* NavBar */ }
+        <NavBar />
         <Map />
       </div>
     );

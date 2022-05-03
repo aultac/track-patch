@@ -12,9 +12,9 @@
     "tojson": "yarn cli tojson"
   },
   "dependencies": {
-    "@track-patch/lib": "workspace:^",
     "@oada/client": "^4.0.1",
     "@overleaf/o-error": "^3.4.0",
+    "@track-patch/lib": "workspace:^",
     "@tsconfig/node16": "^1.0.2",
     "@types/debug": "^4.1.7",
     "@types/node": "^17.0.21",
