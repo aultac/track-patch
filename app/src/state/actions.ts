@@ -4,6 +4,7 @@ import type { VehicleDayTracks, DayTracks, GeoJSONAllVehicles, GeoJSONLineProps,
 import uniqolor from 'uniqolor';
 import debug from 'debug';
 import { connect } from '@oada/client';
+import { minspeed, maxspeed } from '../util';
 //import { getAccessToken } from '@oada/id-client';
 
 const warn = debug("@trackpatch/app#actions:warn");
@@ -157,11 +158,11 @@ export const selectedDate = action('selectedDate', async (date: string): Promise
     // A MultiLineString is just an array of lines, so each line will represet a continuous segment of same-vehicle-same-speedbucket
    
     const newFeature = ({ speedbucket } : { speedbucket: number }): GeoJSONVehicleFeature => {
-      const maxspeed = (speedbucket === state.speedbuckets.length ? 100 : state.speedbuckets[speedbucket]!);
-      const minspeed = (speedbucket === 0 ? 0 : state.speedbuckets[speedbucket-1]!);
+      const max = maxspeed(speedbucket, state.speedbuckets);
+      const min = minspeed(speedbucket, state.speedbuckets);
       return {
         type: 'Feature',
-        properties: { vehicleid, maxspeed, minspeed, speedbucket, color }, // color is from above
+        properties: { vehicleid, maxspeed: max, minspeed: min, speedbucket, color }, // color is from above
         geometry: {
           type: 'LineString',
           coordinates: [],

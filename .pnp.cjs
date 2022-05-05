@@ -4712,6 +4712,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["@types/node", "npm:16.11.26"],\
             ["@types/react", "npm:17.0.44"],\
             ["@types/react-dom", "npm:18.0.0"],\
+            ["@types/rfdc", "npm:1.1.0"],\
             ["buffer", "npm:6.0.3"],\
             ["crypto-browserify", "npm:3.12.0"],\
             ["dayjs", "npm:1.11.0"],\
@@ -4730,6 +4731,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["react-helmet-async", "virtual:990ab13eee297308a5d88c13e336b925c7bc58c2dcaa2cc24160e0e95f09304dbf0499446cc372ae41df249c953df83c2d4eb53effe0ec014718b71a9cdb404a#npm:1.2.3"],\
             ["react-map-gl", "virtual:990ab13eee297308a5d88c13e336b925c7bc58c2dcaa2cc24160e0e95f09304dbf0499446cc372ae41df249c953df83c2d4eb53effe0ec014718b71a9cdb404a#npm:7.0.10"],\
             ["react-scripts", "virtual:990ab13eee297308a5d88c13e336b925c7bc58c2dcaa2cc24160e0e95f09304dbf0499446cc372ae41df249c953df83c2d4eb53effe0ec014718b71a9cdb404a#npm:5.0.0"],\
+            ["rfdc", "npm:1.3.0"],\
             ["stream-browserify", "npm:3.0.0"],\
             ["string_decoder", "npm:1.3.0"],\
             ["tslib", "npm:2.3.1"],\
@@ -5346,6 +5348,15 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageLocation": "./.yarn/cache/@types-retry-npm-0.12.1-05f3303aac-5f46b25560.zip/node_modules/@types/retry/",\
           "packageDependencies": [\
             ["@types/retry", "npm:0.12.1"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["@types/rfdc", [\
+        ["npm:1.1.0", {\
+          "packageLocation": "./.yarn/cache/@types-rfdc-npm-1.1.0-a211485eb9-ae2e8a6c5d.zip/node_modules/@types/rfdc/",\
+          "packageDependencies": [\
+            ["@types/rfdc", "npm:1.1.0"]\
           ],\
           "linkType": "HARD"\
         }]\
@@ -19112,6 +19123,15 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageLocation": "./.yarn/cache/reusify-npm-1.0.4-95ac4aec11-c3076ebcc2.zip/node_modules/reusify/",\
           "packageDependencies": [\
             ["reusify", "npm:1.0.4"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["rfdc", [\
+        ["npm:1.3.0", {\
+          "packageLocation": "./.yarn/cache/rfdc-npm-1.3.0-272f288ad8-fb2ba8512e.zip/node_modules/rfdc/",\
+          "packageDependencies": [\
+            ["rfdc", "npm:1.3.0"]\
           ],\
           "linkType": "HARD"\
         }]\

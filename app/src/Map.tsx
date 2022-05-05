@@ -4,6 +4,7 @@ import './App.css';
 import debug from 'debug';
 import ReactMapGl, { Source, Layer } from 'react-map-gl';
 import { context } from './state';
+import { minspeed, maxspeed } from './util';
 
 const info = debug('trackpatch/app#App:info');
 const warn = debug('trackpatch/app#App:warn');
@@ -14,7 +15,7 @@ const bad = { color: 'red' };
 const good = { color: 'green' };
 export const Map = observer(function Map() {
   const { state, actions } = React.useContext(context);
-  const geojson = actions.geojson();
+  let geojson = actions.geojson();
 
   // Access the rev so we are updated when it changes.  Have to access it BEFORE !geojson or it might not re-render
   if (state.geojson.rev < 1 || !geojson) {
@@ -32,6 +33,13 @@ export const Map = observer(function Map() {
 
 
   // A good intro to Mapbox styling expressions is: https://docs.mapbox.com/help/tutorials/mapbox-gl-js-expressions/
+  if (state.filterbucket >= 0) {
+    geojson = { ...geojson }; // clone the top level
+    // Now filter the features for any chosen speedbucket (in the clone only)
+    geojson.features = geojson.features.filter(f => f.properties.speedbucket === state.filterbucket);
+    info('Filtered features to only those with speedbucket ', state.filterbucket, '.  There are ', geojson.features.length, ' of them after filtering: ', geojson);
+  }
+  
 
   return (
     <ReactMapGl
