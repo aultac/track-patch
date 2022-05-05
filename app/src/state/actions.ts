@@ -1,6 +1,6 @@
 import { action } from 'mobx';
 import { state, ActivityMessage } from './state';
-import type { VehicleDayTracks, DayTracks, GeoJSONAllVehicles, GeoJSONVehicleFeature } from '../types';
+import type { VehicleDayTracks, DayTracks, GeoJSONAllVehicles, GeoJSONLineProps, GeoJSONVehicleFeature } from '../types';
 import uniqolor from 'uniqolor';
 import debug from 'debug';
 import { connect } from '@oada/client';
@@ -30,7 +30,6 @@ export const deauthorize = action('deauthorize', () => {
 export const authorize = action('authorize', async () => {
   let _domain = state.oada.domain || localStorage.getItem('oada:domain') || '';
   let _token = state.oada.token || localStorage.getItem('oada:token') || '';
-info('Using domain = ', _domain, ', token = ', _token);
   if (!_domain) {
     state.page = 'get-domain';
     info('No domain or no token, showing login screen');
@@ -113,7 +112,9 @@ async function loadDayFromDataFile(date: string) {
 // Segment lines by "speed buckets": 0-10, 10-20, 20-30, 30-40, 40+
 function whichBucket(mph: number): number { // returns array index of which bucket this mph falls within
   for (const [index, bucketspeed] of state.speedbuckets.entries()) {
-    if (mph < bucketspeed) return index;
+    if (mph < bucketspeed) {
+      return index;
+    }
   }
   return state.speedbuckets.length; // past end of array if speed is above last speed
 }
@@ -126,6 +127,7 @@ export const selectedDate = action('selectedDate', async (date: string): Promise
 
   state.date = date;
   // Grab the tracks for this date
+  activity('----------------------------------------------------------');
   activity(`Fetching location data for date ${state.date}`);
   try {
     //const dt = await loadDayFromDataFile(state.date);
@@ -153,8 +155,22 @@ export const selectedDate = action('selectedDate', async (date: string): Promise
 
     // Each speed bucket will be a MultiLineString "feature" (since it will be colored/extruded the same).
     // A MultiLineString is just an array of lines, so each line will represet a continuous segment of same-vehicle-same-speedbucket
-    
-    const features: GeoJSONVehicleFeature[] = []; // one feature for each speedbucket for this vehicle
+   
+    const newFeature = ({ speedbucket } : { speedbucket: number }): GeoJSONVehicleFeature => {
+      const maxspeed = (speedbucket === state.speedbuckets.length ? 100 : state.speedbuckets[speedbucket]!);
+      const minspeed = (speedbucket === 0 ? 0 : state.speedbuckets[speedbucket-1]!);
+      return {
+        type: 'Feature',
+        properties: { vehicleid, maxspeed, minspeed, speedbucket, color }, // color is from above
+        geometry: {
+          type: 'LineString',
+          coordinates: [],
+        }
+      };
+    };
+
+    const features: GeoJSONVehicleFeature[] = []; // one feature for each contiguous speedbucket for this vehicle
+    /*
     for (let i=0; i <= state.speedbuckets.length; i++) { // note the "=" gets us the last bucket
       let maxspeed = (i === state.speedbuckets.length ? 100 : state.speedbuckets[i]!);
       let minspeed = (i === 0 ? 0 : state.speedbuckets[i-1]!);
@@ -162,6 +178,8 @@ export const selectedDate = action('selectedDate', async (date: string): Promise
         type: 'Feature',
         properties: { vehicleid, maxspeed, minspeed, color },
         geometry: {
+          type: 'LineString',
+          coordinates: [],
           type: 'MultiLineString',
           coordinates: [ 
             [ ], // initially line is just empty
@@ -169,49 +187,61 @@ export const selectedDate = action('selectedDate', async (date: string): Promise
         }
       };
     }
+    */
 
     // Now loop over all the tracks for that vehicle (keyed by starttime),
     // then use the speed buckets to break the big track into smaller tracks
     if (vehicledaytracks && vehicledaytracks.tracks) {
+      let curfeature: GeoJSONVehicleFeature | null = null;
       for (const starttime of Object.keys(vehicledaytracks.tracks).sort()) {
         const track = vehicledaytracks.tracks[starttime]!;
         const times = Object.keys(track).sort(); // put sample times in order
         // initialize curbucket to the first point's speed bucket
-        let curbucket = whichBucket(track[times[0]!]!.speed);
+        //let curbucket = whichBucket(track[times[0]!]!.speed);
 
+        /*
         const curMultiLineCoords = (): GeoJSON.Position[][] => features[curbucket]!.geometry.coordinates;
         // Handy function to get the last line segment for the current speed bucket's feature
         const curLineSegment = (): GeoJSON.Position[] => { // Position[] is how they represent a line
           const coords = curMultiLineCoords();
           return coords[coords.length-1]!;
         };
+        */
 
         // Now walk all the points in order
+        let curbucket: number = -1;
         for (const time of times) {
           const point = track[time]!;
           const geojson_point = [ point.lon, point.lat ];
           const bkt = whichBucket(point.speed);
 
           // If this point would switch us to a new bucket, end the previous line here
-          let curline = curLineSegment();
+          //let curline = curLineSegment();
           if (bkt !== curbucket) {
-            curline.push(geojson_point);
+            if (features.length > 0) {// only finish off the previous one if there is a previous one
+              features[features.length-1]!.geometry.coordinates.push(geojson_point);
+            }
             curbucket = bkt;
+            features.push(newFeature({ speedbucket: curbucket }));
+            /*
             // Create a new empty line for the next segment
             curMultiLineCoords().push([]); // start the new line where the old line left off
             // And now update the current line segment variable here
             curline = curLineSegment();
+            */
           }
           // Just add this point to the end of the current line segment (which could be the first point if the line is empty).
           // This duplicates the point at the end of the prior segment and at the start of the next so they are connected.
-          curline.push(geojson_point); 
+          //curline.push(geojson_point); 
+          features[features.length-1]!.geometry.coordinates.push(geojson_point); 
         }
       }
     }
 
-    // And finally, add all the features for this vehicle (one multi-line for each speed bucket) to the main geojson feature collection
-    const features_with_points = features.filter(f => f.geometry.coordinates[0]!.length > 0);
-    allfeatures = [ ...allfeatures, ...features_with_points ];
+    // Only include features in the output that have actual points
+    //const features_with_points = features.filter(f => f.geometry.coordinates[0]!.length > 0);
+    //allfeatures = [ ...allfeatures, ...features_with_points ];
+    allfeatures = [ ...allfeatures, ...features ]; // if this line-string method works, just keep one big features array, no need for 2
   }
   activity(`Created ${allfeatures.length} tracks for ${Object.keys(day).length} vehicles, placing into state`);
   geojson({ // action down below
@@ -262,6 +292,7 @@ let _geojson: GeoJSONAllVehicles | null = null;
 export const geojson = action('geojson', (geojson?: GeoJSONAllVehicles | null): typeof _geojson | void => {
   if (typeof geojson === 'undefined') return _geojson;
   _geojson = geojson;
+  info('geojson is now: ', geojson);
   state.geojson.rev++;
 });
 
@@ -270,4 +301,11 @@ export const geojson = action('geojson', (geojson?: GeoJSONAllVehicles | null): 
 // Basic View interaction
 //-------------------------------------------------------------------
 
-
+export const filterbucket = action('filterbucket', (filterbucket: string | number): void => {
+  if (typeof filterbucket === 'string') {
+    if (filterbucket === 'all') state.filterbucket = -1;
+    state.filterbucket = +(filterbucket);
+    return;
+  }
+  state.filterbucket = filterbucket;
+});

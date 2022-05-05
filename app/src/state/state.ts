@@ -21,6 +21,7 @@ export type State = {
   },
   activityLog: ActivityMessage[],
   speedbuckets: number[],
+  filterbucket: number, // index of which speed bucket to show
   date: string | null,
   daytracks: BigData,
   geojson: BigData,
@@ -36,6 +37,7 @@ export const state = observable<State>({
   },
   activityLog: [],
   speedbuckets: [ 10, 20, 30, 40 ],
+  filterbucket: -1, // -1 means all
   date: null,
   daytracks: { rev: 0 },
   geojson: { rev: 0 },

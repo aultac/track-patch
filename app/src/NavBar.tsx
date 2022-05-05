@@ -5,6 +5,8 @@ import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
+import Select from '@mui/material/Select';
+import MenuItem from '@mui/material/MenuItem';
 import debug from 'debug';
 import { context } from './state';
 
@@ -40,6 +42,25 @@ export const NavBar = observer(() => {
               value={state.date || ''} 
               onChange={evt => actions.selectedDate(evt.target.value)}
             />
+          </Box>
+
+          <Box>
+            <Select
+              value={ state.filterbucket >= 0 ? state.filterbucket : 'all' }
+              label="Filter Speed"
+              onChange={ evt => { actions.filterbucket(evt.target.value) } }
+              style={{color: 'white'}}
+            >
+              <MenuItem value={'all'}>All Speeds</MenuItem>
+              { state.speedbuckets.map((b,index) => 
+                <MenuItem value={index} key={`speedbucketchoice${index}`}>
+                  { index === 0 ? `< ${b} mph` : `${state.speedbuckets[index-1]!}-${b} mph` }
+                </MenuItem>)
+              }
+              <MenuItem value={state.speedbuckets.length}>
+                &gt; {state.speedbuckets[state.speedbuckets.length-1]} mph
+              </MenuItem>
+            </Select>
           </Box>
 
         </Toolbar>

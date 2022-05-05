@@ -1,3 +1,5 @@
+export type { Point, Track, VehicleDayTrack, VehicleDayTracks, DayTracks } from '@track-patch/lib';
+/*
 import type { Dayjs } from 'dayjs';
 
 export type Point = {
@@ -50,14 +52,16 @@ export const DaysTree = {
     }
   }
 };
-
+*/
 export type GeoJSONLineProps = {
   vehicleid: string,
   maxspeed: number,
   minspeed: number,
   color: string,
+  speedbucket: number,
 };
-export type GeoJSONVehicleFeature = GeoJSON.Feature<GeoJSON.MultiLineString, GeoJSONLineProps>;
+//export type GeoJSONVehicleFeature = GeoJSON.Feature<GeoJSON.MultiLineString, GeoJSONLineProps>;
+export type GeoJSONVehicleFeature = GeoJSON.Feature<GeoJSON.LineString, GeoJSONLineProps>;
 export type GeoJSONAllVehicles = {
   type: 'FeatureCollection',
   features: GeoJSONVehicleFeature[],
