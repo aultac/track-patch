@@ -29,17 +29,29 @@ program.command('summary')
     info('****************************************************************');
     info('  Summary: ');
     info('****************************************************************');
+    const vehicleids: { [key: string]: number } = {};
     for (const [day, vdtracks] of Object.entries(days)) {
       info('Day: ', day);
       info('    # Vehicles with tracks: ', Object.keys(vdtracks).length);
        for (const [vid, vdt] of Object.entries(vdtracks)) {
+         if (!vehicleids[vid]) { vehicleids[vid] = 0 };
          for (const [starttime, track] of Object.entries(vdt.tracks)) {
            const times = Object.keys(track);
-           info(`        ${vid}: ${Object.keys(track).length} points`);
+           vehicleids[vid] += times.length;
+           info(`        ${vid}: ${times.length} points`);
          }
        }
       info('----------------------------------');
     }
+    info('Vehicles and total points:');
+    let sum = 0;
+    for (const [vid, count] of Object.entries(vehicleids)) {
+      info('    Vehicle ', vid, ': ', count, ' total points');
+      sum += count;
+    }
+    info('------------------------------------------------');
+    const numvehicles = Object.keys(vehicleids).length;
+    info(`${numvehicles} vehicles, average of ${sum / numvehicles} points per vehicle`);
 
   });
 

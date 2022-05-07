@@ -60,9 +60,9 @@ export const Map = observer(function Map() {
             ['linear'], // arg1 to the 'interpolate' operator
             ['zoom'], 
             10,
-            ['/', ['-', 100, ['number', ['get', 'maxspeed']]], 10],
+            ['/', ['-', 150, ['number', ['get', 'maxspeed']]], 10],
             13,
-            ['/', ['-', 100, ['number', ['get', 'maxspeed']]], 20],
+            ['/', ['-', 150, ['number', ['get', 'maxspeed']]], 20],
           ],
         }} />
 
