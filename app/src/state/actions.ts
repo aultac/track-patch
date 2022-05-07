@@ -285,13 +285,20 @@ export const toggleSimulate = action('toggleSimulate', (): void => {
 let simtimer: ReturnType<typeof setInterval> | null = null;
 export const simEndtime = action('simEndtime', (
   {beginning, end, hour, minute, second, time }: 
-  { beginning?: boolean, end?: boolean, hour?: number, minute?: number, second?: number, time?: Dayjs }): void => {
-  if (typeof beginning !== 'undefined') { state.simulate.endtime = dayjs(`${state.date}T00:00:00`); return }
-  if (typeof end !== 'undefined') { state.simulate.endtime = dayjs(`${state.date}T23:59:59`); return }
-  if (typeof hour !== 'undefined') { state.simulate.endtime = state.simulate.endtime.add(hour, 'hours'); }
-  if (typeof minute !== 'undefined') { state.simulate.endtime = state.simulate.endtime.add(minute, 'minutes'); }
-  if (typeof second !== 'undefined') { state.simulate.endtime = state.simulate.endtime.add(second, 'seconds'); }
-  if (typeof time !== 'undefined') { state.simulate.endtime = time; return; }
+  { beginning?: boolean, end?: boolean, hour?: number, minute?: number, second?: number, time?: Dayjs }
+): void => {
+  let endtime = state.simulate.endtime;
+  if (typeof beginning !== 'undefined') { endtime = dayjs(`${state.date}T00:00:00`); }
+  if (typeof end !== 'undefined') { endtime = dayjs(`${state.date}T23:59:59`); }
+  if (typeof hour !== 'undefined') { endtime = state.simulate.endtime.add(hour, 'hours'); }
+  if (typeof minute !== 'undefined') { endtime = state.simulate.endtime.add(minute, 'minutes'); }
+  if (typeof second !== 'undefined') { endtime = state.simulate.endtime.add(second, 'seconds'); }
+  if (typeof time !== 'undefined') { endtime = time; }
+  // If we over-shot...
+  if (endtime.format('YYYY-MM-DD') !== state.date) {
+    endtime = dayjs(`${state.date}T00:00:00`);
+  }
+  state.simulate.endtime = endtime;
   return;
 });
 export const playSim = action('playSim', (): void => {
