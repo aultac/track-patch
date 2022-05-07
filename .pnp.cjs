@@ -4710,6 +4710,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["@types/jest", "npm:27.4.1"],\
             ["@types/mapbox-gl", "npm:2.6.3"],\
             ["@types/node", "npm:16.11.26"],\
+            ["@types/numeral", "npm:2.0.2"],\
             ["@types/react", "npm:17.0.44"],\
             ["@types/react-dom", "npm:18.0.0"],\
             ["@types/rfdc", "npm:1.1.0"],\
@@ -4724,6 +4725,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["mapbox-gl", "npm:2.8.0"],\
             ["mobx", "npm:6.5.0"],\
             ["mobx-react-lite", "virtual:990ab13eee297308a5d88c13e336b925c7bc58c2dcaa2cc24160e0e95f09304dbf0499446cc372ae41df249c953df83c2d4eb53effe0ec014718b71a9cdb404a#npm:3.3.0"],\
+            ["numeral", "npm:2.0.6"],\
             ["path-browserify", "npm:1.0.1"],\
             ["process", "npm:0.11.10"],\
             ["react", "npm:18.0.0"],\
@@ -5214,6 +5216,15 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageLocation": "./.yarn/cache/@types-node-npm-17.0.23-167849e796-a351755473.zip/node_modules/@types/node/",\
           "packageDependencies": [\
             ["@types/node", "npm:17.0.23"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["@types/numeral", [\
+        ["npm:2.0.2", {\
+          "packageLocation": "./.yarn/cache/@types-numeral-npm-2.0.2-9d4395fc9c-d8b778ef5d.zip/node_modules/@types/numeral/",\
+          "packageDependencies": [\
+            ["@types/numeral", "npm:2.0.2"]\
           ],\
           "linkType": "HARD"\
         }]\
@@ -15452,6 +15463,15 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageDependencies": [\
             ["nth-check", "npm:2.0.1"],\
             ["boolbase", "npm:1.0.0"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["numeral", [\
+        ["npm:2.0.6", {\
+          "packageLocation": "./.yarn/cache/numeral-npm-2.0.6-2c27ceaa3c-89f0111165.zip/node_modules/numeral/",\
+          "packageDependencies": [\
+            ["numeral", "npm:2.0.6"]\
           ],\
           "linkType": "HARD"\
         }]\
