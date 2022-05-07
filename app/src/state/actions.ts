@@ -1,4 +1,5 @@
 import { action } from 'mobx';
+import type { Dayjs } from 'dayjs';
 import { state, ActivityMessage } from './state';
 import type { VehicleDayTracks, DayTracks, GeoJSONAllVehicles, GeoJSONLineProps, GeoJSONVehicleFeature } from '../types';
 import uniqolor from 'uniqolor';
@@ -161,92 +162,41 @@ export const selectedDate = action('selectedDate', async (date: string): Promise
     // Each speed bucket will be a MultiLineString "feature" (since it will be colored/extruded the same).
     // A MultiLineString is just an array of lines, so each line will represet a continuous segment of same-vehicle-same-speedbucket
    
-    const newFeature = ({ speedbucket } : { speedbucket: number }): GeoJSONVehicleFeature => {
-      const max = maxspeed(speedbucket, state.speedbuckets);
-      const min = minspeed(speedbucket, state.speedbuckets);
-      return {
-        type: 'Feature',
-        properties: { vehicleid, maxspeed: max, minspeed: min, speedbucket, color }, // color is from above
-        geometry: {
-          type: 'LineString',
-          coordinates: [],
-        }
-      };
-    };
-
-    const features: GeoJSONVehicleFeature[] = []; // one feature for each contiguous speedbucket for this vehicle
-    /*
-    for (let i=0; i <= state.speedbuckets.length; i++) { // note the "=" gets us the last bucket
-      let maxspeed = (i === state.speedbuckets.length ? 100 : state.speedbuckets[i]!);
-      let minspeed = (i === 0 ? 0 : state.speedbuckets[i-1]!);
-      features[i] = {
-        type: 'Feature',
-        properties: { vehicleid, maxspeed, minspeed, color },
-        geometry: {
-          type: 'LineString',
-          coordinates: [],
-          type: 'MultiLineString',
-          coordinates: [ 
-            [ ], // initially line is just empty
-          ], // this will be an array of arrays of arrays (i.e. array of lines, and a line is an array of points, and a point is an array of 2 numbers)
-        }
-      };
-    }
-    */
-
     // Now loop over all the tracks for that vehicle (keyed by starttime),
     // then use the speed buckets to break the big track into smaller tracks
     if (vehicledaytracks && vehicledaytracks.tracks) {
-      let curfeature: GeoJSONVehicleFeature | null = null;
       for (const starttime of Object.keys(vehicledaytracks.tracks).sort()) {
         const track = vehicledaytracks.tracks[starttime]!;
         const times = Object.keys(track).sort(); // put sample times in order
-        // initialize curbucket to the first point's speed bucket
-        //let curbucket = whichBucket(track[times[0]!]!.speed);
-
-        /*
-        const curMultiLineCoords = (): GeoJSON.Position[][] => features[curbucket]!.geometry.coordinates;
-        // Handy function to get the last line segment for the current speed bucket's feature
-        const curLineSegment = (): GeoJSON.Position[] => { // Position[] is how they represent a line
-          const coords = curMultiLineCoords();
-          return coords[coords.length-1]!;
-        };
-        */
-
         // Now walk all the points in order
-        let curbucket: number = -1;
-        for (const time of times) {
+        for (const [index, time] of times.entries()) {
+          if (!index) continue; // skip first point, we are making lines so we need 2 points
           const point = track[time]!;
-          const geojson_point = [ point.lon, point.lat ];
-          const bkt = whichBucket(point.speed);
-
-          // If this point would switch us to a new bucket, end the previous line here
-          //let curline = curLineSegment();
-          if (bkt !== curbucket) {
-            if (features.length > 0) {// only finish off the previous one if there is a previous one
-              features[features.length-1]!.geometry.coordinates.push(geojson_point);
+          const prev = track[times[index-1]!]!;
+          const coordinates: number[][] = [ 
+            [prev.lon, prev.lat],
+            [point.lon, point.lat],
+          ];
+          const speedbucket = whichBucket(point.speed);
+          allfeatures.push({
+            type: 'Feature',
+            properties: { 
+              vehicleid, 
+              maxspeed: maxspeed(speedbucket, state.speedbuckets),
+              minspeed: minspeed(speedbucket, state.speedbuckets),
+              speedbucket,
+              mph: point.speed,
+              time: point.time,
+              color 
+            }, // color is from above
+            geometry: {
+              type: 'LineString',
+              coordinates,
             }
-            curbucket = bkt;
-            features.push(newFeature({ speedbucket: curbucket }));
-            /*
-            // Create a new empty line for the next segment
-            curMultiLineCoords().push([]); // start the new line where the old line left off
-            // And now update the current line segment variable here
-            curline = curLineSegment();
-            */
-          }
-          // Just add this point to the end of the current line segment (which could be the first point if the line is empty).
-          // This duplicates the point at the end of the prior segment and at the start of the next so they are connected.
-          //curline.push(geojson_point); 
-          features[features.length-1]!.geometry.coordinates.push(geojson_point); 
+          });
         }
       }
     }
-
-    // Only include features in the output that have actual points
-    //const features_with_points = features.filter(f => f.geometry.coordinates[0]!.length > 0);
-    //allfeatures = [ ...allfeatures, ...features_with_points ];
-    allfeatures = [ ...allfeatures, ...features ]; // if this line-string method works, just keep one big features array, no need for 2
   }
   activity(`Created ${allfeatures.length} tracks for ${Object.keys(day).length} vehicles, placing into state`);
   geojson({ // action down below
