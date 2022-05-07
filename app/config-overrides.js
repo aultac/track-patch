@@ -14,7 +14,7 @@ module.exports = {
         "util": require.resolve("util/"),
         "url": require.resolve('url/'),
         "path": require.resolve('path-browserify'),
-        "process": require.resolve('process'),
+        "process": require.resolve('process/browser'),
       })
       config.resolve.fallback = fallback;
 
