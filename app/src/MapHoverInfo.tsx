@@ -9,7 +9,6 @@ const warn = debug('trackpatch/app#MapHoverInfo:warn');
 export const MapHoverInfo = observer(function MapHoverInfo() {
   const { state } = React.useContext(context);
   if (!state.hover.active) return <div></div>;
-info('Rendering MapHoverInfo at x = ', state.hover.x, ', ', state.hover.y);
   return (
     <div style={{ 
       left: state.hover.x, 
@@ -24,8 +23,8 @@ info('Rendering MapHoverInfo at x = ', state.hover.x, ', ', state.hover.y);
       zIndex: 9,
       pointerEvents: 'none',
     }}>
-      {state.hover.features.map(f => 
-        <div style={{ color: f.properties.color }}>
+      {state.hover.features.map((f,i) => 
+        <div key={`hoverinfo${i}`} style={{ color: f.properties.color }}>
           {f.properties.vehicleid}: {f.properties.minspeed} - {f.properties.maxspeed} mph
         </div>
       )}

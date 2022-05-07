@@ -1,5 +1,6 @@
 import { observable } from 'mobx';
 import type { GeoJSONVehicleFeature } from '../types';
+import dayjs, { Dayjs } from 'dayjs';
 import debug from 'debug';
 
 const warn = debug('@track-patch/app#state:warn');
@@ -34,6 +35,12 @@ export type State = {
     active: boolean,
   },
 
+  simulate: {
+    endtime: Dayjs,
+    simspeed: number, // 1 real sec = simspeed data seconds
+    running: boolean,
+  }
+
 };
 
 export const state = observable<State>({
@@ -55,6 +62,11 @@ export const state = observable<State>({
     y: 0,
     features: [],
     active: false,
+  },
+  simulate: {
+    endtime: dayjs(0),
+    simspeed: 120, // 2 mins per second
+    running: false,
   },
 });
 

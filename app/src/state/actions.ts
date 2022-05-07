@@ -1,5 +1,5 @@
 import { action } from 'mobx';
-import type { Dayjs } from 'dayjs';
+import dayjs, { Dayjs } from 'dayjs';
 import { state, ActivityMessage } from './state';
 import type { VehicleDayTracks, DayTracks, GeoJSONAllVehicles, GeoJSONLineProps, GeoJSONVehicleFeature } from '../types';
 import uniqolor from 'uniqolor';
@@ -131,7 +131,12 @@ export const selectedDate = action('selectedDate', async (date: string): Promise
   // Show the loading page with the activity
   geojson(null);
 
+
   state.date = date;
+
+  // Set the simulation end time as the end of this day
+  simulate({ running: false, endtime: dayjs(`${date}T23:59:59`) });
+
   // Grab the tracks for this date
   activity('----------------------------------------------------------');
   activity(`Fetching location data for date ${state.date}`);
@@ -186,7 +191,7 @@ export const selectedDate = action('selectedDate', async (date: string): Promise
               minspeed: minspeed(speedbucket, state.speedbuckets),
               speedbucket,
               mph: point.speed,
-              time: point.time,
+              time: dayjs(point.time),
               color 
             }, // color is from above
             geometry: {
@@ -267,4 +272,41 @@ export const filterbucket = action('filterbucket', (filterbucket: string | numbe
 
 export const hover = action('hover', (hover: typeof state['hover']): void => {
   state.hover = hover;
+});
+
+export const simulate = action('simulate', (sim: { endtime?: Dayjs, running?: boolean, simspeed?: number }): void => {
+  if (state.simulate.running) stopSim();
+  state.simulate = { ...state.simulate, ...sim };
+});
+export const toggleSimulate = action('toggleSimulate', (): void => {
+  if (state.simulate.running) return stopSim();
+  playSim();
+});
+let simtimer: ReturnType<typeof setInterval> | null = null;
+export const simEndtime = action('simEndtime', (
+  {beginning, end, hour, minute, second, time }: 
+  { beginning?: boolean, end?: boolean, hour?: number, minute?: number, second?: number, time?: Dayjs }): void => {
+  if (typeof beginning !== 'undefined') { state.simulate.endtime = dayjs(`${state.date}T00:00:00`); return }
+  if (typeof end !== 'undefined') { state.simulate.endtime = dayjs(`${state.date}T23:59:59`); return }
+  if (typeof hour !== 'undefined') { state.simulate.endtime = state.simulate.endtime.add(hour, 'hours'); }
+  if (typeof minute !== 'undefined') { state.simulate.endtime = state.simulate.endtime.add(minute, 'minutes'); }
+  if (typeof second !== 'undefined') { state.simulate.endtime = state.simulate.endtime.add(second, 'seconds'); }
+  if (typeof time !== 'undefined') { state.simulate.endtime = time; return; }
+  return;
+});
+export const playSim = action('playSim', (): void => {
+  if (state.simulate.running) return; // already runnning
+  state.simulate.running = true;
+  const refreshms = 250;
+  simtimer = setInterval(() => {
+    if (state.simulate.endtime.format('HH:mm:ss') === "23:59:59") {
+      simEndtime({ beginning: true });
+    }
+    simEndtime({ second: state.simulate.simspeed * (refreshms/1000) });
+  }, refreshms);
+});
+export const stopSim = action('stopSim', (): void => {
+  if (!state.simulate.running) return; // already stopped
+  state.simulate.running = false;
+  if (simtimer) clearInterval(simtimer);
 });

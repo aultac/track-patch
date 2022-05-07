@@ -50,12 +50,18 @@ export const Map = observer(function Map() {
   }
 
   // A good intro to Mapbox styling expressions is: https://docs.mapbox.com/help/tutorials/mapbox-gl-js-expressions/
+  geojson = { ...geojson }; // clone the top level
   if (state.filterbucket >= 0) {
-    geojson = { ...geojson }; // clone the top level
     // Now filter the features for any chosen speedbucket (in the clone only)
     geojson.features = geojson.features.filter(f => f.properties.speedbucket === state.filterbucket);
     info('Filtered features to only those with speedbucket ', state.filterbucket, '.  There are ', geojson.features.length, ' of them after filtering: ', geojson);
   }
+
+  // Filter all features for times before the "simulate endtime"
+  const endtime = state.simulate.endtime;
+  geojson.features = geojson.features.filter(f => { 
+    return endtime.isAfter(f.properties.time);
+  });
 
   return (
     <ReactMapGl
