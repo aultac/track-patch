@@ -1,7 +1,6 @@
-import { observable, autorun } from 'mobx';
+import { observable } from 'mobx';
+import type { GeoJSONVehicleFeature } from '../types';
 import debug from 'debug';
-import type { DayTracks } from '@track-patch/lib';
-import type GeoJSON from 'geojson';
 
 const warn = debug('@track-patch/app#state:warn');
 const info = debug('@track-patch/app#state:info');
@@ -20,12 +19,21 @@ export type State = {
     token: string | null,
   },
   activityLog: ActivityMessage[],
-  speedbuckets: number[],
   filterbucket: number, // index of which speed bucket to show
   date: string | null,
+
+  speedbuckets: number[],
   daytracks: BigData,
   geojson: BigData,
   vehicleColors: { [vehicleid: string]: string },
+
+  hover: {
+    x: number,
+    y: number,
+    features: GeoJSONVehicleFeature[],
+    active: boolean,
+  },
+
 };
 
 export const state = observable<State>({
@@ -42,5 +50,11 @@ export const state = observable<State>({
   daytracks: { rev: 0 },
   geojson: { rev: 0 },
   vehicleColors: {},
+  hover: {
+    x: 0,
+    y: 0,
+    features: [],
+    active: false,
+  },
 });
 

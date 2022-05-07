@@ -3,7 +3,7 @@ const dotenv = require('dotenv-webpack');
 
 module.exports = {
   webpack: function override(config) {
-    /*
+
       const fallback = config.resolve.fallback || {};
       Object.assign(fallback, {
         "crypto": require.resolve("crypto-browserify"),
@@ -14,9 +14,9 @@ module.exports = {
         "util": require.resolve("util/"),
         "url": require.resolve('url/'),
         "path": require.resolve('path-browserify'),
+        "process": require.resolve('process'),
       })
       config.resolve.fallback = fallback;
-    */
 
     const plugins = config.plugins || [];
     plugins.push(
@@ -28,6 +28,10 @@ module.exports = {
       )
     );
     plugins.push(new dotenv());
+    plugins.push(new webpack.ProvidePlugin({
+      'process': 'process'
+    }));
+
     config.plugins = plugins;
 
     return config;

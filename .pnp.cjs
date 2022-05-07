@@ -4725,6 +4725,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["mobx", "npm:6.5.0"],\
             ["mobx-react-lite", "virtual:990ab13eee297308a5d88c13e336b925c7bc58c2dcaa2cc24160e0e95f09304dbf0499446cc372ae41df249c953df83c2d4eb53effe0ec014718b71a9cdb404a#npm:3.3.0"],\
             ["path-browserify", "npm:1.0.1"],\
+            ["process", "npm:0.11.10"],\
             ["react", "npm:18.0.0"],\
             ["react-app-rewired", "virtual:990ab13eee297308a5d88c13e336b925c7bc58c2dcaa2cc24160e0e95f09304dbf0499446cc372ae41df249c953df83c2d4eb53effe0ec014718b71a9cdb404a#npm:2.2.1"],\
             ["react-dom", "virtual:990ab13eee297308a5d88c13e336b925c7bc58c2dcaa2cc24160e0e95f09304dbf0499446cc372ae41df249c953df83c2d4eb53effe0ec014718b71a9cdb404a#npm:18.0.0"],\

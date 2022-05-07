@@ -2908,6 +2908,7 @@ __metadata:
     mobx: ^6.5.0
     mobx-react-lite: ^3.3.0
     path-browserify: ^1.0.1
+    process: ^0.11.10
     react: ^18.0.0
     react-app-rewired: ^2.2.1
     react-dom: ^18.0.0

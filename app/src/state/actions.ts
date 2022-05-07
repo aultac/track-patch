@@ -5,7 +5,7 @@ import uniqolor from 'uniqolor';
 import debug from 'debug';
 import { connect } from '@oada/client';
 import { minspeed, maxspeed } from '../util';
-//import { getAccessToken } from '@oada/id-client';
+import { getAccessToken } from '@oada/id-client/dist/browser';
 
 const warn = debug("@trackpatch/app#actions:warn");
 const info = debug("@trackpatch/app#actions:info");
@@ -25,8 +25,11 @@ export function oada(newoada?: OADAType): OADAType {
 
 
 export const deauthorize = action('deauthorize', () => {
-  state.oada.token = '';
   localStorage.setItem('oada:token', '');
+  localStorage.setItem('oada:domain', '');
+  state.oada.token = '';
+  state.oada.domain = '';
+  state.page = 'get-domain';
 });
 export const authorize = action('authorize', async () => {
   let _domain = state.oada.domain || localStorage.getItem('oada:domain') || '';
@@ -42,10 +45,11 @@ export const authorize = action('authorize', async () => {
     info('Have a domain of ', _domain, ', but no token so starting login process');
     return;
     /*
-    const redirect = window.location.origin + '/handleOAuthRedirect.html';
-    const results = await getAccessToken(domain, { 
+    const redirect = window.location.origin + '/track-patch/handleOAuthRedirect.html';
+    const results = await getAccessToken(_domain, { 
       metadata: { redirect_uris: [ redirect ] },
     });
+    info('results of getAccessToekn are: ', results);
     */
   }
 
@@ -309,4 +313,8 @@ export const filterbucket = action('filterbucket', (filterbucket: string | numbe
     return;
   }
   state.filterbucket = filterbucket;
+});
+
+export const hover = action('hover', (hover: typeof state['hover']): void => {
+  state.hover = hover;
 });

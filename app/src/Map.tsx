@@ -2,9 +2,10 @@ import React from 'react';
 import { observer } from 'mobx-react-lite';
 import './App.css';
 import debug from 'debug';
-import ReactMapGl, { Source, Layer } from 'react-map-gl';
+import ReactMapGl, { Source, Layer, MapLayerMouseEvent } from 'react-map-gl';
 import { context } from './state';
-import { minspeed, maxspeed } from './util';
+import type { GeoJSONVehicleFeature } from './types';
+import { MapHoverInfo } from './MapHoverInfo';
 
 const info = debug('trackpatch/app#App:info');
 const warn = debug('trackpatch/app#App:warn');
@@ -16,6 +17,23 @@ const good = { color: 'green' };
 export const Map = observer(function Map() {
   const { state, actions } = React.useContext(context);
   let geojson = actions.geojson();
+
+  // Hover panel: you have to call useCallback BEFORE any returns
+  const onHover = React.useCallback((evt: MapLayerMouseEvent) => {
+    const active = evt.features && evt.features.length > 0 || false;
+    actions.hover({ 
+      x: evt.point.x, 
+      y: evt.point.y, 
+      features: (((evt.features as unknown) || []) as GeoJSONVehicleFeature[]),
+      active,
+    });
+  },[]);
+  const onLeave = () => {
+    actions.hover({ x: 0, y: 0, features: [], active: false });
+  }
+    
+
+
 
   // Access the rev so we are updated when it changes.  Have to access it BEFORE !geojson or it might not re-render
   if (state.geojson.rev < 1 || !geojson) {
@@ -31,7 +49,6 @@ export const Map = observer(function Map() {
     );
   }
 
-
   // A good intro to Mapbox styling expressions is: https://docs.mapbox.com/help/tutorials/mapbox-gl-js-expressions/
   if (state.filterbucket >= 0) {
     geojson = { ...geojson }; // clone the top level
@@ -39,7 +56,6 @@ export const Map = observer(function Map() {
     geojson.features = geojson.features.filter(f => f.properties.speedbucket === state.filterbucket);
     info('Filtered features to only those with speedbucket ', state.filterbucket, '.  There are ', geojson.features.length, ' of them after filtering: ', geojson);
   }
-  
 
   return (
     <ReactMapGl
@@ -51,6 +67,9 @@ export const Map = observer(function Map() {
       }}
       style={{width: '100vw', height: '90vh'}}
       mapStyle="mapbox://styles/mapbox/satellite-streets-v11"
+      onMouseMove={onHover}
+      onMouseLeave={onLeave}
+      interactiveLayerIds={['data']}
     >
       <Source type="geojson" data={geojson}>
         <Layer id="data" type="line" paint={{
@@ -67,6 +86,7 @@ export const Map = observer(function Map() {
         }} />
 
       </Source>
+      <MapHoverInfo />
     </ReactMapGl>
   );
 });

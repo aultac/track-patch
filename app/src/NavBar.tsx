@@ -63,6 +63,12 @@ export const NavBar = observer(() => {
             </Select>
           </Box>
 
+          <Box style={{flexGrow: 1}}></Box>
+
+          <Box>
+            { state.oada.token ? <a style={{color: "white"}} href="#" onClick={() => actions.deauthorize()}>Logout</a> : '' }
+          </Box>
+
         </Toolbar>
       </Container>
     </AppBar>
