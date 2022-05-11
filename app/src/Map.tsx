@@ -4,7 +4,7 @@ import './App.css';
 import debug from 'debug';
 import ReactMapGl, { Source, Layer, MapLayerMouseEvent } from 'react-map-gl';
 import { context } from './state';
-import type { GeoJSONVehicleFeature } from './types';
+import type { GeoJSONVehicleFeature, GeoJSONVehicleMarkerProps, GeoJSONVehicleMarkers } from './types';
 import { MapHoverInfo } from './MapHoverInfo';
 
 const info = debug('trackpatch/app#App:info');
@@ -63,6 +63,39 @@ export const Map = observer(function Map() {
     return endtime.isAfter(f.properties.time);
   });
 
+  // Grab all the last known vehicle locations to plot markers
+  const vehicles: { [vid: string]: GeoJSONVehicleMarkerProps } = {};
+  for (const f of geojson.features) {
+    const vid = f.properties.vehicleid;
+    const props = { 
+      ...f.properties,
+      point: f.geometry.coordinates[f.geometry.coordinates.length-1]!,
+    };
+    if (!vehicles[vid]) {
+      vehicles[vid] = props;
+      continue;
+    }
+    if (vehicles[vid]!.time.isBefore(f.properties.time)) {
+      vehicles[vid] = props;
+    }
+  }
+  // Create geojson circles out of it
+  const markers_geojson: GeoJSONVehicleMarkers = {
+    type: 'FeatureCollection',
+    features: Object.values(vehicles).map(v => ({
+      type: 'Feature',
+      properties: v,
+      geometry: {
+        type: 'Point',
+        coordinates: v.point,
+      }
+    })),
+  };
+    
+  
+  // Check all last-known locations to identify any groups
+  // TODO
+
   return (
     <ReactMapGl
       mapboxAccessToken={MAPBOX_TOKEN}
@@ -92,7 +125,26 @@ export const Map = observer(function Map() {
         }} />
 
       </Source>
+
       <MapHoverInfo />
+
+      <Source type="geojson" data={markers_geojson}>
+        <Layer id="markerdta" type="circle" paint={{ 
+          'circle-radius': [
+            'interpolate',
+            ['linear'],
+            ['zoom'],
+            10,
+            5,
+            13,
+            10,
+          ],
+          'circle-color': [ 'get', 'color' ],
+          'circle-stroke-width': 1,
+        }} />
+
+      </Source>
+
     </ReactMapGl>
   );
 });
