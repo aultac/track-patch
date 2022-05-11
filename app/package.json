@@ -1,7 +1,7 @@
 {
   "name": "@track-patch/app",
   "homepage": "https://aultac.github.io/track-patch",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "private": true,
   "dependencies": {
     "@fontsource/oleo-script": "^4.5.5",
