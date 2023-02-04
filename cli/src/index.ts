@@ -21,7 +21,7 @@ program.command('split-geohash-roads')
   .description('Split road files in workorderapp/public/split_by_dataset into geohash-based files')
   .option('-d, --dir <input_directory>', 'directory of geojsons to convert', '../workorderapp/public/split_by_dataset')
   .option('-f, --file <input_file>', 'single file to convert')
-  .option('-o, --output', 'output directory to accumulate geohash-based geojson files', '../workorderapp/split_by_geohash')
+  .option('-o, --output', 'output directory to accumulate geohash-based geojson files', '../workorderapp/public/roads-by-geohash')
   .action(splitGeohashRoads);
 
 

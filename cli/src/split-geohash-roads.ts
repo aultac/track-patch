@@ -1,6 +1,8 @@
 import log from './log.js';
-import { readdir, readFile } from 'fs/promises';
+import { readdir, readFile, writeFile } from 'fs/promises';
 import type { FeatureCollection, Feature} from 'geojson';
+import { mkdirp } from 'mkdirp';
+import pmap from 'p-map';
 import shape2geohash from 'shape2geohash';
 
 const { info, trace } = log.get('split-geohash-roads');
@@ -32,8 +34,11 @@ export async function splitGeohashRoads({ dir, file, output }: { dir?: string, f
       }
       const geohash4s = await shape2geohash(feature, { precision: GEOHASH_LENGTH, allowDuplicates: false });
       for (const g4 of geohash4s) {
+        const fclone = { ...feature }; // make a shallow clone so we can save this same feature separately for every geohash bucket it is in with that geohash in the properties
+        fclone.properties = { ...feature.properties, geohash: g4 }; // add the geohash to the properties
+        
         if (!geohash_buckets[g4]) geohash_buckets[g4] = [];
-        geohash_buckets[g4]!.push(feature);
+        geohash_buckets[g4]!.push(fclone);
       }
     }
 
@@ -54,6 +59,21 @@ export async function splitGeohashRoads({ dir, file, output }: { dir?: string, f
   }
   info('==========================================================');
 
+  if (!output) {
+    info('No output directory given (-o), not writing files');
+    return;
+  }
+  await mkdirp(output);
+ 
+  info('Writing files to',output);
+  await pmap(
+    Object.entries(geohash_buckets), 
+    ([geohash, json]) => writeFile(`${output}/${geohash}.json`, JSON.stringify(json)), 
+    { concurrency: 100 }
+  );
+
+  info('Done!  CTRL-C to quit');
+  return;
 }
 
 

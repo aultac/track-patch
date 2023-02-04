@@ -29,6 +29,10 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
         "reference": "workspace:cli"\
       },\
       {\
+        "name": "@track-patch/constants",\
+        "reference": "workspace:constants"\
+      },\
+      {\
         "name": "@track-patch/gps2road",\
         "reference": "workspace:gps2road"\
       },\
@@ -46,6 +50,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
     "fallbackExclusionList": [\
       ["@track-patch/app", ["workspace:app"]],\
       ["@track-patch/cli", ["workspace:cli"]],\
+      ["@track-patch/constants", ["workspace:constants"]],\
       ["@track-patch/gps2road", ["workspace:gps2road"]],\
       ["@track-patch/lib", ["workspace:lib"]],\
       ["track-patch", ["workspace:."]],\
@@ -5675,8 +5680,39 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["event-stream", "npm:4.0.1"],\
             ["fgdb", "npm:1.0.0"],\
             ["jsonstream", "npm:1.0.3"],\
-            ["p-map", "npm:5.3.0"],\
+            ["mkdirp", "npm:2.1.3"],\
+            ["p-map", "npm:5.5.0"],\
             ["shape2geohash", "npm:1.2.6"],\
+            ["typescript", "patch:typescript@npm%3A4.6.3#~builtin<compat/typescript>::version=4.6.3&hash=bda367"]\
+          ],\
+          "linkType": "SOFT"\
+        }]\
+      ]],\
+      ["@track-patch/constants", [\
+        ["workspace:constants", {\
+          "packageLocation": "./constants/",\
+          "packageDependencies": [\
+            ["@track-patch/constants", "workspace:constants"],\
+            ["@rollup/plugin-commonjs", "virtual:b753737444e3209da67c651fc11c7004dfd680ee0383abe9150ba4e946bd6d5a2812204644b5e93454ecc23e1875050286857a1802e85a3788f84db4d48cef90#npm:21.0.3"],\
+            ["@rollup/plugin-json", "virtual:b753737444e3209da67c651fc11c7004dfd680ee0383abe9150ba4e946bd6d5a2812204644b5e93454ecc23e1875050286857a1802e85a3788f84db4d48cef90#npm:4.1.0"],\
+            ["@rollup/plugin-node-resolve", "virtual:b753737444e3209da67c651fc11c7004dfd680ee0383abe9150ba4e946bd6d5a2812204644b5e93454ecc23e1875050286857a1802e85a3788f84db4d48cef90#npm:13.1.3"],\
+            ["@rollup/plugin-typescript", "virtual:b753737444e3209da67c651fc11c7004dfd680ee0383abe9150ba4e946bd6d5a2812204644b5e93454ecc23e1875050286857a1802e85a3788f84db4d48cef90#npm:8.3.1"],\
+            ["@tsconfig/node16", "npm:1.0.2"],\
+            ["@turf/turf", "npm:6.5.0"],\
+            ["@types/debug", "npm:4.1.7"],\
+            ["@types/geojson", "npm:7946.0.10"],\
+            ["@types/node", "npm:17.0.23"],\
+            ["@yarnpkg/sdks", "npm:2.6.0"],\
+            ["concurrently", "npm:7.1.0"],\
+            ["dayjs", "npm:1.11.0"],\
+            ["debug", "virtual:b86a9fb34323a98c6519528ed55faa0d9b44ca8879307c0b29aa384bde47ff59a7d0c9051b31246f14521dfb71ba3c5d6d0b35c29fffc17bf875aa6ad977d9e8#npm:4.3.4"],\
+            ["live-server", "npm:1.2.1"],\
+            ["nodemon", "npm:2.0.15"],\
+            ["rollup", "npm:2.70.1"],\
+            ["rollup-plugin-pnp-resolve", "npm:2.0.0"],\
+            ["shape2geohash", "npm:1.2.6"],\
+            ["terser", "npm:5.12.1"],\
+            ["tslib", "npm:2.3.1"],\
             ["typescript", "patch:typescript@npm%3A4.6.3#~builtin<compat/typescript>::version=4.6.3&hash=bda367"]\
           ],\
           "linkType": "SOFT"\
@@ -5691,7 +5727,9 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["@rollup/plugin-json", "virtual:b753737444e3209da67c651fc11c7004dfd680ee0383abe9150ba4e946bd6d5a2812204644b5e93454ecc23e1875050286857a1802e85a3788f84db4d48cef90#npm:4.1.0"],\
             ["@rollup/plugin-node-resolve", "virtual:b753737444e3209da67c651fc11c7004dfd680ee0383abe9150ba4e946bd6d5a2812204644b5e93454ecc23e1875050286857a1802e85a3788f84db4d48cef90#npm:13.1.3"],\
             ["@rollup/plugin-typescript", "virtual:b753737444e3209da67c651fc11c7004dfd680ee0383abe9150ba4e946bd6d5a2812204644b5e93454ecc23e1875050286857a1802e85a3788f84db4d48cef90#npm:8.3.1"],\
+            ["@track-patch/constants", "workspace:constants"],\
             ["@tsconfig/node16", "npm:1.0.2"],\
+            ["@turf/turf", "npm:6.5.0"],\
             ["@types/debug", "npm:4.1.7"],\
             ["@types/geojson", "npm:7946.0.10"],\
             ["@types/node", "npm:17.0.23"],\
@@ -5699,10 +5737,13 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["concurrently", "npm:7.1.0"],\
             ["dayjs", "npm:1.11.0"],\
             ["debug", "virtual:b86a9fb34323a98c6519528ed55faa0d9b44ca8879307c0b29aa384bde47ff59a7d0c9051b31246f14521dfb71ba3c5d6d0b35c29fffc17bf875aa6ad977d9e8#npm:4.3.4"],\
+            ["fetch-ponyfill", "npm:7.1.0"],\
             ["live-server", "npm:1.2.1"],\
             ["nodemon", "npm:2.0.15"],\
+            ["p-map", "npm:5.5.0"],\
             ["rollup", "npm:2.70.1"],\
             ["rollup-plugin-pnp-resolve", "npm:2.0.0"],\
+            ["shape2geohash", "npm:1.2.6"],\
             ["terser", "npm:5.12.1"],\
             ["tslib", "npm:2.3.1"],\
             ["typescript", "patch:typescript@npm%3A4.6.3#~builtin<compat/typescript>::version=4.6.3&hash=bda367"]\
@@ -5755,6 +5796,33 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "linkType": "HARD"\
         }]\
       ]],\
+      ["@turf/along", [\
+        ["npm:6.5.0", {\
+          "packageLocation": "./.yarn/cache/@turf-along-npm-6.5.0-fa255041a4-ea0b4d03d6.zip/node_modules/@turf/along/",\
+          "packageDependencies": [\
+            ["@turf/along", "npm:6.5.0"],\
+            ["@turf/bearing", "npm:6.5.0"],\
+            ["@turf/destination", "npm:6.5.0"],\
+            ["@turf/distance", "npm:6.5.0"],\
+            ["@turf/helpers", "npm:6.5.0"],\
+            ["@turf/invariant", "npm:6.5.0"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["@turf/angle", [\
+        ["npm:6.5.0", {\
+          "packageLocation": "./.yarn/cache/@turf-angle-npm-6.5.0-7f6a8b4340-e4f27c15e1.zip/node_modules/@turf/angle/",\
+          "packageDependencies": [\
+            ["@turf/angle", "npm:6.5.0"],\
+            ["@turf/bearing", "npm:6.5.0"],\
+            ["@turf/helpers", "npm:6.5.0"],\
+            ["@turf/invariant", "npm:6.5.0"],\
+            ["@turf/rhumb-bearing", "npm:6.5.0"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
       ["@turf/area", [\
         ["npm:6.5.0", {\
           "packageLocation": "./.yarn/cache/@turf-area-npm-6.5.0-8edd2bbf40-4b62c6874f.zip/node_modules/@turf/area/",\
@@ -5773,6 +5841,17 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["@turf/bbox", "npm:6.5.0"],\
             ["@turf/helpers", "npm:6.5.0"],\
             ["@turf/meta", "npm:6.5.0"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["@turf/bbox-clip", [\
+        ["npm:6.5.0", {\
+          "packageLocation": "./.yarn/cache/@turf-bbox-clip-npm-6.5.0-bc08e71d1d-0ca079fa5e.zip/node_modules/@turf/bbox-clip/",\
+          "packageDependencies": [\
+            ["@turf/bbox-clip", "npm:6.5.0"],\
+            ["@turf/helpers", "npm:6.5.0"],\
+            ["@turf/invariant", "npm:6.5.0"]\
           ],\
           "linkType": "HARD"\
         }]\
@@ -5798,6 +5877,95 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "linkType": "HARD"\
         }]\
       ]],\
+      ["@turf/bezier-spline", [\
+        ["npm:6.5.0", {\
+          "packageLocation": "./.yarn/cache/@turf-bezier-spline-npm-6.5.0-2e4d50d9f1-35dbde0f52.zip/node_modules/@turf/bezier-spline/",\
+          "packageDependencies": [\
+            ["@turf/bezier-spline", "npm:6.5.0"],\
+            ["@turf/helpers", "npm:6.5.0"],\
+            ["@turf/invariant", "npm:6.5.0"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["@turf/boolean-clockwise", [\
+        ["npm:6.5.0", {\
+          "packageLocation": "./.yarn/cache/@turf-boolean-clockwise-npm-6.5.0-547482138a-a359550683.zip/node_modules/@turf/boolean-clockwise/",\
+          "packageDependencies": [\
+            ["@turf/boolean-clockwise", "npm:6.5.0"],\
+            ["@turf/helpers", "npm:6.5.0"],\
+            ["@turf/invariant", "npm:6.5.0"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["@turf/boolean-contains", [\
+        ["npm:6.5.0", {\
+          "packageLocation": "./.yarn/cache/@turf-boolean-contains-npm-6.5.0-f6a2989d38-85d062c298.zip/node_modules/@turf/boolean-contains/",\
+          "packageDependencies": [\
+            ["@turf/boolean-contains", "npm:6.5.0"],\
+            ["@turf/bbox", "npm:6.5.0"],\
+            ["@turf/boolean-point-in-polygon", "npm:6.5.0"],\
+            ["@turf/boolean-point-on-line", "npm:6.5.0"],\
+            ["@turf/helpers", "npm:6.5.0"],\
+            ["@turf/invariant", "npm:6.5.0"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["@turf/boolean-crosses", [\
+        ["npm:6.5.0", {\
+          "packageLocation": "./.yarn/cache/@turf-boolean-crosses-npm-6.5.0-b88efdd9cd-05af7a8bad.zip/node_modules/@turf/boolean-crosses/",\
+          "packageDependencies": [\
+            ["@turf/boolean-crosses", "npm:6.5.0"],\
+            ["@turf/boolean-point-in-polygon", "npm:6.5.0"],\
+            ["@turf/helpers", "npm:6.5.0"],\
+            ["@turf/invariant", "npm:6.5.0"],\
+            ["@turf/line-intersect", "npm:6.5.0"],\
+            ["@turf/polygon-to-line", "npm:6.5.0"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["@turf/boolean-disjoint", [\
+        ["npm:6.5.0", {\
+          "packageLocation": "./.yarn/cache/@turf-boolean-disjoint-npm-6.5.0-cf8c7cb24b-f1785bf45f.zip/node_modules/@turf/boolean-disjoint/",\
+          "packageDependencies": [\
+            ["@turf/boolean-disjoint", "npm:6.5.0"],\
+            ["@turf/boolean-point-in-polygon", "npm:6.5.0"],\
+            ["@turf/helpers", "npm:6.5.0"],\
+            ["@turf/line-intersect", "npm:6.5.0"],\
+            ["@turf/meta", "npm:6.5.0"],\
+            ["@turf/polygon-to-line", "npm:6.5.0"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["@turf/boolean-equal", [\
+        ["npm:6.5.0", {\
+          "packageLocation": "./.yarn/cache/@turf-boolean-equal-npm-6.5.0-6abf7a988b-ed3c8547bf.zip/node_modules/@turf/boolean-equal/",\
+          "packageDependencies": [\
+            ["@turf/boolean-equal", "npm:6.5.0"],\
+            ["@turf/clean-coords", "npm:6.5.0"],\
+            ["@turf/helpers", "npm:6.5.0"],\
+            ["@turf/invariant", "npm:6.5.0"],\
+            ["geojson-equality", "npm:0.1.6"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["@turf/boolean-intersects", [\
+        ["npm:6.5.0", {\
+          "packageLocation": "./.yarn/cache/@turf-boolean-intersects-npm-6.5.0-accb974f67-4a077ddd03.zip/node_modules/@turf/boolean-intersects/",\
+          "packageDependencies": [\
+            ["@turf/boolean-intersects", "npm:6.5.0"],\
+            ["@turf/boolean-disjoint", "npm:6.5.0"],\
+            ["@turf/helpers", "npm:6.5.0"],\
+            ["@turf/meta", "npm:6.5.0"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
       ["@turf/boolean-overlap", [\
         ["npm:6.5.0", {\
           "packageLocation": "./.yarn/cache/@turf-boolean-overlap-npm-6.5.0-24556e08ad-1c10eac571.zip/node_modules/@turf/boolean-overlap/",\
@@ -5809,6 +5977,19 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["@turf/line-overlap", "npm:6.5.0"],\
             ["@turf/meta", "npm:6.5.0"],\
             ["geojson-equality", "npm:0.1.6"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["@turf/boolean-parallel", [\
+        ["npm:6.5.0", {\
+          "packageLocation": "./.yarn/cache/@turf-boolean-parallel-npm-6.5.0-2032825282-a8d44a4a63.zip/node_modules/@turf/boolean-parallel/",\
+          "packageDependencies": [\
+            ["@turf/boolean-parallel", "npm:6.5.0"],\
+            ["@turf/clean-coords", "npm:6.5.0"],\
+            ["@turf/helpers", "npm:6.5.0"],\
+            ["@turf/line-segment", "npm:6.5.0"],\
+            ["@turf/rhumb-bearing", "npm:6.5.0"]\
           ],\
           "linkType": "HARD"\
         }]\
@@ -5849,6 +6030,208 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "linkType": "HARD"\
         }]\
       ]],\
+      ["@turf/buffer", [\
+        ["npm:6.5.0", {\
+          "packageLocation": "./.yarn/cache/@turf-buffer-npm-6.5.0-2133528cc1-d069ef219b.zip/node_modules/@turf/buffer/",\
+          "packageDependencies": [\
+            ["@turf/buffer", "npm:6.5.0"],\
+            ["@turf/bbox", "npm:6.5.0"],\
+            ["@turf/center", "npm:6.5.0"],\
+            ["@turf/helpers", "npm:6.5.0"],\
+            ["@turf/meta", "npm:6.5.0"],\
+            ["@turf/projection", "npm:6.5.0"],\
+            ["d3-geo", "npm:1.7.1"],\
+            ["turf-jsts", "npm:1.2.3"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["@turf/center", [\
+        ["npm:6.5.0", {\
+          "packageLocation": "./.yarn/cache/@turf-center-npm-6.5.0-d242b19710-d0e26ff714.zip/node_modules/@turf/center/",\
+          "packageDependencies": [\
+            ["@turf/center", "npm:6.5.0"],\
+            ["@turf/bbox", "npm:6.5.0"],\
+            ["@turf/helpers", "npm:6.5.0"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["@turf/center-mean", [\
+        ["npm:6.5.0", {\
+          "packageLocation": "./.yarn/cache/@turf-center-mean-npm-6.5.0-04ecd3bb4b-30ae4f8e86.zip/node_modules/@turf/center-mean/",\
+          "packageDependencies": [\
+            ["@turf/center-mean", "npm:6.5.0"],\
+            ["@turf/bbox", "npm:6.5.0"],\
+            ["@turf/helpers", "npm:6.5.0"],\
+            ["@turf/meta", "npm:6.5.0"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["@turf/center-median", [\
+        ["npm:6.5.0", {\
+          "packageLocation": "./.yarn/cache/@turf-center-median-npm-6.5.0-9a86081b65-f1b462bb7b.zip/node_modules/@turf/center-median/",\
+          "packageDependencies": [\
+            ["@turf/center-median", "npm:6.5.0"],\
+            ["@turf/center-mean", "npm:6.5.0"],\
+            ["@turf/centroid", "npm:6.5.0"],\
+            ["@turf/distance", "npm:6.5.0"],\
+            ["@turf/helpers", "npm:6.5.0"],\
+            ["@turf/meta", "npm:6.5.0"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["@turf/center-of-mass", [\
+        ["npm:6.5.0", {\
+          "packageLocation": "./.yarn/cache/@turf-center-of-mass-npm-6.5.0-963959b69a-91a3741492.zip/node_modules/@turf/center-of-mass/",\
+          "packageDependencies": [\
+            ["@turf/center-of-mass", "npm:6.5.0"],\
+            ["@turf/centroid", "npm:6.5.0"],\
+            ["@turf/convex", "npm:6.5.0"],\
+            ["@turf/helpers", "npm:6.5.0"],\
+            ["@turf/invariant", "npm:6.5.0"],\
+            ["@turf/meta", "npm:6.5.0"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["@turf/centroid", [\
+        ["npm:6.5.0", {\
+          "packageLocation": "./.yarn/cache/@turf-centroid-npm-6.5.0-99d1e4024e-1a37c26232.zip/node_modules/@turf/centroid/",\
+          "packageDependencies": [\
+            ["@turf/centroid", "npm:6.5.0"],\
+            ["@turf/helpers", "npm:6.5.0"],\
+            ["@turf/meta", "npm:6.5.0"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["@turf/circle", [\
+        ["npm:6.5.0", {\
+          "packageLocation": "./.yarn/cache/@turf-circle-npm-6.5.0-ebad27df61-d06c2dfac6.zip/node_modules/@turf/circle/",\
+          "packageDependencies": [\
+            ["@turf/circle", "npm:6.5.0"],\
+            ["@turf/destination", "npm:6.5.0"],\
+            ["@turf/helpers", "npm:6.5.0"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["@turf/clean-coords", [\
+        ["npm:6.5.0", {\
+          "packageLocation": "./.yarn/cache/@turf-clean-coords-npm-6.5.0-0e0bec294e-c067b88680.zip/node_modules/@turf/clean-coords/",\
+          "packageDependencies": [\
+            ["@turf/clean-coords", "npm:6.5.0"],\
+            ["@turf/helpers", "npm:6.5.0"],\
+            ["@turf/invariant", "npm:6.5.0"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["@turf/clone", [\
+        ["npm:6.5.0", {\
+          "packageLocation": "./.yarn/cache/@turf-clone-npm-6.5.0-8b7001cf50-8ef6f6ba88.zip/node_modules/@turf/clone/",\
+          "packageDependencies": [\
+            ["@turf/clone", "npm:6.5.0"],\
+            ["@turf/helpers", "npm:6.5.0"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["@turf/clusters", [\
+        ["npm:6.5.0", {\
+          "packageLocation": "./.yarn/cache/@turf-clusters-npm-6.5.0-5ecdcd1a05-bf191d0868.zip/node_modules/@turf/clusters/",\
+          "packageDependencies": [\
+            ["@turf/clusters", "npm:6.5.0"],\
+            ["@turf/helpers", "npm:6.5.0"],\
+            ["@turf/meta", "npm:6.5.0"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["@turf/clusters-dbscan", [\
+        ["npm:6.5.0", {\
+          "packageLocation": "./.yarn/cache/@turf-clusters-dbscan-npm-6.5.0-23c2c58c08-8277584085.zip/node_modules/@turf/clusters-dbscan/",\
+          "packageDependencies": [\
+            ["@turf/clusters-dbscan", "npm:6.5.0"],\
+            ["@turf/clone", "npm:6.5.0"],\
+            ["@turf/distance", "npm:6.5.0"],\
+            ["@turf/helpers", "npm:6.5.0"],\
+            ["@turf/meta", "npm:6.5.0"],\
+            ["density-clustering", "npm:1.3.0"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["@turf/clusters-kmeans", [\
+        ["npm:6.5.0", {\
+          "packageLocation": "./.yarn/cache/@turf-clusters-kmeans-npm-6.5.0-a898e3cd2b-036647f74c.zip/node_modules/@turf/clusters-kmeans/",\
+          "packageDependencies": [\
+            ["@turf/clusters-kmeans", "npm:6.5.0"],\
+            ["@turf/clone", "npm:6.5.0"],\
+            ["@turf/helpers", "npm:6.5.0"],\
+            ["@turf/invariant", "npm:6.5.0"],\
+            ["@turf/meta", "npm:6.5.0"],\
+            ["skmeans", "npm:0.9.7"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["@turf/collect", [\
+        ["npm:6.5.0", {\
+          "packageLocation": "./.yarn/cache/@turf-collect-npm-6.5.0-1c539bf186-a1bf11e60f.zip/node_modules/@turf/collect/",\
+          "packageDependencies": [\
+            ["@turf/collect", "npm:6.5.0"],\
+            ["@turf/bbox", "npm:6.5.0"],\
+            ["@turf/boolean-point-in-polygon", "npm:6.5.0"],\
+            ["@turf/helpers", "npm:6.5.0"],\
+            ["rbush", "npm:2.0.2"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["@turf/combine", [\
+        ["npm:6.5.0", {\
+          "packageLocation": "./.yarn/cache/@turf-combine-npm-6.5.0-4353df5088-b5f68f8501.zip/node_modules/@turf/combine/",\
+          "packageDependencies": [\
+            ["@turf/combine", "npm:6.5.0"],\
+            ["@turf/helpers", "npm:6.5.0"],\
+            ["@turf/meta", "npm:6.5.0"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["@turf/concave", [\
+        ["npm:6.5.0", {\
+          "packageLocation": "./.yarn/cache/@turf-concave-npm-6.5.0-14ee982809-2ac77ab4fe.zip/node_modules/@turf/concave/",\
+          "packageDependencies": [\
+            ["@turf/concave", "npm:6.5.0"],\
+            ["@turf/clone", "npm:6.5.0"],\
+            ["@turf/distance", "npm:6.5.0"],\
+            ["@turf/helpers", "npm:6.5.0"],\
+            ["@turf/invariant", "npm:6.5.0"],\
+            ["@turf/meta", "npm:6.5.0"],\
+            ["@turf/tin", "npm:6.5.0"],\
+            ["topojson-client", "npm:3.1.0"],\
+            ["topojson-server", "npm:3.0.1"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["@turf/convex", [\
+        ["npm:6.5.0", {\
+          "packageLocation": "./.yarn/cache/@turf-convex-npm-6.5.0-9d85385ab9-6e6301aa60.zip/node_modules/@turf/convex/",\
+          "packageDependencies": [\
+            ["@turf/convex", "npm:6.5.0"],\
+            ["@turf/helpers", "npm:6.5.0"],\
+            ["@turf/meta", "npm:6.5.0"],\
+            ["concaveman", "npm:1.2.1"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
       ["@turf/destination", [\
         ["npm:6.5.0", {\
           "packageLocation": "./.yarn/cache/@turf-destination-npm-6.5.0-748ae1ba0c-eac68b89fb.zip/node_modules/@turf/destination/",\
@@ -5860,6 +6243,31 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "linkType": "HARD"\
         }]\
       ]],\
+      ["@turf/difference", [\
+        ["npm:6.5.0", {\
+          "packageLocation": "./.yarn/cache/@turf-difference-npm-6.5.0-087d886455-0a43038b0f.zip/node_modules/@turf/difference/",\
+          "packageDependencies": [\
+            ["@turf/difference", "npm:6.5.0"],\
+            ["@turf/helpers", "npm:6.5.0"],\
+            ["@turf/invariant", "npm:6.5.0"],\
+            ["polygon-clipping", "npm:0.15.3"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["@turf/dissolve", [\
+        ["npm:6.5.0", {\
+          "packageLocation": "./.yarn/cache/@turf-dissolve-npm-6.5.0-227d182986-93d464abbb.zip/node_modules/@turf/dissolve/",\
+          "packageDependencies": [\
+            ["@turf/dissolve", "npm:6.5.0"],\
+            ["@turf/helpers", "npm:6.5.0"],\
+            ["@turf/invariant", "npm:6.5.0"],\
+            ["@turf/meta", "npm:6.5.0"],\
+            ["polygon-clipping", "npm:0.15.3"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
       ["@turf/distance", [\
         ["npm:6.5.0", {\
           "packageLocation": "./.yarn/cache/@turf-distance-npm-6.5.0-31f0d31a23-f311e19a5d.zip/node_modules/@turf/distance/",\
@@ -5867,6 +6275,32 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["@turf/distance", "npm:6.5.0"],\
             ["@turf/helpers", "npm:6.5.0"],\
             ["@turf/invariant", "npm:6.5.0"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["@turf/distance-weight", [\
+        ["npm:6.5.0", {\
+          "packageLocation": "./.yarn/cache/@turf-distance-weight-npm-6.5.0-fd2ecaf34c-d9253817d3.zip/node_modules/@turf/distance-weight/",\
+          "packageDependencies": [\
+            ["@turf/distance-weight", "npm:6.5.0"],\
+            ["@turf/centroid", "npm:6.5.0"],\
+            ["@turf/helpers", "npm:6.5.0"],\
+            ["@turf/invariant", "npm:6.5.0"],\
+            ["@turf/meta", "npm:6.5.0"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["@turf/ellipse", [\
+        ["npm:6.5.0", {\
+          "packageLocation": "./.yarn/cache/@turf-ellipse-npm-6.5.0-b840ec2bfb-2f206594c3.zip/node_modules/@turf/ellipse/",\
+          "packageDependencies": [\
+            ["@turf/ellipse", "npm:6.5.0"],\
+            ["@turf/helpers", "npm:6.5.0"],\
+            ["@turf/invariant", "npm:6.5.0"],\
+            ["@turf/rhumb-destination", "npm:6.5.0"],\
+            ["@turf/transform-rotate", "npm:6.5.0"]\
           ],\
           "linkType": "HARD"\
         }]\
@@ -5883,11 +6317,89 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "linkType": "HARD"\
         }]\
       ]],\
+      ["@turf/explode", [\
+        ["npm:6.5.0", {\
+          "packageLocation": "./.yarn/cache/@turf-explode-npm-6.5.0-ee11f9a870-574cdb7f8e.zip/node_modules/@turf/explode/",\
+          "packageDependencies": [\
+            ["@turf/explode", "npm:6.5.0"],\
+            ["@turf/helpers", "npm:6.5.0"],\
+            ["@turf/meta", "npm:6.5.0"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["@turf/flatten", [\
+        ["npm:6.5.0", {\
+          "packageLocation": "./.yarn/cache/@turf-flatten-npm-6.5.0-1ee43666f8-eaeeb6358f.zip/node_modules/@turf/flatten/",\
+          "packageDependencies": [\
+            ["@turf/flatten", "npm:6.5.0"],\
+            ["@turf/helpers", "npm:6.5.0"],\
+            ["@turf/meta", "npm:6.5.0"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["@turf/flip", [\
+        ["npm:6.5.0", {\
+          "packageLocation": "./.yarn/cache/@turf-flip-npm-6.5.0-8ca5c8fec1-d7d85cba24.zip/node_modules/@turf/flip/",\
+          "packageDependencies": [\
+            ["@turf/flip", "npm:6.5.0"],\
+            ["@turf/clone", "npm:6.5.0"],\
+            ["@turf/helpers", "npm:6.5.0"],\
+            ["@turf/meta", "npm:6.5.0"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["@turf/great-circle", [\
+        ["npm:6.5.0", {\
+          "packageLocation": "./.yarn/cache/@turf-great-circle-npm-6.5.0-e9fa4078fa-ee1f3da517.zip/node_modules/@turf/great-circle/",\
+          "packageDependencies": [\
+            ["@turf/great-circle", "npm:6.5.0"],\
+            ["@turf/helpers", "npm:6.5.0"],\
+            ["@turf/invariant", "npm:6.5.0"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
       ["@turf/helpers", [\
         ["npm:6.5.0", {\
           "packageLocation": "./.yarn/cache/@turf-helpers-npm-6.5.0-a40ad42565-d57f746351.zip/node_modules/@turf/helpers/",\
           "packageDependencies": [\
             ["@turf/helpers", "npm:6.5.0"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["@turf/hex-grid", [\
+        ["npm:6.5.0", {\
+          "packageLocation": "./.yarn/cache/@turf-hex-grid-npm-6.5.0-7caf568e28-6f888f65b6.zip/node_modules/@turf/hex-grid/",\
+          "packageDependencies": [\
+            ["@turf/hex-grid", "npm:6.5.0"],\
+            ["@turf/distance", "npm:6.5.0"],\
+            ["@turf/helpers", "npm:6.5.0"],\
+            ["@turf/intersect", "npm:6.5.0"],\
+            ["@turf/invariant", "npm:6.5.0"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["@turf/interpolate", [\
+        ["npm:6.5.0", {\
+          "packageLocation": "./.yarn/cache/@turf-interpolate-npm-6.5.0-0cc7c653fa-279f8d02c6.zip/node_modules/@turf/interpolate/",\
+          "packageDependencies": [\
+            ["@turf/interpolate", "npm:6.5.0"],\
+            ["@turf/bbox", "npm:6.5.0"],\
+            ["@turf/centroid", "npm:6.5.0"],\
+            ["@turf/clone", "npm:6.5.0"],\
+            ["@turf/distance", "npm:6.5.0"],\
+            ["@turf/helpers", "npm:6.5.0"],\
+            ["@turf/hex-grid", "npm:6.5.0"],\
+            ["@turf/invariant", "npm:6.5.0"],\
+            ["@turf/meta", "npm:6.5.0"],\
+            ["@turf/point-grid", "npm:6.5.0"],\
+            ["@turf/square-grid", "npm:6.5.0"],\
+            ["@turf/triangle-grid", "npm:6.5.0"]\
           ],\
           "linkType": "HARD"\
         }]\
@@ -5914,6 +6426,84 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "linkType": "HARD"\
         }]\
       ]],\
+      ["@turf/isobands", [\
+        ["npm:6.5.0", {\
+          "packageLocation": "./.yarn/cache/@turf-isobands-npm-6.5.0-68042417e3-676c74270e.zip/node_modules/@turf/isobands/",\
+          "packageDependencies": [\
+            ["@turf/isobands", "npm:6.5.0"],\
+            ["@turf/area", "npm:6.5.0"],\
+            ["@turf/bbox", "npm:6.5.0"],\
+            ["@turf/boolean-point-in-polygon", "npm:6.5.0"],\
+            ["@turf/explode", "npm:6.5.0"],\
+            ["@turf/helpers", "npm:6.5.0"],\
+            ["@turf/invariant", "npm:6.5.0"],\
+            ["@turf/meta", "npm:6.5.0"],\
+            ["object-assign", "npm:4.1.1"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["@turf/isolines", [\
+        ["npm:6.5.0", {\
+          "packageLocation": "./.yarn/cache/@turf-isolines-npm-6.5.0-343ba21384-0e4a85eb16.zip/node_modules/@turf/isolines/",\
+          "packageDependencies": [\
+            ["@turf/isolines", "npm:6.5.0"],\
+            ["@turf/bbox", "npm:6.5.0"],\
+            ["@turf/helpers", "npm:6.5.0"],\
+            ["@turf/invariant", "npm:6.5.0"],\
+            ["@turf/meta", "npm:6.5.0"],\
+            ["object-assign", "npm:4.1.1"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["@turf/kinks", [\
+        ["npm:6.5.0", {\
+          "packageLocation": "./.yarn/cache/@turf-kinks-npm-6.5.0-336f45cc90-9393991891.zip/node_modules/@turf/kinks/",\
+          "packageDependencies": [\
+            ["@turf/kinks", "npm:6.5.0"],\
+            ["@turf/helpers", "npm:6.5.0"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["@turf/length", [\
+        ["npm:6.5.0", {\
+          "packageLocation": "./.yarn/cache/@turf-length-npm-6.5.0-a4605ff17c-ae4feb750d.zip/node_modules/@turf/length/",\
+          "packageDependencies": [\
+            ["@turf/length", "npm:6.5.0"],\
+            ["@turf/distance", "npm:6.5.0"],\
+            ["@turf/helpers", "npm:6.5.0"],\
+            ["@turf/meta", "npm:6.5.0"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["@turf/line-arc", [\
+        ["npm:6.5.0", {\
+          "packageLocation": "./.yarn/cache/@turf-line-arc-npm-6.5.0-7eebba80c9-c0e9496410.zip/node_modules/@turf/line-arc/",\
+          "packageDependencies": [\
+            ["@turf/line-arc", "npm:6.5.0"],\
+            ["@turf/circle", "npm:6.5.0"],\
+            ["@turf/destination", "npm:6.5.0"],\
+            ["@turf/helpers", "npm:6.5.0"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["@turf/line-chunk", [\
+        ["npm:6.5.0", {\
+          "packageLocation": "./.yarn/cache/@turf-line-chunk-npm-6.5.0-b80a8453bb-ea73258f90.zip/node_modules/@turf/line-chunk/",\
+          "packageDependencies": [\
+            ["@turf/line-chunk", "npm:6.5.0"],\
+            ["@turf/helpers", "npm:6.5.0"],\
+            ["@turf/length", "npm:6.5.0"],\
+            ["@turf/line-slice-along", "npm:6.5.0"],\
+            ["@turf/meta", "npm:6.5.0"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
       ["@turf/line-intersect", [\
         ["npm:6.5.0", {\
           "packageLocation": "./.yarn/cache/@turf-line-intersect-npm-6.5.0-7b76bbb820-ae5eb762d8.zip/node_modules/@turf/line-intersect/",\
@@ -5924,6 +6514,18 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["@turf/line-segment", "npm:6.5.0"],\
             ["@turf/meta", "npm:6.5.0"],\
             ["geojson-rbush", "npm:3.2.0"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["@turf/line-offset", [\
+        ["npm:6.5.0", {\
+          "packageLocation": "./.yarn/cache/@turf-line-offset-npm-6.5.0-2e4d41be05-899bfc5481.zip/node_modules/@turf/line-offset/",\
+          "packageDependencies": [\
+            ["@turf/line-offset", "npm:6.5.0"],\
+            ["@turf/helpers", "npm:6.5.0"],\
+            ["@turf/invariant", "npm:6.5.0"],\
+            ["@turf/meta", "npm:6.5.0"]\
           ],\
           "linkType": "HARD"\
         }]\
@@ -5957,6 +6559,31 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "linkType": "HARD"\
         }]\
       ]],\
+      ["@turf/line-slice", [\
+        ["npm:6.5.0", {\
+          "packageLocation": "./.yarn/cache/@turf-line-slice-npm-6.5.0-f0b240f5af-33f5fa1eed.zip/node_modules/@turf/line-slice/",\
+          "packageDependencies": [\
+            ["@turf/line-slice", "npm:6.5.0"],\
+            ["@turf/helpers", "npm:6.5.0"],\
+            ["@turf/invariant", "npm:6.5.0"],\
+            ["@turf/nearest-point-on-line", "npm:6.5.0"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["@turf/line-slice-along", [\
+        ["npm:6.5.0", {\
+          "packageLocation": "./.yarn/cache/@turf-line-slice-along-npm-6.5.0-1d04cf40af-f73d247c3c.zip/node_modules/@turf/line-slice-along/",\
+          "packageDependencies": [\
+            ["@turf/line-slice-along", "npm:6.5.0"],\
+            ["@turf/bearing", "npm:6.5.0"],\
+            ["@turf/destination", "npm:6.5.0"],\
+            ["@turf/distance", "npm:6.5.0"],\
+            ["@turf/helpers", "npm:6.5.0"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
       ["@turf/line-split", [\
         ["npm:6.5.0", {\
           "packageLocation": "./.yarn/cache/@turf-line-split-npm-6.5.0-ddc165f3b6-cae22b5121.zip/node_modules/@turf/line-split/",\
@@ -5976,12 +6603,74 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "linkType": "HARD"\
         }]\
       ]],\
+      ["@turf/line-to-polygon", [\
+        ["npm:6.5.0", {\
+          "packageLocation": "./.yarn/cache/@turf-line-to-polygon-npm-6.5.0-bb9ad5e266-d2bec71e04.zip/node_modules/@turf/line-to-polygon/",\
+          "packageDependencies": [\
+            ["@turf/line-to-polygon", "npm:6.5.0"],\
+            ["@turf/bbox", "npm:6.5.0"],\
+            ["@turf/clone", "npm:6.5.0"],\
+            ["@turf/helpers", "npm:6.5.0"],\
+            ["@turf/invariant", "npm:6.5.0"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["@turf/mask", [\
+        ["npm:6.5.0", {\
+          "packageLocation": "./.yarn/cache/@turf-mask-npm-6.5.0-73fc710e1a-76b955a473.zip/node_modules/@turf/mask/",\
+          "packageDependencies": [\
+            ["@turf/mask", "npm:6.5.0"],\
+            ["@turf/helpers", "npm:6.5.0"],\
+            ["polygon-clipping", "npm:0.15.3"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
       ["@turf/meta", [\
         ["npm:6.5.0", {\
           "packageLocation": "./.yarn/cache/@turf-meta-npm-6.5.0-66a9378eac-c6bb936aa9.zip/node_modules/@turf/meta/",\
           "packageDependencies": [\
             ["@turf/meta", "npm:6.5.0"],\
             ["@turf/helpers", "npm:6.5.0"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["@turf/midpoint", [\
+        ["npm:6.5.0", {\
+          "packageLocation": "./.yarn/cache/@turf-midpoint-npm-6.5.0-451dbb4d61-4b74936c85.zip/node_modules/@turf/midpoint/",\
+          "packageDependencies": [\
+            ["@turf/midpoint", "npm:6.5.0"],\
+            ["@turf/bearing", "npm:6.5.0"],\
+            ["@turf/destination", "npm:6.5.0"],\
+            ["@turf/distance", "npm:6.5.0"],\
+            ["@turf/helpers", "npm:6.5.0"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["@turf/moran-index", [\
+        ["npm:6.5.0", {\
+          "packageLocation": "./.yarn/cache/@turf-moran-index-npm-6.5.0-2fb5fbbdbb-52be31d95a.zip/node_modules/@turf/moran-index/",\
+          "packageDependencies": [\
+            ["@turf/moran-index", "npm:6.5.0"],\
+            ["@turf/distance-weight", "npm:6.5.0"],\
+            ["@turf/helpers", "npm:6.5.0"],\
+            ["@turf/meta", "npm:6.5.0"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["@turf/nearest-point", [\
+        ["npm:6.5.0", {\
+          "packageLocation": "./.yarn/cache/@turf-nearest-point-npm-6.5.0-349e1d6e25-23826c73c8.zip/node_modules/@turf/nearest-point/",\
+          "packageDependencies": [\
+            ["@turf/nearest-point", "npm:6.5.0"],\
+            ["@turf/clone", "npm:6.5.0"],\
+            ["@turf/distance", "npm:6.5.0"],\
+            ["@turf/helpers", "npm:6.5.0"],\
+            ["@turf/meta", "npm:6.5.0"]\
           ],\
           "linkType": "HARD"\
         }]\
@@ -6002,6 +6691,274 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "linkType": "HARD"\
         }]\
       ]],\
+      ["@turf/nearest-point-to-line", [\
+        ["npm:6.5.0", {\
+          "packageLocation": "./.yarn/cache/@turf-nearest-point-to-line-npm-6.5.0-9101e59168-ae712e42bd.zip/node_modules/@turf/nearest-point-to-line/",\
+          "packageDependencies": [\
+            ["@turf/nearest-point-to-line", "npm:6.5.0"],\
+            ["@turf/helpers", "npm:6.5.0"],\
+            ["@turf/invariant", "npm:6.5.0"],\
+            ["@turf/meta", "npm:6.5.0"],\
+            ["@turf/point-to-line-distance", "npm:6.5.0"],\
+            ["object-assign", "npm:4.1.1"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["@turf/planepoint", [\
+        ["npm:6.5.0", {\
+          "packageLocation": "./.yarn/cache/@turf-planepoint-npm-6.5.0-67287c7fd7-a8b350db72.zip/node_modules/@turf/planepoint/",\
+          "packageDependencies": [\
+            ["@turf/planepoint", "npm:6.5.0"],\
+            ["@turf/helpers", "npm:6.5.0"],\
+            ["@turf/invariant", "npm:6.5.0"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["@turf/point-grid", [\
+        ["npm:6.5.0", {\
+          "packageLocation": "./.yarn/cache/@turf-point-grid-npm-6.5.0-f8f6861299-e45c9f123e.zip/node_modules/@turf/point-grid/",\
+          "packageDependencies": [\
+            ["@turf/point-grid", "npm:6.5.0"],\
+            ["@turf/boolean-within", "npm:6.5.0"],\
+            ["@turf/distance", "npm:6.5.0"],\
+            ["@turf/helpers", "npm:6.5.0"],\
+            ["@turf/invariant", "npm:6.5.0"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["@turf/point-on-feature", [\
+        ["npm:6.5.0", {\
+          "packageLocation": "./.yarn/cache/@turf-point-on-feature-npm-6.5.0-6f9e626d77-e83a0c7647.zip/node_modules/@turf/point-on-feature/",\
+          "packageDependencies": [\
+            ["@turf/point-on-feature", "npm:6.5.0"],\
+            ["@turf/boolean-point-in-polygon", "npm:6.5.0"],\
+            ["@turf/center", "npm:6.5.0"],\
+            ["@turf/explode", "npm:6.5.0"],\
+            ["@turf/helpers", "npm:6.5.0"],\
+            ["@turf/nearest-point", "npm:6.5.0"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["@turf/point-to-line-distance", [\
+        ["npm:6.5.0", {\
+          "packageLocation": "./.yarn/cache/@turf-point-to-line-distance-npm-6.5.0-60c918a3be-addea96dbd.zip/node_modules/@turf/point-to-line-distance/",\
+          "packageDependencies": [\
+            ["@turf/point-to-line-distance", "npm:6.5.0"],\
+            ["@turf/bearing", "npm:6.5.0"],\
+            ["@turf/distance", "npm:6.5.0"],\
+            ["@turf/helpers", "npm:6.5.0"],\
+            ["@turf/invariant", "npm:6.5.0"],\
+            ["@turf/meta", "npm:6.5.0"],\
+            ["@turf/projection", "npm:6.5.0"],\
+            ["@turf/rhumb-bearing", "npm:6.5.0"],\
+            ["@turf/rhumb-distance", "npm:6.5.0"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["@turf/points-within-polygon", [\
+        ["npm:6.5.0", {\
+          "packageLocation": "./.yarn/cache/@turf-points-within-polygon-npm-6.5.0-c4c8b03d05-cd5f26c89a.zip/node_modules/@turf/points-within-polygon/",\
+          "packageDependencies": [\
+            ["@turf/points-within-polygon", "npm:6.5.0"],\
+            ["@turf/boolean-point-in-polygon", "npm:6.5.0"],\
+            ["@turf/helpers", "npm:6.5.0"],\
+            ["@turf/meta", "npm:6.5.0"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["@turf/polygon-smooth", [\
+        ["npm:6.5.0", {\
+          "packageLocation": "./.yarn/cache/@turf-polygon-smooth-npm-6.5.0-5a865ff46f-689d9006ee.zip/node_modules/@turf/polygon-smooth/",\
+          "packageDependencies": [\
+            ["@turf/polygon-smooth", "npm:6.5.0"],\
+            ["@turf/helpers", "npm:6.5.0"],\
+            ["@turf/meta", "npm:6.5.0"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["@turf/polygon-tangents", [\
+        ["npm:6.5.0", {\
+          "packageLocation": "./.yarn/cache/@turf-polygon-tangents-npm-6.5.0-d30a21ba5d-a9fdf1ecb7.zip/node_modules/@turf/polygon-tangents/",\
+          "packageDependencies": [\
+            ["@turf/polygon-tangents", "npm:6.5.0"],\
+            ["@turf/bbox", "npm:6.5.0"],\
+            ["@turf/boolean-within", "npm:6.5.0"],\
+            ["@turf/explode", "npm:6.5.0"],\
+            ["@turf/helpers", "npm:6.5.0"],\
+            ["@turf/invariant", "npm:6.5.0"],\
+            ["@turf/nearest-point", "npm:6.5.0"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["@turf/polygon-to-line", [\
+        ["npm:6.5.0", {\
+          "packageLocation": "./.yarn/cache/@turf-polygon-to-line-npm-6.5.0-e16763366e-ba189ff22a.zip/node_modules/@turf/polygon-to-line/",\
+          "packageDependencies": [\
+            ["@turf/polygon-to-line", "npm:6.5.0"],\
+            ["@turf/helpers", "npm:6.5.0"],\
+            ["@turf/invariant", "npm:6.5.0"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["@turf/polygonize", [\
+        ["npm:6.5.0", {\
+          "packageLocation": "./.yarn/cache/@turf-polygonize-npm-6.5.0-44af27bff9-e4cc91c306.zip/node_modules/@turf/polygonize/",\
+          "packageDependencies": [\
+            ["@turf/polygonize", "npm:6.5.0"],\
+            ["@turf/boolean-point-in-polygon", "npm:6.5.0"],\
+            ["@turf/envelope", "npm:6.5.0"],\
+            ["@turf/helpers", "npm:6.5.0"],\
+            ["@turf/invariant", "npm:6.5.0"],\
+            ["@turf/meta", "npm:6.5.0"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["@turf/projection", [\
+        ["npm:6.5.0", {\
+          "packageLocation": "./.yarn/cache/@turf-projection-npm-6.5.0-2aeb1b051c-31baafb27e.zip/node_modules/@turf/projection/",\
+          "packageDependencies": [\
+            ["@turf/projection", "npm:6.5.0"],\
+            ["@turf/clone", "npm:6.5.0"],\
+            ["@turf/helpers", "npm:6.5.0"],\
+            ["@turf/meta", "npm:6.5.0"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["@turf/random", [\
+        ["npm:6.5.0", {\
+          "packageLocation": "./.yarn/cache/@turf-random-npm-6.5.0-66da40e30b-d7c99d106f.zip/node_modules/@turf/random/",\
+          "packageDependencies": [\
+            ["@turf/random", "npm:6.5.0"],\
+            ["@turf/helpers", "npm:6.5.0"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["@turf/rectangle-grid", [\
+        ["npm:6.5.0", {\
+          "packageLocation": "./.yarn/cache/@turf-rectangle-grid-npm-6.5.0-ec55deda88-a43b1cc769.zip/node_modules/@turf/rectangle-grid/",\
+          "packageDependencies": [\
+            ["@turf/rectangle-grid", "npm:6.5.0"],\
+            ["@turf/boolean-intersects", "npm:6.5.0"],\
+            ["@turf/distance", "npm:6.5.0"],\
+            ["@turf/helpers", "npm:6.5.0"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["@turf/rewind", [\
+        ["npm:6.5.0", {\
+          "packageLocation": "./.yarn/cache/@turf-rewind-npm-6.5.0-7c01451029-a7d718a937.zip/node_modules/@turf/rewind/",\
+          "packageDependencies": [\
+            ["@turf/rewind", "npm:6.5.0"],\
+            ["@turf/boolean-clockwise", "npm:6.5.0"],\
+            ["@turf/clone", "npm:6.5.0"],\
+            ["@turf/helpers", "npm:6.5.0"],\
+            ["@turf/invariant", "npm:6.5.0"],\
+            ["@turf/meta", "npm:6.5.0"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["@turf/rhumb-bearing", [\
+        ["npm:6.5.0", {\
+          "packageLocation": "./.yarn/cache/@turf-rhumb-bearing-npm-6.5.0-6d5edecd5e-150b7e1a8e.zip/node_modules/@turf/rhumb-bearing/",\
+          "packageDependencies": [\
+            ["@turf/rhumb-bearing", "npm:6.5.0"],\
+            ["@turf/helpers", "npm:6.5.0"],\
+            ["@turf/invariant", "npm:6.5.0"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["@turf/rhumb-destination", [\
+        ["npm:6.5.0", {\
+          "packageLocation": "./.yarn/cache/@turf-rhumb-destination-npm-6.5.0-0d6809348a-c783c52663.zip/node_modules/@turf/rhumb-destination/",\
+          "packageDependencies": [\
+            ["@turf/rhumb-destination", "npm:6.5.0"],\
+            ["@turf/helpers", "npm:6.5.0"],\
+            ["@turf/invariant", "npm:6.5.0"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["@turf/rhumb-distance", [\
+        ["npm:6.5.0", {\
+          "packageLocation": "./.yarn/cache/@turf-rhumb-distance-npm-6.5.0-5394363117-b9b78ee6f0.zip/node_modules/@turf/rhumb-distance/",\
+          "packageDependencies": [\
+            ["@turf/rhumb-distance", "npm:6.5.0"],\
+            ["@turf/helpers", "npm:6.5.0"],\
+            ["@turf/invariant", "npm:6.5.0"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["@turf/sample", [\
+        ["npm:6.5.0", {\
+          "packageLocation": "./.yarn/cache/@turf-sample-npm-6.5.0-b03f17a7e5-ad57f7d90e.zip/node_modules/@turf/sample/",\
+          "packageDependencies": [\
+            ["@turf/sample", "npm:6.5.0"],\
+            ["@turf/helpers", "npm:6.5.0"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["@turf/sector", [\
+        ["npm:6.5.0", {\
+          "packageLocation": "./.yarn/cache/@turf-sector-npm-6.5.0-1cb6b8a161-bce4329550.zip/node_modules/@turf/sector/",\
+          "packageDependencies": [\
+            ["@turf/sector", "npm:6.5.0"],\
+            ["@turf/circle", "npm:6.5.0"],\
+            ["@turf/helpers", "npm:6.5.0"],\
+            ["@turf/invariant", "npm:6.5.0"],\
+            ["@turf/line-arc", "npm:6.5.0"],\
+            ["@turf/meta", "npm:6.5.0"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["@turf/shortest-path", [\
+        ["npm:6.5.0", {\
+          "packageLocation": "./.yarn/cache/@turf-shortest-path-npm-6.5.0-0863dc08e6-50959d2332.zip/node_modules/@turf/shortest-path/",\
+          "packageDependencies": [\
+            ["@turf/shortest-path", "npm:6.5.0"],\
+            ["@turf/bbox", "npm:6.5.0"],\
+            ["@turf/bbox-polygon", "npm:6.5.0"],\
+            ["@turf/boolean-point-in-polygon", "npm:6.5.0"],\
+            ["@turf/clean-coords", "npm:6.5.0"],\
+            ["@turf/distance", "npm:6.5.0"],\
+            ["@turf/helpers", "npm:6.5.0"],\
+            ["@turf/invariant", "npm:6.5.0"],\
+            ["@turf/meta", "npm:6.5.0"],\
+            ["@turf/transform-scale", "npm:6.5.0"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["@turf/simplify", [\
+        ["npm:6.5.0", {\
+          "packageLocation": "./.yarn/cache/@turf-simplify-npm-6.5.0-8b02fc011a-133ce07840.zip/node_modules/@turf/simplify/",\
+          "packageDependencies": [\
+            ["@turf/simplify", "npm:6.5.0"],\
+            ["@turf/clean-coords", "npm:6.5.0"],\
+            ["@turf/clone", "npm:6.5.0"],\
+            ["@turf/helpers", "npm:6.5.0"],\
+            ["@turf/meta", "npm:6.5.0"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
       ["@turf/square", [\
         ["npm:6.5.0", {\
           "packageLocation": "./.yarn/cache/@turf-square-npm-6.5.0-a2c4ee3c8e-db0525ac08.zip/node_modules/@turf/square/",\
@@ -6013,6 +6970,128 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "linkType": "HARD"\
         }]\
       ]],\
+      ["@turf/square-grid", [\
+        ["npm:6.5.0", {\
+          "packageLocation": "./.yarn/cache/@turf-square-grid-npm-6.5.0-0c18c9d025-48a14aa06a.zip/node_modules/@turf/square-grid/",\
+          "packageDependencies": [\
+            ["@turf/square-grid", "npm:6.5.0"],\
+            ["@turf/helpers", "npm:6.5.0"],\
+            ["@turf/rectangle-grid", "npm:6.5.0"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["@turf/standard-deviational-ellipse", [\
+        ["npm:6.5.0", {\
+          "packageLocation": "./.yarn/cache/@turf-standard-deviational-ellipse-npm-6.5.0-8447046771-c49c6ae4c4.zip/node_modules/@turf/standard-deviational-ellipse/",\
+          "packageDependencies": [\
+            ["@turf/standard-deviational-ellipse", "npm:6.5.0"],\
+            ["@turf/center-mean", "npm:6.5.0"],\
+            ["@turf/ellipse", "npm:6.5.0"],\
+            ["@turf/helpers", "npm:6.5.0"],\
+            ["@turf/invariant", "npm:6.5.0"],\
+            ["@turf/meta", "npm:6.5.0"],\
+            ["@turf/points-within-polygon", "npm:6.5.0"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["@turf/tag", [\
+        ["npm:6.5.0", {\
+          "packageLocation": "./.yarn/cache/@turf-tag-npm-6.5.0-8ec0f34b23-75420f81d3.zip/node_modules/@turf/tag/",\
+          "packageDependencies": [\
+            ["@turf/tag", "npm:6.5.0"],\
+            ["@turf/boolean-point-in-polygon", "npm:6.5.0"],\
+            ["@turf/clone", "npm:6.5.0"],\
+            ["@turf/helpers", "npm:6.5.0"],\
+            ["@turf/meta", "npm:6.5.0"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["@turf/tesselate", [\
+        ["npm:6.5.0", {\
+          "packageLocation": "./.yarn/cache/@turf-tesselate-npm-6.5.0-826ac38063-a11945f77e.zip/node_modules/@turf/tesselate/",\
+          "packageDependencies": [\
+            ["@turf/tesselate", "npm:6.5.0"],\
+            ["@turf/helpers", "npm:6.5.0"],\
+            ["earcut", "npm:2.2.4"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["@turf/tin", [\
+        ["npm:6.5.0", {\
+          "packageLocation": "./.yarn/cache/@turf-tin-npm-6.5.0-1a35930917-dad24f3506.zip/node_modules/@turf/tin/",\
+          "packageDependencies": [\
+            ["@turf/tin", "npm:6.5.0"],\
+            ["@turf/helpers", "npm:6.5.0"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["@turf/transform-rotate", [\
+        ["npm:6.5.0", {\
+          "packageLocation": "./.yarn/cache/@turf-transform-rotate-npm-6.5.0-1c5972e40f-8a90fd1fb6.zip/node_modules/@turf/transform-rotate/",\
+          "packageDependencies": [\
+            ["@turf/transform-rotate", "npm:6.5.0"],\
+            ["@turf/centroid", "npm:6.5.0"],\
+            ["@turf/clone", "npm:6.5.0"],\
+            ["@turf/helpers", "npm:6.5.0"],\
+            ["@turf/invariant", "npm:6.5.0"],\
+            ["@turf/meta", "npm:6.5.0"],\
+            ["@turf/rhumb-bearing", "npm:6.5.0"],\
+            ["@turf/rhumb-destination", "npm:6.5.0"],\
+            ["@turf/rhumb-distance", "npm:6.5.0"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["@turf/transform-scale", [\
+        ["npm:6.5.0", {\
+          "packageLocation": "./.yarn/cache/@turf-transform-scale-npm-6.5.0-e56cdbe7a7-e7927e2bb9.zip/node_modules/@turf/transform-scale/",\
+          "packageDependencies": [\
+            ["@turf/transform-scale", "npm:6.5.0"],\
+            ["@turf/bbox", "npm:6.5.0"],\
+            ["@turf/center", "npm:6.5.0"],\
+            ["@turf/centroid", "npm:6.5.0"],\
+            ["@turf/clone", "npm:6.5.0"],\
+            ["@turf/helpers", "npm:6.5.0"],\
+            ["@turf/invariant", "npm:6.5.0"],\
+            ["@turf/meta", "npm:6.5.0"],\
+            ["@turf/rhumb-bearing", "npm:6.5.0"],\
+            ["@turf/rhumb-destination", "npm:6.5.0"],\
+            ["@turf/rhumb-distance", "npm:6.5.0"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["@turf/transform-translate", [\
+        ["npm:6.5.0", {\
+          "packageLocation": "./.yarn/cache/@turf-transform-translate-npm-6.5.0-218bffe9bd-034e4b2ce4.zip/node_modules/@turf/transform-translate/",\
+          "packageDependencies": [\
+            ["@turf/transform-translate", "npm:6.5.0"],\
+            ["@turf/clone", "npm:6.5.0"],\
+            ["@turf/helpers", "npm:6.5.0"],\
+            ["@turf/invariant", "npm:6.5.0"],\
+            ["@turf/meta", "npm:6.5.0"],\
+            ["@turf/rhumb-destination", "npm:6.5.0"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["@turf/triangle-grid", [\
+        ["npm:6.5.0", {\
+          "packageLocation": "./.yarn/cache/@turf-triangle-grid-npm-6.5.0-50ea03b38c-720749466d.zip/node_modules/@turf/triangle-grid/",\
+          "packageDependencies": [\
+            ["@turf/triangle-grid", "npm:6.5.0"],\
+            ["@turf/distance", "npm:6.5.0"],\
+            ["@turf/helpers", "npm:6.5.0"],\
+            ["@turf/intersect", "npm:6.5.0"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
       ["@turf/truncate", [\
         ["npm:6.5.0", {\
           "packageLocation": "./.yarn/cache/@turf-truncate-npm-6.5.0-de74b0dd15-554b5d6ed1.zip/node_modules/@turf/truncate/",\
@@ -6020,6 +7099,158 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["@turf/truncate", "npm:6.5.0"],\
             ["@turf/helpers", "npm:6.5.0"],\
             ["@turf/meta", "npm:6.5.0"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["@turf/turf", [\
+        ["npm:6.5.0", {\
+          "packageLocation": "./.yarn/cache/@turf-turf-npm-6.5.0-53302bbe78-141828346f.zip/node_modules/@turf/turf/",\
+          "packageDependencies": [\
+            ["@turf/turf", "npm:6.5.0"],\
+            ["@turf/along", "npm:6.5.0"],\
+            ["@turf/angle", "npm:6.5.0"],\
+            ["@turf/area", "npm:6.5.0"],\
+            ["@turf/bbox", "npm:6.5.0"],\
+            ["@turf/bbox-clip", "npm:6.5.0"],\
+            ["@turf/bbox-polygon", "npm:6.5.0"],\
+            ["@turf/bearing", "npm:6.5.0"],\
+            ["@turf/bezier-spline", "npm:6.5.0"],\
+            ["@turf/boolean-clockwise", "npm:6.5.0"],\
+            ["@turf/boolean-contains", "npm:6.5.0"],\
+            ["@turf/boolean-crosses", "npm:6.5.0"],\
+            ["@turf/boolean-disjoint", "npm:6.5.0"],\
+            ["@turf/boolean-equal", "npm:6.5.0"],\
+            ["@turf/boolean-intersects", "npm:6.5.0"],\
+            ["@turf/boolean-overlap", "npm:6.5.0"],\
+            ["@turf/boolean-parallel", "npm:6.5.0"],\
+            ["@turf/boolean-point-in-polygon", "npm:6.5.0"],\
+            ["@turf/boolean-point-on-line", "npm:6.5.0"],\
+            ["@turf/boolean-within", "npm:6.5.0"],\
+            ["@turf/buffer", "npm:6.5.0"],\
+            ["@turf/center", "npm:6.5.0"],\
+            ["@turf/center-mean", "npm:6.5.0"],\
+            ["@turf/center-median", "npm:6.5.0"],\
+            ["@turf/center-of-mass", "npm:6.5.0"],\
+            ["@turf/centroid", "npm:6.5.0"],\
+            ["@turf/circle", "npm:6.5.0"],\
+            ["@turf/clean-coords", "npm:6.5.0"],\
+            ["@turf/clone", "npm:6.5.0"],\
+            ["@turf/clusters", "npm:6.5.0"],\
+            ["@turf/clusters-dbscan", "npm:6.5.0"],\
+            ["@turf/clusters-kmeans", "npm:6.5.0"],\
+            ["@turf/collect", "npm:6.5.0"],\
+            ["@turf/combine", "npm:6.5.0"],\
+            ["@turf/concave", "npm:6.5.0"],\
+            ["@turf/convex", "npm:6.5.0"],\
+            ["@turf/destination", "npm:6.5.0"],\
+            ["@turf/difference", "npm:6.5.0"],\
+            ["@turf/dissolve", "npm:6.5.0"],\
+            ["@turf/distance", "npm:6.5.0"],\
+            ["@turf/distance-weight", "npm:6.5.0"],\
+            ["@turf/ellipse", "npm:6.5.0"],\
+            ["@turf/envelope", "npm:6.5.0"],\
+            ["@turf/explode", "npm:6.5.0"],\
+            ["@turf/flatten", "npm:6.5.0"],\
+            ["@turf/flip", "npm:6.5.0"],\
+            ["@turf/great-circle", "npm:6.5.0"],\
+            ["@turf/helpers", "npm:6.5.0"],\
+            ["@turf/hex-grid", "npm:6.5.0"],\
+            ["@turf/interpolate", "npm:6.5.0"],\
+            ["@turf/intersect", "npm:6.5.0"],\
+            ["@turf/invariant", "npm:6.5.0"],\
+            ["@turf/isobands", "npm:6.5.0"],\
+            ["@turf/isolines", "npm:6.5.0"],\
+            ["@turf/kinks", "npm:6.5.0"],\
+            ["@turf/length", "npm:6.5.0"],\
+            ["@turf/line-arc", "npm:6.5.0"],\
+            ["@turf/line-chunk", "npm:6.5.0"],\
+            ["@turf/line-intersect", "npm:6.5.0"],\
+            ["@turf/line-offset", "npm:6.5.0"],\
+            ["@turf/line-overlap", "npm:6.5.0"],\
+            ["@turf/line-segment", "npm:6.5.0"],\
+            ["@turf/line-slice", "npm:6.5.0"],\
+            ["@turf/line-slice-along", "npm:6.5.0"],\
+            ["@turf/line-split", "npm:6.5.0"],\
+            ["@turf/line-to-polygon", "npm:6.5.0"],\
+            ["@turf/mask", "npm:6.5.0"],\
+            ["@turf/meta", "npm:6.5.0"],\
+            ["@turf/midpoint", "npm:6.5.0"],\
+            ["@turf/moran-index", "npm:6.5.0"],\
+            ["@turf/nearest-point", "npm:6.5.0"],\
+            ["@turf/nearest-point-on-line", "npm:6.5.0"],\
+            ["@turf/nearest-point-to-line", "npm:6.5.0"],\
+            ["@turf/planepoint", "npm:6.5.0"],\
+            ["@turf/point-grid", "npm:6.5.0"],\
+            ["@turf/point-on-feature", "npm:6.5.0"],\
+            ["@turf/point-to-line-distance", "npm:6.5.0"],\
+            ["@turf/points-within-polygon", "npm:6.5.0"],\
+            ["@turf/polygon-smooth", "npm:6.5.0"],\
+            ["@turf/polygon-tangents", "npm:6.5.0"],\
+            ["@turf/polygon-to-line", "npm:6.5.0"],\
+            ["@turf/polygonize", "npm:6.5.0"],\
+            ["@turf/projection", "npm:6.5.0"],\
+            ["@turf/random", "npm:6.5.0"],\
+            ["@turf/rewind", "npm:6.5.0"],\
+            ["@turf/rhumb-bearing", "npm:6.5.0"],\
+            ["@turf/rhumb-destination", "npm:6.5.0"],\
+            ["@turf/rhumb-distance", "npm:6.5.0"],\
+            ["@turf/sample", "npm:6.5.0"],\
+            ["@turf/sector", "npm:6.5.0"],\
+            ["@turf/shortest-path", "npm:6.5.0"],\
+            ["@turf/simplify", "npm:6.5.0"],\
+            ["@turf/square", "npm:6.5.0"],\
+            ["@turf/square-grid", "npm:6.5.0"],\
+            ["@turf/standard-deviational-ellipse", "npm:6.5.0"],\
+            ["@turf/tag", "npm:6.5.0"],\
+            ["@turf/tesselate", "npm:6.5.0"],\
+            ["@turf/tin", "npm:6.5.0"],\
+            ["@turf/transform-rotate", "npm:6.5.0"],\
+            ["@turf/transform-scale", "npm:6.5.0"],\
+            ["@turf/transform-translate", "npm:6.5.0"],\
+            ["@turf/triangle-grid", "npm:6.5.0"],\
+            ["@turf/truncate", "npm:6.5.0"],\
+            ["@turf/union", "npm:6.5.0"],\
+            ["@turf/unkink-polygon", "npm:6.5.0"],\
+            ["@turf/voronoi", "npm:6.5.0"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["@turf/union", [\
+        ["npm:6.5.0", {\
+          "packageLocation": "./.yarn/cache/@turf-union-npm-6.5.0-3ce3f23cc9-d842882004.zip/node_modules/@turf/union/",\
+          "packageDependencies": [\
+            ["@turf/union", "npm:6.5.0"],\
+            ["@turf/helpers", "npm:6.5.0"],\
+            ["@turf/invariant", "npm:6.5.0"],\
+            ["polygon-clipping", "npm:0.15.3"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["@turf/unkink-polygon", [\
+        ["npm:6.5.0", {\
+          "packageLocation": "./.yarn/cache/@turf-unkink-polygon-npm-6.5.0-fb23c6ef1e-94ec1479e9.zip/node_modules/@turf/unkink-polygon/",\
+          "packageDependencies": [\
+            ["@turf/unkink-polygon", "npm:6.5.0"],\
+            ["@turf/area", "npm:6.5.0"],\
+            ["@turf/boolean-point-in-polygon", "npm:6.5.0"],\
+            ["@turf/helpers", "npm:6.5.0"],\
+            ["@turf/meta", "npm:6.5.0"],\
+            ["rbush", "npm:2.0.2"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["@turf/voronoi", [\
+        ["npm:6.5.0", {\
+          "packageLocation": "./.yarn/cache/@turf-voronoi-npm-6.5.0-e7d61657b2-7922cae99b.zip/node_modules/@turf/voronoi/",\
+          "packageDependencies": [\
+            ["@turf/voronoi", "npm:6.5.0"],\
+            ["@turf/helpers", "npm:6.5.0"],\
+            ["@turf/invariant", "npm:6.5.0"],\
+            ["d3-voronoi", "npm:1.1.2"]\
           ],\
           "linkType": "HARD"\
         }]\
@@ -9599,6 +10830,19 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "linkType": "HARD"\
         }]\
       ]],\
+      ["concaveman", [\
+        ["npm:1.2.1", {\
+          "packageLocation": "./.yarn/cache/concaveman-npm-1.2.1-9b7ea42f29-170d18573d.zip/node_modules/concaveman/",\
+          "packageDependencies": [\
+            ["concaveman", "npm:1.2.1"],\
+            ["point-in-polygon", "npm:1.1.0"],\
+            ["rbush", "npm:3.0.1"],\
+            ["robust-predicates", "npm:2.0.4"],\
+            ["tinyqueue", "npm:2.0.3"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
       ["concurrently", [\
         ["npm:7.1.0", {\
           "packageLocation": "./.yarn/cache/concurrently-npm-7.1.0-d3983cf1fe-723996afc7.zip/node_modules/concurrently/",\
@@ -10354,6 +11598,34 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "linkType": "HARD"\
         }]\
       ]],\
+      ["d3-array", [\
+        ["npm:1.2.4", {\
+          "packageLocation": "./.yarn/cache/d3-array-npm-1.2.4-37b8938a64-d0be1fa7d7.zip/node_modules/d3-array/",\
+          "packageDependencies": [\
+            ["d3-array", "npm:1.2.4"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["d3-geo", [\
+        ["npm:1.7.1", {\
+          "packageLocation": "./.yarn/cache/d3-geo-npm-1.7.1-c8c440617e-5b771ba8d9.zip/node_modules/d3-geo/",\
+          "packageDependencies": [\
+            ["d3-geo", "npm:1.7.1"],\
+            ["d3-array", "npm:1.2.4"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["d3-voronoi", [\
+        ["npm:1.1.2", {\
+          "packageLocation": "./.yarn/cache/d3-voronoi-npm-1.1.2-d7efda5f96-a456c215c5.zip/node_modules/d3-voronoi/",\
+          "packageDependencies": [\
+            ["d3-voronoi", "npm:1.1.2"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
       ["damerau-levenshtein", [\
         ["npm:1.0.8", {\
           "packageLocation": "./.yarn/cache/damerau-levenshtein-npm-1.0.8-bda7311c69-d240b77575.zip/node_modules/damerau-levenshtein/",\
@@ -10706,6 +11978,15 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageLocation": "./.yarn/cache/delegates-npm-1.0.0-9b1942d75f-a51744d9b5.zip/node_modules/delegates/",\
           "packageDependencies": [\
             ["delegates", "npm:1.0.0"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["density-clustering", [\
+        ["npm:1.3.0", {\
+          "packageLocation": "./.yarn/cache/density-clustering-npm-1.3.0-84096ec813-4f3d42df1c.zip/node_modules/density-clustering/",\
+          "packageDependencies": [\
+            ["density-clustering", "npm:1.3.0"]\
           ],\
           "linkType": "HARD"\
         }]\
@@ -12468,6 +13749,16 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["through2", "npm:4.0.2"],\
             ["to-arraybuffer", "npm:1.0.1"],\
             ["tough-cookie", "npm:4.0.0"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["fetch-ponyfill", [\
+        ["npm:7.1.0", {\
+          "packageLocation": "./.yarn/cache/fetch-ponyfill-npm-7.1.0-083109d699-7fd497dd5f.zip/node_modules/fetch-ponyfill/",\
+          "packageDependencies": [\
+            ["fetch-ponyfill", "npm:7.1.0"],\
+            ["node-fetch", "virtual:083109d6993d54b0bf1d200d3315b933016c3ae76e4345a5e6d672315ab31efc0525244812e910920e8db870cd77465466aba15b1d0884eb872c8f7df8bb230a#npm:2.6.9"]\
           ],\
           "linkType": "HARD"\
         }]\
@@ -16708,6 +17999,13 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["mkdirp", "npm:1.0.4"]\
           ],\
           "linkType": "HARD"\
+        }],\
+        ["npm:2.1.3", {\
+          "packageLocation": "./.yarn/cache/mkdirp-npm-2.1.3-02ac724001-5d7d7997e3.zip/node_modules/mkdirp/",\
+          "packageDependencies": [\
+            ["mkdirp", "npm:2.1.3"]\
+          ],\
+          "linkType": "HARD"\
         }]\
       ]],\
       ["mobx", [\
@@ -16980,6 +18278,27 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["node-fetch", "npm:2.6.7"]\
           ],\
           "linkType": "SOFT"\
+        }],\
+        ["npm:2.6.9", {\
+          "packageLocation": "./.yarn/cache/node-fetch-npm-2.6.9-9fc9a54529-acb04f9ce7.zip/node_modules/node-fetch/",\
+          "packageDependencies": [\
+            ["node-fetch", "npm:2.6.9"]\
+          ],\
+          "linkType": "SOFT"\
+        }],\
+        ["virtual:083109d6993d54b0bf1d200d3315b933016c3ae76e4345a5e6d672315ab31efc0525244812e910920e8db870cd77465466aba15b1d0884eb872c8f7df8bb230a#npm:2.6.9", {\
+          "packageLocation": "./.yarn/__virtual__/node-fetch-virtual-b8e840f398/0/cache/node-fetch-npm-2.6.9-9fc9a54529-acb04f9ce7.zip/node_modules/node-fetch/",\
+          "packageDependencies": [\
+            ["node-fetch", "virtual:083109d6993d54b0bf1d200d3315b933016c3ae76e4345a5e6d672315ab31efc0525244812e910920e8db870cd77465466aba15b1d0884eb872c8f7df8bb230a#npm:2.6.9"],\
+            ["@types/encoding", null],\
+            ["encoding", null],\
+            ["whatwg-url", "npm:5.0.0"]\
+          ],\
+          "packagePeers": [\
+            "@types/encoding",\
+            "encoding"\
+          ],\
+          "linkType": "HARD"\
         }],\
         ["virtual:e414995db9c779306e687c7a7c66965e66d0cd7270f6b9fc4f00cc9772c5d50b305ab83e142e0e21dbf10968f7437cbdfcb170d05f4bde68707ac7d0082c9cca#npm:2.6.7", {\
           "packageLocation": "./.yarn/__virtual__/node-fetch-virtual-10f4bc17d9/0/cache/node-fetch-npm-2.6.7-777aa2a6df-8d816ffd1e.zip/node_modules/node-fetch/",\
@@ -17586,10 +18905,10 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           ],\
           "linkType": "HARD"\
         }],\
-        ["npm:5.3.0", {\
-          "packageLocation": "./.yarn/cache/p-map-npm-5.3.0-45d6f24b75-744f47b110.zip/node_modules/p-map/",\
+        ["npm:5.5.0", {\
+          "packageLocation": "./.yarn/cache/p-map-npm-5.5.0-9758eb14ee-065cb6fca6.zip/node_modules/p-map/",\
           "packageDependencies": [\
-            ["p-map", "npm:5.3.0"],\
+            ["p-map", "npm:5.5.0"],\
             ["aggregate-error", "npm:4.0.0"]\
           ],\
           "linkType": "HARD"\
@@ -17979,6 +19298,15 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageLocation": "./.yarn/cache/pluralize-npm-7.0.0-5e0212129c-e3f694924b.zip/node_modules/pluralize/",\
           "packageDependencies": [\
             ["pluralize", "npm:7.0.0"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["point-in-polygon", [\
+        ["npm:1.1.0", {\
+          "packageLocation": "./.yarn/cache/point-in-polygon-npm-1.1.0-7a1fd13f23-67a6374f0b.zip/node_modules/point-in-polygon/",\
+          "packageDependencies": [\
+            ["point-in-polygon", "npm:1.1.0"]\
           ],\
           "linkType": "HARD"\
         }]\
@@ -20016,6 +21344,13 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
         }]\
       ]],\
       ["quickselect", [\
+        ["npm:1.1.1", {\
+          "packageLocation": "./.yarn/cache/quickselect-npm-1.1.1-dc25e637fd-419c88a1fb.zip/node_modules/quickselect/",\
+          "packageDependencies": [\
+            ["quickselect", "npm:1.1.1"]\
+          ],\
+          "linkType": "HARD"\
+        }],\
         ["npm:2.0.0", {\
           "packageLocation": "./.yarn/cache/quickselect-npm-2.0.0-620eb59fdc-ed2e784310.zip/node_modules/quickselect/",\
           "packageDependencies": [\
@@ -20098,6 +21433,14 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
         }]\
       ]],\
       ["rbush", [\
+        ["npm:2.0.2", {\
+          "packageLocation": "./.yarn/cache/rbush-npm-2.0.2-e537395c77-43fd4a47e0.zip/node_modules/rbush/",\
+          "packageDependencies": [\
+            ["rbush", "npm:2.0.2"],\
+            ["quickselect", "npm:1.1.1"]\
+          ],\
+          "linkType": "HARD"\
+        }],\
         ["npm:3.0.1", {\
           "packageLocation": "./.yarn/cache/rbush-npm-3.0.1-9fc2a71778-b7def5ba76.zip/node_modules/rbush/",\
           "packageDependencies": [\
@@ -21124,6 +22467,15 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "linkType": "HARD"\
         }]\
       ]],\
+      ["robust-predicates", [\
+        ["npm:2.0.4", {\
+          "packageLocation": "./.yarn/cache/robust-predicates-npm-2.0.4-1b628708f6-fe93852a6f.zip/node_modules/robust-predicates/",\
+          "packageDependencies": [\
+            ["robust-predicates", "npm:2.0.4"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
       ["rollup", [\
         ["npm:2.70.1", {\
           "packageLocation": "./.yarn/cache/rollup-npm-2.70.1-13154f7180-06c62933e6.zip/node_modules/rollup/",\
@@ -21679,6 +23031,15 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageLocation": "./.yarn/cache/sisteransi-npm-1.0.5-af60cc0cfa-aba6438f46.zip/node_modules/sisteransi/",\
           "packageDependencies": [\
             ["sisteransi", "npm:1.0.5"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["skmeans", [\
+        ["npm:0.9.7", {\
+          "packageLocation": "./.yarn/cache/skmeans-npm-0.9.7-5801dbdfa7-f46bb155ee.zip/node_modules/skmeans/",\
+          "packageDependencies": [\
+            ["skmeans", "npm:0.9.7"]\
           ],\
           "linkType": "HARD"\
         }]\
@@ -22883,6 +24244,26 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "linkType": "HARD"\
         }]\
       ]],\
+      ["topojson-client", [\
+        ["npm:3.1.0", {\
+          "packageLocation": "./.yarn/cache/topojson-client-npm-3.1.0-70e59c7f28-8c029a4f18.zip/node_modules/topojson-client/",\
+          "packageDependencies": [\
+            ["topojson-client", "npm:3.1.0"],\
+            ["commander", "npm:2.20.3"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["topojson-server", [\
+        ["npm:3.0.1", {\
+          "packageLocation": "./.yarn/cache/topojson-server-npm-3.0.1-9282f35d6b-471ad11496.zip/node_modules/topojson-server/",\
+          "packageDependencies": [\
+            ["topojson-server", "npm:3.0.1"],\
+            ["commander", "npm:2.20.3"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
       ["touch", [\
         ["npm:3.1.0", {\
           "packageLocation": "./.yarn/cache/touch-npm-3.1.0-e2eacebbda-e0be589cb5.zip/node_modules/touch/",\
@@ -23056,6 +24437,15 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageLocation": "./.yarn/cache/tunnel-npm-0.0.6-b1c0830ea4-c362948df9.zip/node_modules/tunnel/",\
           "packageDependencies": [\
             ["tunnel", "npm:0.0.6"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["turf-jsts", [\
+        ["npm:1.2.3", {\
+          "packageLocation": "./.yarn/cache/turf-jsts-npm-1.2.3-d8a78a41f1-89238606b0.zip/node_modules/turf-jsts/",\
+          "packageDependencies": [\
+            ["turf-jsts", "npm:1.2.3"]\
           ],\
           "linkType": "HARD"\
         }]\
