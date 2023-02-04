@@ -9,7 +9,8 @@
     "dev": "tsc -b -w",
     "cli": "node dist/index.js",
     "summary": "yarn cli summary",
-    "tojson": "yarn cli tojson"
+    "tojson": "yarn cli tojson",
+    "cl-fromgdb": "yarn cli cl-fromgdb"
   },
   "dependencies": {
     "@oada/client": "^4.0.1",
@@ -17,13 +18,22 @@
     "@track-patch/lib": "workspace:^",
     "@tsconfig/node16": "^1.0.2",
     "@types/debug": "^4.1.7",
+    "@types/geojson": "^7946.0.10",
+    "@types/jsonstream": "^0.8.30",
     "@types/node": "^17.0.21",
     "commander": "^9.0.0",
     "csv-parse": "^5.0.4",
     "dayjs": "^1.10.8",
     "debug": "^4.3.3",
     "dotenv": "^16.0.0",
+    "event-stream": "^4.0.1",
+    "fgdb": "^1.0.0",
+    "jsonstream": "^1.0.3",
     "p-map": "^5.3.0",
+    "shape2geohash": "^1.2.6",
     "typescript": "^4.6.2"
+  },
+  "devDependencies": {
+    "@types/event-stream": "^4"
   }
 }

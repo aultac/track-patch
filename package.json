@@ -5,7 +5,9 @@
   "workspaces": [
     "cli",
     "app",
-    "lib"
+    "lib",
+    "workorderapp",
+    "gps2road"
   ],
   "dependencies": {
     "@tsconfig/node16": "^1.0.2",
