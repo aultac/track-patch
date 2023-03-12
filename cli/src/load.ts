@@ -4,7 +4,7 @@ import debug from 'debug';
 import dayjs from 'dayjs';
 import { access, writeFile } from 'fs/promises';
 import fs from 'fs';
-import type { DayTracks, Track } from '@track-patch/lib';
+import type { DayTracks } from '@track-patch/lib';
 
 const info = debug('trackpatch/cli#load:info');
 const warn = debug('trackpatch/cli#load:warn');
@@ -53,13 +53,13 @@ export async function csvToDayTracksJSON(filepath: string): Promise<DayTracks> {
     if (!day[vid]) day[vid] = {
       id: vid,
       day: di,
-      tracks: {},
-      points: [],
+      track: [],
     };
-    day[vid]!.points!.push({
+    day[vid]!.track!.push({
       lat: +(record['geo.Lat']),
       lon: +(record['geo.Long']),
       time: date,
+      heading: 0,
       speed: kphToMph(+(record['speedkph'])),
     });
     if (!(count++ % 1000)) info('Finished reading record ', count);
@@ -69,21 +69,11 @@ export async function csvToDayTracksJSON(filepath: string): Promise<DayTracks> {
   // Now walk through all things and sort their points
   for (const vdtracks of Object.values(days)) {
     for (const vdt of Object.values(vdtracks)) {
-      if (!vdt.points || vdt.points.length < 1) {
+      if (!vdt.track || vdt.track.length < 1) {
         warn('The VehicleDayTrack had no points or was empty: ', vdt);
         continue;
       }
-      // A track is just the points array indexed by time
-      const trk: Track = {};
-      for (const point of vdt.points) {
-        const time = point.time.unix();
-        trk[time] = point; // We are just using all the points as a single track for now
-      }
-
-      // store the track at the start time:
-      const starttime = vdt.points[0]!.time.unix();
-      vdt.tracks[starttime] = trk;
-      delete vdt.points; // don't need points array anymore
+      vdt.track.sort((a,b) => a.time.unix() - b.time.unix());
     }
   }
 

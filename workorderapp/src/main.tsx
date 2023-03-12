@@ -5,6 +5,12 @@ import { version } from '../package.json'
 import { context, initialContext } from './state';
 import { App } from './App'
 
+//@ts-ignore
+import { Stream } from 'readable-stream';
+// @ts-ignore
+window.Stream = Stream;
+
+
 import 'mapbox-gl/dist/mapbox-gl.css'
 import './index.css'
 

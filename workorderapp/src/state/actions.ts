@@ -1,7 +1,10 @@
 import { runInAction, action } from 'mobx';
+import { parse, ParseStepResult } from 'papaparse';
 import { state, ActivityMessage } from './state';
 import log from '../log';
-import type { GeoJSON } from 'geojson';
+import type { Feature, FeatureCollection, GeoJSON, LineString } from 'geojson';
+import { DayTracks, vehicletracks } from '@track-patch/lib';
+import readtracks from './readtracks-worker.js'; // I couldn't get this to work as a worker
 
 const { info, warn } = log.get("actions");
 
@@ -28,7 +31,7 @@ const loadGeoJSON = action('loadGeoJSON', async (path: string): Promise<GeoJSON 
 let _roads: GeoJSON | null = null;
 export function roads() { return _roads; }
 export const loadRoads = action('loadRoads', async (filename: string) => {
-  _roads = await loadGeoJSON(`split_by_dataset/${filename}`);
+  _roads = await loadGeoJSON(`roads-by-geohash/${filename}`);
   runInAction(() => { state.roads.rev++ });
 });
 let _milemarkers: GeoJSON | null = null;
@@ -64,6 +67,10 @@ export const page = action('page', (page: typeof state.page): void  => {
   state.page = page;
 });
 
+export const popActivity = action('popActivity', () => {
+  if (state.activityLog.length < 1) return;
+  state.activityLog = state.activityLog.slice(1);
+});
 export const activity = action('activity', (msg: string | string[] | ActivityMessage | ActivityMessage[], type: ActivityMessage['type'] = 'good') => {
   if (!Array.isArray(msg)) {
     msg = [ msg ] as string[] | ActivityMessage[];
@@ -78,6 +85,7 @@ export const activity = action('activity', (msg: string | string[] | ActivityMes
   });
   info(msgs.map(m=>m.msg).join('\n'));
   state.activityLog = [...state.activityLog, ...msgs ];
+  setTimeout(popActivity, 5000);
 });
 
 
@@ -87,6 +95,47 @@ export const activity = action('activity', (msg: string | string[] | ActivityMes
 
 export const hover = action('hover', (hover: typeof state['hover']): void => {
   state.hover = hover;
+});
+
+//----------------------------------------------------------------
+// Parsing the big tracks file
+//----------------------------------------------------------------
+
+export const parsingInProgress = action('parsingInProgress', (val: typeof state['parsing']['inprogress']): void => {
+  state.parsing.inprogress = val;
+});
+export const parsingEstimatedRows = action('parsingEstimatedRows', (val: typeof state['parsing']['estimatedRows']): void => {
+  state.parsing.estimatedRows = val;
+});
+export const parsingCurrentNumRows = action('parsingCurrentNumRows', (val: typeof state['parsing']['currentNumRows']): void => {
+  state.parsing.currentNumRows = val;
+});
+export const parsingState = action('parsingState', (val: string) => {
+  state.parsing.state = val;
+});
+let _daytracks: DayTracks | null = null;
+export function daytracks() { return _daytracks; }
+let _daytracksGeojson: FeatureCollection | null = null;
+export function daytracksGeoJSON() { return _daytracksGeojson; }
+// This populates both _daytracks and _daytracksGeojson
+export const loadDayTracks = action('loadDayTracks', async (file: File) => {
+  parsingInProgress(true);
+  parsingEstimatedRows(file.size / 240); // seems to be around 240 bytes/record
+
+  const result = await readtracks({
+    file,
+    numRowsParsed: parsingCurrentNumRows,
+    parsingState,
+  });
+  _daytracks = result.daytracks;
+  _daytracksGeojson = result.daytracksGeoJSON;
+
+  parsingEstimatedRows(state.parsing.currentNumRows); // make sure progress bar is finished
+  activity('Parsing complete!');
+  parsingInProgress(false);
+  info('Parsing complete, days = ', _daytracks);
+  runInAction(() => { state.daytracks.rev++ });
+  runInAction(() => { state.daytracksGeoJSON.rev++ });
 });
 
 

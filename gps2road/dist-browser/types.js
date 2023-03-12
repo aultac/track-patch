@@ -28,4 +28,32 @@ export function assertRoadCollectionGeoJSON(obj) {
         }
     }
 }
+export function assertMileMarkerProperties(obj) {
+    if (!obj)
+        throw `cannot be falsey`;
+    if (typeof obj !== 'object')
+        throw `must be an object`;
+    if (typeof obj.POST_NAME !== 'string')
+        throw `POST_NAME property must be a string`;
+}
+export function assertMileMarkerFeature(obj) {
+    if (!obj)
+        throw `cannot be falsey`;
+    if (typeof obj !== 'object')
+        throw `must be an object`;
+    if (obj.type !== 'Point')
+        throw `must be a Point feature`;
+    assertMileMarkerProperties(obj.properties);
+}
+export function assertMilemarkerGeoJSON(obj) {
+    if (!obj)
+        throw `cannot be falsey`;
+    if (typeof obj !== 'object')
+        throw `must be an object`;
+    if (!Array.isArray(obj.features))
+        throw `features must be an array`;
+    for (const f of obj.features) {
+        assertMileMarkerFeature(f);
+    }
+}
 //# sourceMappingURL=types.js.map

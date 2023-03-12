@@ -1,5 +1,7 @@
 {
   "compilerOptions": {
+    "skipLibCheck": true,
+    "lib": [ "es2022" ],
     "allowSyntheticDefaultImports": true,
     "stripInternal": true,
     "importHelpers": true,

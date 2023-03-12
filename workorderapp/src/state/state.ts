@@ -1,12 +1,17 @@
 import { observable } from 'mobx';
 import log from '../log';
 
+import type { DayTracks, VehicleDayTracks, VehicleDayTrack, Track, Point } from '@track-patch/lib';
+
+import geojsonvizfiles from './geojsonvizfiles.json';
+
 const { info, warn } = log.get('state');
 
 export type ActivityMessage = {
   msg: string,
   type: 'good' | 'bad',
 };
+
 
 export type BigData = { rev: number };
 
@@ -15,6 +20,21 @@ export type State = {
   activityLog: ActivityMessage[],
   search: string,
 
+  show: {
+    roads: Boolean,
+    milemarkers: Boolean,
+    tracks: Boolean,
+  },
+
+  parsing: {
+    inprogress: boolean,
+    estimatedRows: number,
+    currentNumRows: number,
+    state: string, // tracks, roads, geojson
+  },
+
+  daytracks: BigData,
+  daytracksGeoJSON: BigData,
   roads: BigData,
   milemarkers: BigData,
 
@@ -26,6 +46,8 @@ export type State = {
   hover: {
     x: number,
     y: number,
+    lat: number, 
+    lon: number,
     features: any[],
     active: boolean,
   },
@@ -34,103 +56,34 @@ export type State = {
 
 export const state = observable<State>({
   page: 'map',
+  show: {
+    roads: false,
+    milemarkers: false,
+    tracks: false,
+  },
   activityLog: [],
   search: '',
+  parsing: {
+    inprogress: false,
+    estimatedRows: 0,
+    currentNumRows: 0,
+    state: '',
+  },
   roads: { rev: 0 },
   milemarkers: { rev: 0 },
+  daytracks: { rev: 0 },
+  daytracksGeoJSON: { rev: 0 },
   hover: {
     x: 0,
     y: 0,
+    lat: 0,
+    lon: 0,
     features: [],
     active: false,
   },
   geojsonviz: {
-    selectedFile: "018025HIGHWAY_PLINE.SHP.geojson.json",
-    files: [
-      "018011COMBINEDNG911CENTERLINES_PLINE.SHP.geojson.json",
-      "018013NG911CENTERLINES_PLINE.SHP.geojson.json",
-      "018025HIGHWAY_PLINE.SHP.geojson.json",
-      "018025ROADS_PLINE.SHP.geojson.json",
-      "018111NG911CENTERLINES_PLINE.SHP.geojson.json",
-      "018125NG911CENTERLINES_PLINE.SHP.geojson.json",
-      "018131NG911CENTERLINES_PLINE.SHP.geojson.json",
-      "018143NG911CENTERLINES_PLINE.SHP.geojson.json",
-      "018145_NG911CENTERLINES_PLINE.SHP.geojson.json",
-      "018149ROADS_PLINE.SHP.geojson.json",
-      "18037COMBINEDNG911CENTERLINES_PLINE.SHP.geojson.json",
-      "18135NG911CENTERLINES_PLINE.SHP.geojson.json",
-      "ADDRESSRANGESDONE_PLINE.SHP.geojson.json",
-      "CENTERLINE.SHP.geojson.json",
-      "CENTERLINES.SHP.geojson.json",
-      "CLINTONIN_STREETCENTERLINES.SHP.geojson.json",
-      "GIBSON_STREETCENTERLINES_2021.geojson.json",
-      "HAMCO_CENTERLINE_30AUG2021.SHP.geojson.json",
-      "JAY911ROADS.SHP.geojson.json",
-      "LAKECOUNTY_STREETCENTERLINES.geojson.json",
-      "NC_ROAD_CENTERLINES.geojson.json",
-      "ROADCENTERLINES.SHP.geojson.json",
-      "ROADS.SHP.geojson.json",
-      "ROADS_20211108.SHP.geojson.json",
-      "ROAD_CENTERLINE.SHP.geojson.json",
-      "STREETCENTERLINE.geojson.json",
-      "STREETCENTERLINES.geojson.json",
-      "STREETS.geojson.json",
-      "STREETS_DEKALB.geojson.json",
-      "UDXF11039_LINE.geojson.json",
-      "UDXF11367_LINE.geojson.json",
-      "UDXF11379_LINE.geojson.json",
-      "UDXF126_LINE.geojson.json",
-      "UDXF1300_LINE.geojson.json",
-      "UDXF1307_LINE.geojson.json",
-      "UDXF1399_LINE.geojson.json",
-      "UDXF1405_LINE.geojson.json",
-      "UDXF140_LINE.geojson.json",
-      "UDXF14237_LINE.geojson.json",
-      "UDXF1569_LINE.geojson.json",
-      "UDXF1588_LINE.geojson.json",
-      "UDXF1843_LINE.geojson.json",
-      "UDXF1862_LINE.geojson.json",
-      "UDXF1875_LINE.geojson.json",
-      "UDXF2091_LINE.geojson.json",
-      "UDXF217_LINE.geojson.json",
-      "UDXF223_LINE.geojson.json",
-      "UDXF2541_LINE.geojson.json",
-      "UDXF2548_LINE.geojson.json",
-      "UDXF27735_LINE.geojson.json",
-      "UDXF27738_LINE.geojson.json",
-      "UDXF2959_LINE.geojson.json",
-      "UDXF300_LINE.geojson.json",
-      "UDXF30772_LINE.geojson.json",
-      "UDXF30775_LINE.geojson.json",
-      "UDXF31100_LINE.geojson.json",
-      "UDXF31101_LINE.geojson.json",
-      "UDXF31132_LINE.geojson.json",
-      "UDXF31161_LINE.geojson.json",
-      "UDXF311_LINE.geojson.json",
-      "UDXF3458_LINE.geojson.json",
-      "UDXF3469_LINE.geojson.json",
-      "UDXF3679_LINE.geojson.json",
-      "UDXF3691_LINE.geojson.json",
-      "UDXF4310_LINE.geojson.json",
-      "UDXF504_LINE.geojson.json",
-      "UDXF512_LINE.geojson.json",
-      "UDXF5179_LINE.geojson.json",
-      "UDXF5181_LINE.geojson.json",
-      "UDXF58076_LINE.geojson.json",
-      "UDXF59442_LINE.geojson.json",
-      "UDXF59443_LINE.geojson.json",
-      "UDXF60645_LINE.geojson.json",
-      "UDXF60646_LINE.geojson.json",
-      "UDXF608_LINE.geojson.json",
-      "UDXF6699_LINE.geojson.json",
-      "UDXF6765_LINE.geojson.json",
-      "UDXF6773_LINE.geojson.json",
-      "UDXF7693_LINE.geojson.json",
-      "UDXF7696_LINE.geojson.json",
-      "UDXF911_LINE.geojson.json",
-      "UDXF917_LINE.geojson.json",
-      "VANDERBURGH_STREET.geojson.json",
-    ],
+    selectedFile: "dp4cc.json",
+    files: geojsonvizfiles,
   },
 });
 

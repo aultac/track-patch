@@ -26,6 +26,7 @@ export default defineConfig([
       sourcemap: true
     },
   },
+  /*
   {
     input: "dist-browser/test/browser/index.js",
     plugins,
@@ -36,5 +37,5 @@ export default defineConfig([
       sourcemap: true
     }
   },
-
+*/
 ]);

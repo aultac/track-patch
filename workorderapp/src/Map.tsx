@@ -4,7 +4,10 @@ import log from './log';
 import ReactMapGl, { Source, Layer, MapLayerMouseEvent } from 'react-map-gl';
 import { context } from './state';
 import { MapHoverInfo } from './MapHoverInfo';
-import type { FeatureCollection } from 'geojson';
+import type { GeoJSON, FeatureCollection, Feature, LineString} from 'geojson';
+import * as MapRoads from './MapRoads';
+import {DayTracks, VehicleDayTrack} from '@track-patch/lib';
+import uniqolor from 'uniqolor';
 
 const { info, warn } = log.get('map');
 
@@ -15,51 +18,17 @@ const good = { color: 'green' };
 export const Map = observer(function Map() {
   const { state, actions } = React.useContext(context);
 
-  let roads = actions.roads() as FeatureCollection;
-  let milemarkers = actions.milemarkers();
-
-  // Hover panel: you have to call useCallback BEFORE any returns
-  const onHover = React.useCallback((evt: MapLayerMouseEvent) => {
-    const active = evt.features && evt.features.length > 0 || false;
-    actions.hover({ 
-      x: evt.point.x, 
-      y: evt.point.y, 
-      features: (((evt.features as unknown) || []) as any[]),
-      active,
-    });
-  },[]);
-  const onLeave = () => {
-    actions.hover({ x: 0, y: 0, features: [], active: false });
-  }
-    
-
-
+  //-------------------------------------------------------------------
+  // Filter any roads/milemarkers if available:
   // Access the rev so we are updated when it changes.  Have to access it BEFORE !geojson or it might not re-render
-  if (state.roads.rev < 1 || !roads || state.milemarkers.rev < 1 || !milemarkers) {
-    return (
-      <div style={{padding: '10px'}}>
-        Click above to load mile markers and roads
-        {state.activityLog.map((msg, index) => 
-          <div key={`activity${index}`} style={msg.type === 'good' ? good : bad}>
-            {msg.msg}
-          </div>
-        )}
-      </div>
-    );
+  let roads: FeatureCollection | null = actions.roads() as FeatureCollection;
+  let milemarkers: GeoJSON | null = actions.milemarkers();
+  if (state.roads.rev < 1 || !roads) {
+    roads = null;
   }
-
-// XXX STOPPED HERE: 
-// - index the milemarkers by POST_NAME prefix
-// - identify road type by road names
-// - Index all roads by geohash/road_type
-//   * determine road type from the myriad places road names come from in spreadsheet
-// - create GPS to RoadSegment 
-//   * if near geohash border, include multiple geohashes
-//   * priority by road type: Interstate/US -> wide distance
-//   * include state: previous road name estimate for same path (avoid jumps onto side roads)
-// - create GPS+RoadSegment to MileMarker
-//
-
+  if (state.milemarkers.rev < 1 || !milemarkers) {
+    milemarkers = null;
+  }
   // filter features to include only those that match the search:
   if (roads && state.search) {
     roads = {
@@ -68,7 +37,40 @@ export const Map = observer(function Map() {
     };
   }
 
-  // A good intro to Mapbox styling expressions is: https://docs.mapbox.com/help/tutorials/mapbox-gl-js-expressions/
+
+  //-------------------------------------------------------------
+  // show tracks if loaded
+  let tracks: FeatureCollection | null = actions.daytracksGeoJSON();
+  if (state.daytracksGeoJSON.rev < 1 || !tracks) {
+    tracks = null;
+  }
+
+
+  //------------------------------------------------------------
+  // Mouse Events:
+  const onHover = React.useCallback((evt: MapLayerMouseEvent) => {
+    const active = evt.features && evt.features.length > 0 || false;
+    actions.hover({ 
+      x: evt.point.x, 
+      y: evt.point.y, 
+      lat: evt.lngLat.lat,
+      lon: evt.lngLat.lng,
+      features: (((evt.features as unknown) || []) as any[]),
+      active,
+    });
+  },[]);
+
+  const onLeave = () => {
+    actions.hover({ x: 0, y: 0, lat: 0, lon: 0, features: [], active: false });
+  }
+    
+  const onClick = async (evt: MapLayerMouseEvent) => {
+    await navigator.clipboard.writeText(`{ lon: ${evt.lngLat.lng}, lat: ${evt.lngLat.lat} }`);
+  }
+
+  const interactiveLayerIds = [];
+  if (roads) interactiveLayerIds.push('roads');
+  if (milemarkers) interactiveLayerIds.push('milemarkers');
 
   return (
     <ReactMapGl
@@ -78,34 +80,48 @@ export const Map = observer(function Map() {
         latitude: 39.5,
         zoom: 4.5
       }}
-      style={{width: '100vw', height: '90vh'}}
+      style={{width: '70vw', height: '90vh'}}
       mapStyle="mapbox://styles/mapbox/satellite-streets-v11"
+      onClick={onClick}
       onMouseMove={onHover}
       onMouseLeave={onLeave}
-      interactiveLayerIds={['roads', 'milemarkers']}
+      interactiveLayerIds={interactiveLayerIds}
     >
+
+    { !roads ? <React.Fragment /> :
       <Source type="geojson" data={roads as any}>
         <Layer id="roads" type="line" paint={{
           'line-color': '#FF0000',
           'line-width': 2,
         }} />
       </Source>
+    }
 
-      <MapHoverInfo />
+    <MapHoverInfo />
 
-      { !state.search
-        ? <Source type="geojson" data={milemarkers as any}>
-            <Layer id="milemarkers" type="circle" paint={{ 
-              'circle-radius': 2,
-              'circle-color': '#FF00FF',
-              'circle-stroke-width': 1,
-            }} />
-          </Source>
-        : ''
-      }
+    { !milemarkers ? <React.Fragment /> :
+      <Source type="geojson" data={milemarkers as any}>
+        <Layer id="milemarkers" type="circle" paint={{ 
+          'circle-radius': 2,
+          'circle-color': '#FF00FF',
+          'circle-stroke-width': 1,
+        }} />
+      </Source>
+    }
+
+    { !tracks ? <React.Fragment /> :
+      <Source type="geojson" data={tracks as any}>
+        <Layer id="tracks" type="line" paint={{
+          'line-color': uniqolor.random().color,
+          'line-width': 2,
+        }} />
+      </Source>
+
+    }
 
 
     </ReactMapGl>
   );
 });
+
 

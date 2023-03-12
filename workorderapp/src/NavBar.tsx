@@ -6,8 +6,11 @@ import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import Select from '@mui/material/Select';
-import MenuItem from '@mui/material/MenuItem';
 import TextField from '@mui/material/TextField';
+import MenuIcon from '@mui/icons-material/Menu';
+import IconButton from '@mui/material/IconButton';
+import MenuItem from '@mui/material/MenuItem';
+import Menu from '@mui/material/Menu';
 import log from './log';
 import { context } from './state';
 
@@ -17,6 +20,14 @@ const { info } = log.get('navbar');
 // Mostly from the MaterialUI example page
 export const NavBar = observer(() => {
   const { state, actions } = React.useContext(context);
+  const [ anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+
+  const handleMenu = (event: React.MouseEvent<HTMLElement>) => { setAnchorEl(event.currentTarget); }
+  const handleClose = () => { setAnchorEl(null) };
+  const menuClicked = (whichItem: typeof state.page) => () => {
+    actions.page(whichItem);
+    setAnchorEl(null);
+  }
 
   return (
     <AppBar position="static">
@@ -26,7 +37,7 @@ export const NavBar = observer(() => {
             <img 
               width="50px" 
               height="50px" 
-              src="/track-patch/trackpatch-logo-white.svg" 
+              src="trackpatch-logo-white.svg" 
             />
             <Typography style={{ fontWeight: 'bold', fontFamily: '"Oleo Script", cursive' }} >AUTOMATIC<br/>WORKORDERS</Typography>
           </Box>
@@ -34,26 +45,33 @@ export const NavBar = observer(() => {
           <Box sx={{ width: '30px' }}>
           </Box>
 
-          <Box>
-            <Select label="GeoJSON Viz File" onChange={(evt) => actions.selectGeojsonVizFile(evt.target.value as string) } value={state.geojsonviz.selectedFile}>
-              {state.geojsonviz.files.map((f,i) => 
-                <MenuItem key={`vizfile${i}`} value={f}>{f}</MenuItem>
-              )}
-            </Select>
+          {/* Spacer to move menu to right */}
+          <Box sx={{ flexGrow: 1 }}>
           </Box>
 
+          { /*
           <Box>
-            <a style={{color: "white"}} href="#" onClick={() => { actions.loadRoads(state.geojsonviz.selectedFile) } }>Load Roads (rev {state.roads.rev})</a>
+            <IconButton size="large" onClick={handleMenu} color="inherit">
+              <MenuIcon />
+            </IconButton>
+            <Menu
+              anchorEl={anchorEl}
+              anchorOrigin={{
+                vertical: 'top',
+                horizontal: 'right',
+              }}
+              keepMounted
+              transformOrigin={{
+                vertical: 'top',
+                horizontal: 'right',
+              }}
+              open={Boolean(anchorEl)}
+              onClose={handleClose}
+            >
+              <MenuItem onClick={menuClicked('roadsmap')}>Roads Map Mode</MenuItem>
+            </Menu>
           </Box>
-
-          <Box>
-             <a style={{color: "white"}} href="#" onClick={() => { actions.loadMilemarkers() } }>Load MileMarkers (rev {state.milemarkers.rev})</a>
-          </Box>
-
-          <Box>
-             <TextField onChange={(evt) => { actions.search(evt.target.value) } } value={state.search} />
-          </Box>
-
+          */ }
         </Toolbar>
       </Container>
     </AppBar>

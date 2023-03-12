@@ -1,4 +1,42 @@
-import type { Feature, FeatureCollection } from 'geojson';
+import type { GeoJSON, Feature, Point as GeoJSONPoint, FeatureCollection } from 'geojson';
+
+export type MileMarkerProperties = {
+  POST_NAME: string,
+};
+export type MileMarkerFeature = Feature<GeoJSONPoint> & {
+  properties: MileMarkerProperties,
+};
+export type MileMarkerGeoJSON = FeatureCollection & {
+  features: MileMarkerFeature[],
+};
+// Converted out of GeoJSON and into our structure
+export type IndexedMileMarkers = {
+  [roadname_prefix: string]: MileMarker[], // sorted
+};
+
+export type Point = {
+  lat: number,
+  lon: number,
+};
+
+export type MileMarker = Point & {
+  name: string,
+  number: number,
+};
+
+export type Road = RoadTypeInfo & {
+  mileMarkers?: {
+    min: MileMarker,
+    max: MileMarker,
+  },
+  geojson?: GeoJSON,
+};
+
+
+export type PointWithRoad = {
+  point: Point,
+  road: Road,
+};
 
 export type RoadNameProperties = {
   geofulladdress: string, // this is the main thing
@@ -41,5 +79,25 @@ export function assertRoadCollectionGeoJSON(obj: any): asserts obj is RoadCollec
     catch (e: any) { 
       throw `assertRoadCollectionGeoJSON: feature at index ${index} failed assertRoadGeoJSON with error: ${e.toString()}`;
     }
+  }
+}
+
+export function assertMileMarkerProperties(obj: any): asserts obj is MileMarkerProperties {
+  if (!obj) throw `cannot be falsey`;
+  if (typeof obj !== 'object') throw `must be an object`;
+  if (typeof obj.POST_NAME !== 'string') throw `POST_NAME property must be a string`;
+}
+export function assertMileMarkerFeature(obj: any): asserts obj is MileMarkerFeature {
+  if (!obj) throw `cannot be falsey`;
+  if (typeof obj !== 'object') throw `must be an object`;
+  if (obj.type !== 'Point') throw `must be a Point feature`;
+  assertMileMarkerProperties(obj.properties);
+}
+export function assertMilemarkerGeoJSON(obj: any): asserts obj is MileMarkerGeoJSON {
+  if (!obj) throw `cannot be falsey`;
+  if (typeof obj !== 'object') throw `must be an object`;
+  if (!Array.isArray(obj.features)) throw `features must be an array`;
+  for (const f of (obj.features as any[])) {
+    assertMileMarkerFeature(f);
   }
 }

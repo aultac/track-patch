@@ -3,19 +3,23 @@ import 'dotenv/config'; // loads all environment variables found in .env in proj
 import { Command } from 'commander';
 import { csvToDayTracksJSON, writeToJSON, loadFromJSON } from './load.js';
 import { writeFile, mkdir } from 'fs/promises';
-import { createWriteStream } from 'fs';
 import { splitGeohashRoads } from './split-geohash-roads.js';
+import { splitDayTracks } from './split-day-tracks.js';
 import { geo2csv } from './geo2csv.js';
 import fgdb from 'fgdb';
  
-import { writeDaysToOADA } from './oada.js';
-
 const info = debug('trackpatch/cli:info');
 const warn = debug('trackpatch/cli:warn');
 
 (async () => {
 const program = new Command();
 program.name('Track-Patch Command-line Interface');
+
+program.command('split-day-tracks')
+  .description('Split an INDOT archive CSV file of vehicle tracks into one file per week')
+  .requiredOption('-f, --file <input_file>', 'input CSV file')
+  .requiredOption('-o, --output <output_dir>', 'directory to save the split files into')
+  .action(splitDayTracks);
 
 program.command('split-geohash-roads')
   .description('Split road files in workorderapp/public/split_by_dataset into geohash-based files')
@@ -54,11 +58,8 @@ program.command('summary')
       info('    # Vehicles with tracks: ', Object.keys(vdtracks).length);
        for (const [vid, vdt] of Object.entries(vdtracks)) {
          if (!vehicleids[vid]) { vehicleids[vid] = 0 };
-         for (const [starttime, track] of Object.entries(vdt.tracks)) {
-           const times = Object.keys(track);
-           vehicleids[vid] += times.length;
-           info(`        ${vid}: ${times.length} points`);
-         }
+         vehicleids[vid] += vdt.track.length;
+         info(`        ${vid}: ${vdt.track.length} points`);
        }
       info('----------------------------------');
     }
@@ -74,21 +75,6 @@ program.command('summary')
 
   });
 
-program.command('tooada')
-  .description('Write all data to oada at /bookmarks/track-patch/locations/day-index')
-  .option('-t, --token <token>', 'Token for OADA', process.env.TOKEN || 'notokenfound')
-  .option('-d, --domain <domain>', 'OADA domain', process.env.DOMAIN || 'localhost')
-  .option('-s, --start <YYYY-MM-DD>', 'Start putting data from this date forward', '')
-  .action(async ({ domain, token, start }) => {
-    if (token === 'notokenfound') { 
-      warn('WARNING: you did not pass a token');
-      throw new Error('ERROR: you did not pass a token in .env or as -t on command line. tooada needs a token');
-    }
-    info(`Loading data from json...`);
-    const days = await loadFromJSON();
-    writeDaysToOADA(days, { domain, token, start });
-    info(`Done!`);
-  });
 
 program.command('cl-fromgdb')
   .description('Convert INDOT centerline data from GDB to geohashed geojson')

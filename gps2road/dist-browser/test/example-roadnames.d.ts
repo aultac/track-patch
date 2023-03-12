@@ -1,12 +1,12 @@
 import type { RoadType, RoadTypeInfo } from '../types.js';
-declare type RawExampleRoadnames = {
+type RawExampleRoadnames = {
     [name: string]: string | {
         type: RoadType;
         number?: string;
         ramp?: true;
     };
 };
-export declare type ExampleRoadNames = {
+export type ExampleRoadNames = {
     [name: string]: RoadTypeInfo;
 };
 export declare const _roadnames: RawExampleRoadnames;

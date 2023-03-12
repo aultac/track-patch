@@ -16,7 +16,7 @@ export async function splitGeohashRoads({ dir, file, output }: { dir?: string, f
   let files: string[] = [];
   if (file) files = [ file ];
   if (dir) {
-    files = (await readdir(dir)).filter(f => f.match(/\.geojson.json$/)).map(f => `${dir}/${f}`)
+    files = (await readdir(dir)).filter(f => f.match(/(\.geojson.json|\.geojson|\.json)$/)).map(f => `${dir}/${f}`)
   }
   trace('Have files: ', files);
 
@@ -68,7 +68,10 @@ export async function splitGeohashRoads({ dir, file, output }: { dir?: string, f
   info('Writing files to',output);
   await pmap(
     Object.entries(geohash_buckets), 
-    ([geohash, json]) => writeFile(`${output}/${geohash}.json`, JSON.stringify(json)), 
+    ([geohash, json]) => writeFile(`${output}/${geohash}.json`, JSON.stringify({
+      type: 'FeatureCollection',
+      features: json
+    })), 
     { concurrency: 100 }
   );
 
