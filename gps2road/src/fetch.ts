@@ -11,24 +11,35 @@ const { info } = log.get('fetch');
 
 const { fetch } = fetchLib();
 
-const cache: { [geohash: string]: RoadCollectionGeoJSON } = {};
+const cache: { [geohash: string]: RoadCollectionGeoJSON | null } = {};
 
+let baseurl = "https://aultac.github.io/track-patch"
+export function setBaseUrl(url: string) {
+  baseurl = url.replace(/\/$/,'');
+}
+ 
 export async function fetchRoadTilesByGeohashes(geohashes: string[]): Promise<RoadCollectionGeoJSON[]> {
   const results = await pmap(
     geohashes, 
     async (geohash) => {
-      if (!cache[geohash]) {
-        cache[geohash] = await fetch(`https://aultac.github.io/track-patch/roads-by-geohash/${geohash}.json`)
+      if (typeof cache[geohash] === 'undefined') {
+        cache[geohash] = await fetch(`${baseurl}/roads-by-geohash/${geohash}.json`)
         // @ts-ignore
-          .then(res => res.json());
+          .then(res => {
+            if (res.ok) {
+              return res.json()
+            }
+            return null;
+          })
       }
-      return cache[geohash];
+      return cache[geohash]; // could be null if this 404'ed the first time
     }, { concurrency: 5 }
   );
 
   // Make sure every feature has a geofulladdress, rcl_nguid, and source_datasetid
   const ret: RoadCollectionGeoJSON[] = [];
   for (const r of results) {
+    if (!r) continue;
     const fc = (r as FeatureCollection);
     for (const f of fc.features) {
       if (!f.properties) f.properties = {};
@@ -57,7 +68,13 @@ export async function fetchRoadTilesForPoint(point: Point): Promise<RoadCollecti
 let _milemarkers: IndexedMileMarkers | null = null;
 export async function fetchIndexedMileMarkers(): Promise<IndexedMileMarkers> {
   if (_milemarkers) return _milemarkers;
-  const geojson = await fetch(`https://aultac.github.io/track-patch/milemarkers.geojson`).then(res => res.json());
+  const geojson = await fetch(`${baseurl}/milemarkers.geojson`).then(res => {
+    if (res.ok) {
+      return res.json();
+    }
+    info('FAILED to retrieve mile markers:', res);
+    return null;
+  });
   assertMilemarkerGeoJSON(geojson);
   _milemarkers = {};
   for (const f of geojson.features) {

@@ -71,6 +71,7 @@ export const Map = observer(function Map() {
   const interactiveLayerIds = [];
   if (roads) interactiveLayerIds.push('roads');
   if (milemarkers) interactiveLayerIds.push('milemarkers');
+  if (tracks) interactiveLayerIds.push('tracks');
 
   return (
     <ReactMapGl
@@ -112,7 +113,7 @@ export const Map = observer(function Map() {
     { !tracks ? <React.Fragment /> :
       <Source type="geojson" data={tracks as any}>
         <Layer id="tracks" type="line" paint={{
-          'line-color': uniqolor.random().color,
+          'line-color': [ 'get', 'color' ],
           'line-width': 2,
         }} />
       </Source>

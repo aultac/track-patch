@@ -7,6 +7,7 @@ import { pointToLineDistance } from '@turf/turf';
 import { MAXROADWIDTH_FEET } from '@track-patch/constants';
 import { guessRoadType } from './roadnames.js';
 import { pointAndRoad2Milemarker } from './milemarkers.js';
+export { setBaseUrl } from './fetch.js';
 const { info } = log.get('index');
 export async function gps2road({ point }) {
     const tiles = await fetchRoadTilesForPoint(point);
@@ -15,15 +16,25 @@ export async function gps2road({ point }) {
     // 1. Compute distance to all road segments
     const roadswithdistances = [];
     for (const t of tiles) {
+        const distances = [];
         for (const geojsonroad of t.features) {
-            if (geojsonroad.geometry.type !== 'LineString') {
-                throw new Error('Found a road whose geometry is not a linestring');
+            if (geojsonroad.geometry.type === 'MultiLineString') {
+                for (const linecoordinates of geojsonroad.geometry.coordinates) {
+                    const linestring = { type: 'LineString', coordinates: linecoordinates };
+                    distances.push(pointToLineDistance([point.lon, point.lat], linestring, { units: 'feet' }));
+                }
             }
-            const dist = pointToLineDistance([point.lon, point.lat], geojsonroad.geometry, { units: 'feet' });
+            else if (geojsonroad.geometry.type === 'LineString') {
+                distances.push(pointToLineDistance([point.lon, point.lat], geojsonroad.geometry, { units: 'feet' }));
+            }
+            else {
+                throw new Error('Found a road (' + geojsonroad.properties.geofulladdress + ') whose geometry is not a linestring.  It is instead a' + geojsonroad.geometry.type);
+            }
+            distances.sort((a, b) => a - b);
             roadswithdistances.push({ road: {
                     ...guessRoadType(geojsonroad.properties),
-                    //geojson: geojsonroad, // Do we need to keep this?
-                }, dist });
+                    geojson: t, // Do we need to keep this?  Technically should be geojsonroad
+                }, dist: distances[0] });
         }
     }
     // 2. Sort shortest first
@@ -41,9 +52,12 @@ export async function gps2road({ point }) {
     else if (shortest_local && shortest_local.dist < MAXROADWIDTH_FEET)
         foundroad = shortest_local.road;
     if (!foundroad) {
-        info('Failed to find any roads within max road width of', MAXROADWIDTH_FEET, 'feet');
+        info('Failed to find any roads within max road width of', MAXROADWIDTH_FEET, 'feet out of', roadswithdistances.length, 'roads.  Closest road is', roadswithdistances[0]?.dist);
+        info('point = ', point, ', Closest road = ', roadswithdistances[0]);
+        info('geojson for all roads in this tile: ', JSON.stringify(roadswithdistances[0]?.road.geojson));
         return null;
     }
+    info('Found road for point:', point, ', now finding closest mile maerker');
     // 5. Given road segment, find closest mile marker.
     return pointAndRoad2Milemarker({ point, road: foundroad });
 }

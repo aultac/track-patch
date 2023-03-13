@@ -3,8 +3,10 @@ import { parse, ParseStepResult } from 'papaparse';
 import { state, ActivityMessage } from './state';
 import log from '../log';
 import type { Feature, FeatureCollection, GeoJSON, LineString } from 'geojson';
-import { DayTracks, vehicletracks } from '@track-patch/lib';
+import { assertWorkOrder, DayTracks, vehicletracks, WorkOrder } from '@track-patch/lib';
 import readtracks from './readtracks-worker.js'; // I couldn't get this to work as a worker
+import xlsx from 'xlsx-js-style';
+import numeral from 'numeral';
 
 const { info, warn } = log.get("actions");
 
@@ -139,3 +141,45 @@ export const loadDayTracks = action('loadDayTracks', async (file: File) => {
 });
 
 
+
+let _knownWorkorders: WorkOrder[] | null = null;
+export function knownWorkorders() { return _knownWorkorders };
+export function numKnownWorkorders() { return _knownWorkorders ? _knownWorkorders.length : 0 }
+export const loadKnownWorkorders = action('loadKnownWorkorders', async (file: File) => {
+  const wb = xlsx.read(await file.arrayBuffer());
+  const records = xlsx.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { raw: false });
+  _knownWorkorders = records.filter((r,index) => {
+    try { 
+      assertWorkOrder(r);
+    } catch(e: any) {
+      info('WARNING: line',index+1,'in work orders sheet was not a valid work order:', e.message);
+      return false;
+    }
+    return true;
+  }) as WorkOrder[];
+  runInAction(() => { state.knownWorkorders.orders.rev++ });
+});
+export const saveKnownWorkorders = action('saveKnownWorkorders', async () => {
+  if (!_knownWorkorders) throw new Error('Failed to save: there are no known work orders');
+  const worksheet = xlsx.utils.json_to_sheet(_knownWorkorders);
+  const workbook = xlsx.utils.book_new();
+  xlsx.utils.book_append_sheet(workbook, worksheet, "Validated Records (PoC)");
+  xlsx.writeFile(workbook, 'validated-workorder.xlsx'); // downloads file
+});
+export const knownWorkOrdersParsing = action('knownWorkOrdersParsing', async (val: boolean) => {
+  state.knownWorkorders.parsing = val;
+});
+export const validateWorkorders = action('validateWorkorders', async () => {
+  if (!_knownWorkorders) throw new Error('No work orders to validate');
+  for (const r of _knownWorkorders) {
+    if (r['Total Hrs']) {
+      //info('Proof-of-concept: values are generated at random');
+      // match = reported / computed, therefore computed = reported / match
+      const match = Math.random()*0.4 + 0.8; // 80% - 120%
+      const computedHours = +(r['Total Hrs']) / match;
+      r.match = numeral(match).format('0,0.00%');
+      r.computedHours = numeral(computedHours).format('0,0.0');
+    }
+  }
+  saveKnownWorkorders();
+});

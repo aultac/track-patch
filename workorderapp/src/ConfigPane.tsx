@@ -2,8 +2,7 @@ import React from 'react';
 import { observer } from 'mobx-react-lite';
 import log from './log';
 import { context } from './state';
-import { parse } from 'papaparse';
-import { LinearProgress } from '@mui/material';
+import { Button, LinearProgress, Select, Autocomplete, MenuItem, TextField } from '@mui/material';
 import numeral from 'numeral';
 
 const { info, warn } = log.get('config-pane');
@@ -16,10 +15,10 @@ export const ConfigPane = observer(function ConfigPane() {
 
   const [ inzone, setInzone ] = React.useState<Boolean>(false);
 
-  const handleFile = ({type, inout} : { type: 'drop' | 'drag', inout?: boolean }): React.DragEventHandler  => async (evt) => {
+  const handleFile = ({filetype, eventtype, inout} : { filetype: 'tracks' | 'workorders', eventtype: 'drop' | 'drag', inout?: boolean }): React.DragEventHandler  => async (evt) => {
     evt.preventDefault();
     evt.stopPropagation();
-    switch(type) {
+    switch(eventtype) {
 
       case 'drag':
         if (inzone !== inout) {
@@ -29,25 +28,38 @@ export const ConfigPane = observer(function ConfigPane() {
       break;
 
       case 'drop':
-        info('file dropped, evt = ', evt);
-        actions.parsingInProgress(true);
         const files = [ ...evt.dataTransfer.files ]; // It is dumb that I have to do this
         if (files.length < 1) {
           info('No files dropped!');
           return;
         }
-        info('dropped files: ', files);
-        actions.loadDayTracks(files[0]!);
+        if (filetype === 'tracks') {
+          actions.parsingInProgress(true);
+          actions.loadDayTracks(files[0]!);
+        } else {
+          actions.knownWorkOrdersParsing(true);
+          actions.loadKnownWorkorders(files[0]!);
+          actions.knownWorkOrdersParsing(false);
+        }
       }
     };
 
   return (
     <div style={{ width: '30vw', height: '90vh', padding: '5px' }} >
-      <div style={{ padding: '10px', height: '20%', alignItems: 'center', justifyContent: 'center', display: 'flex', border: '3px dashed #000088', borderRadius: '3px' }}
-        onDragOver={handleFile({ type: 'drag' })}
-        onDrop={handleFile({ type: 'drop' })}
-        onDragEnter={handleFile({ type: 'drag', inout: true })}
-        onDragLeave={handleFile({ type: 'drag', inout: false })}
+
+      <Autocomplete 
+        style={{marginTop: '10px', marginBottom: '5px'}}
+        options={state.geojsonviz.files}  
+        value={state.geojsonviz.selectedFile} 
+        onChange={(evt, value) => actions.selectGeojsonVizFile(value as string)}
+        renderInput={(params) => <TextField {...params} label="Load Road Tile" />}
+      />
+
+      <div style={{ padding: '10px', margin: '5px', height: '20%', alignItems: 'center', justifyContent: 'center', display: 'flex', border: '3px dashed #000088', borderRadius: '3px' }}
+        onDragOver={handleFile({ filetype: 'tracks', eventtype: 'drag' })}
+        onDrop={handleFile({ filetype: 'tracks', eventtype: 'drop' })}
+        onDragEnter={handleFile({ filetype: 'tracks', eventtype: 'drag', inout: true })}
+        onDragLeave={handleFile({ filetype: 'tracks', eventtype: 'drag', inout: false })}
       >
         {
           !state.parsing.inprogress && !state.daytracks.rev ? 'Drop GPS tracks file here.' :
@@ -59,6 +71,32 @@ export const ConfigPane = observer(function ConfigPane() {
           </div>
         }
       </div>
+
+      <div style={{ padding: '10px', margin: '5px', height: '20%', alignItems: 'center', justifyContent: 'center', display: 'flex', border: '3px dashed #008800', borderRadius: '3px' }}
+        onDragOver={handleFile({ filetype: 'workorders', eventtype: 'drag' })}
+        onDrop={handleFile({ filetype: 'workorders', eventtype: 'drop' })}
+        onDragEnter={handleFile({ filetype: 'workorders', eventtype: 'drag', inout: true })}
+        onDragLeave={handleFile({ filetype: 'workorders', eventtype: 'drag', inout: false })}
+      >
+        {
+          !state.knownWorkorders.parsing && !state.knownWorkorders.orders.rev ? 'Drop work orders spreadsheet here to validate.' :
+          <div style={{flexGrow: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center'}}>
+            <div>Loaded {numeral(actions.numKnownWorkorders()).format('0,0')} Work Orders</div>
+          </div>
+        }
+      </div>
+
+      <div style={{ alignItems: 'center', justifyContent: 'center', display: 'flex' }}>
+        <Button 
+          style={{ flexGrow: 1 }}
+          onClick={() => actions.validateWorkorders()} 
+          variant="contained" 
+          disabled={!actions.knownWorkorders() || !actions.daytracks() }
+        >
+          Validate Work Orders (PoC)
+        </Button>
+      </div>
+
 
     </div>
   );

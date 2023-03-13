@@ -1,12 +1,14 @@
 {
   "name": "workorderapp",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.0.1",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "predeploy": "tsc && vite build",
+    "deploy": "gh-pages -d dist"
   },
   "dependencies": {
     "@fontsource/oleo-script": "^4.5.8",
@@ -36,7 +38,8 @@
     "readable-stream": "^3.6.2",
     "rfdc": "^1.3.0",
     "uniqolor": "^1.1.0",
-    "vite-compatible-readable-stream": "^3.6.1"
+    "vite-compatible-readable-stream": "^3.6.1",
+    "xlsx-js-style": "^1.2.0"
   },
   "devDependencies": {
     "@types/debug": "^4",
@@ -47,7 +50,7 @@
     "@types/react-dom": "^18.0.9",
     "@types/rfdc": "^1",
     "@vitejs/plugin-react": "^3.0.0",
-    "typescript": "^4.9.3",
+    "typescript": "^4.9.5",
     "vite": "^4.0.0"
   }
 }

@@ -33,6 +33,12 @@ export type State = {
     state: string, // tracks, roads, geojson
   },
 
+  knownWorkorders: {
+    parsing: boolean, // whether it is currently being parsed
+    orders: BigData,
+    validated: boolean,
+  },
+
   daytracks: BigData,
   daytracksGeoJSON: BigData,
   roads: BigData,
@@ -68,6 +74,11 @@ export const state = observable<State>({
     estimatedRows: 0,
     currentNumRows: 0,
     state: '',
+  },
+  knownWorkorders: {
+    parsing: false,
+    orders: { rev: 0 },
+    validated: false,
   },
   roads: { rev: 0 },
   milemarkers: { rev: 0 },

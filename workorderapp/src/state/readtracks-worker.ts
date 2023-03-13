@@ -6,6 +6,7 @@ import type { Feature, FeatureCollection, GeoJSON, LineString } from 'geojson';
 import { DayTracks, vehicletracks } from '@track-patch/lib';
 import { gps2road } from '@track-patch/gps2road';
 import pLimit from 'p-limit';
+import uniqolor from 'uniqolor';
 
 const { info } = log.get('state/readtracks-worker');
 
@@ -48,7 +49,7 @@ export default async function(
 
   parsingState('roads');
   numRowsParsed(0);
-
+/*
   // Batch things in concurrent batches of 10000 each, and run 100 in parallel in each batch
   const limit = pLimit(100);
   let pointsqueue: ReturnType<typeof limit>[] = [];
@@ -77,11 +78,12 @@ export default async function(
     await Promise.all(pointsqueue);
   }
   // Everything that could figure out a road should now have a road
-
+*/
   parsingState('geojson');
   numRowsParsed(0);
-  daytracksGeoJSON = daytracksToGeoJSON(daytracks, (rownum) => postMessage({ type: 'numRowsParsed', value: rownum }));
+  daytracksGeoJSON = daytracksToGeoJSON(daytracks, numRowsParsed);
 
+  parsingState('Done');
   return { daytracks, daytracksGeoJSON };
 };
 
@@ -98,6 +100,7 @@ function daytracksToGeoJSON(daytracks: DayTracks, rownumReporter: (num: number) 
         properties: {
           vid,
           day,
+          color: uniqolor(vid).color,
         },
         geometry: {
           type: 'LineString',
