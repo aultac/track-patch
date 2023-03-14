@@ -2,7 +2,7 @@ import type { RoadType, RoadTypeInfo } from '../types.js';
 type RawExampleRoadnames = {
     [name: string]: string | {
         type: RoadType;
-        number?: string;
+        number?: number;
         ramp?: true;
     };
 };

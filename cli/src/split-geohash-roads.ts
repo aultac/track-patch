@@ -1,9 +1,11 @@
 import log from './log.js';
 import { readdir, readFile, writeFile } from 'fs/promises';
-import type { FeatureCollection, Feature} from 'geojson';
+import type { FeatureCollection, Feature, LineString, MultiLineString, Position} from 'geojson';
 import { mkdirp } from 'mkdirp';
 import pmap from 'p-map';
 import shape2geohash from 'shape2geohash';
+import geohash from 'latlon-geohash';
+import { bbox } from '@turf/turf'
 
 const { info, trace } = log.get('split-geohash-roads');
 
@@ -32,6 +34,7 @@ export async function splitGeohashRoads({ dir, file, output }: { dir?: string, f
       if (feature.geometry.type !== 'LineString' && feature.geometry.type !== 'MultiLineString') {
         throw new Error(`Apparently some things are not LineStrings or MultiLineStrings.  This one is ${feature.geometry.type}.  Handle it.`);
       }
+
       const geohash4s = await shape2geohash(feature, { precision: GEOHASH_LENGTH, allowDuplicates: false });
       for (const g4 of geohash4s) {
         const fclone = { ...feature }; // make a shallow clone so we can save this same feature separately for every geohash bucket it is in with that geohash in the properties
@@ -78,5 +81,22 @@ export async function splitGeohashRoads({ dir, file, output }: { dir?: string, f
   info('Done!  CTRL-C to quit');
   return;
 }
+/*
+function shape2geohash(shp: Feature<LineString> | Feature<MultiLineString>): string[] {
+  let lines: Position[][] = [];
+  if (shp.geometry.type === 'MultiLineString') {
+    lines = [ ...lines, ...shp.geometry.coordinates ];
+  } else {
+    lines.push(shp.geometry.coordinates);
+  }
+  for (const line of lines) {
+    let prev: Position | null = null;
+    for (const point of line) {
+      if (prev) {
+        const segment = [ prev, point ];
 
-
+      }
+      prev = line;
+    }
+  }
+}*/

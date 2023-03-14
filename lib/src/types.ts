@@ -41,6 +41,7 @@ export type WorkOrder = {
   'Subactivity': string,
   'Work Date': string,
   'Resource Type': string,
+  'Resource Name': string,
   'Total Hrs'?: string,
   'Units Accomplished'?: string,
   'Inventory Asset': string,
@@ -53,6 +54,7 @@ export type WorkOrder = {
   // This app will add these:
   computedHours?: string,
   match?: string,
+  differenceHours?: string,
   // There are others, just keeping these for now
   [key: string]: any,
 }
@@ -77,6 +79,7 @@ const WorkOrderOptionalKeys: (keyof WorkOrder)[] = [
   // These are added by the app:
   'computedHours',
   'match',
+  'differenceHours',
 ];
 export function assertWorkOrder(o: any): asserts o is WorkOrder {
   if (!o || typeof o !== 'object') throw new Error('Must be an object and not falsey');

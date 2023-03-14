@@ -1,11 +1,18 @@
 import type { Point, Road } from './types';
 import { distance, Point as TurfPoint } from '@turf/turf';
 import {fetchMileMarkersForRoad} from './fetch';
+import log from './log.js';
+
+const { info } = log.get('milemarker');
 
 // Returns a road with the milemarker key filled out,
 // also mutates original road to include milemarker key
 export async function pointAndRoad2Milemarker({point, road }: {point: Point, road: Road }): Promise<Road> {
   const thisroadmarkers = await fetchMileMarkersForRoad({ road });
+
+  if (thisroadmarkers.length < 1) {
+    return road; // no mile markers found
+  }
 
   // Now find closest mile marker to this point
   const mindist = thisroadmarkers.reduce((min,marker,index) => {
@@ -16,7 +23,7 @@ export async function pointAndRoad2Milemarker({point, road }: {point: Point, roa
 
   // Now find the marker before and after the closest marker and decide which is closer
   const closest = mindist.marker!;
-  
+
   // They are sorted in thisroadmarkers, so now get before/after by just index+1-1
   const before = mindist.index > 0 ? thisroadmarkers[mindist.index-1] : null;
   const after = mindist.index < thisroadmarkers.length - 1 ? thisroadmarkers[mindist.index+1] : null;
@@ -29,7 +36,7 @@ export async function pointAndRoad2Milemarker({point, road }: {point: Point, roa
   if (beforedist < afterdist) {
     return {
       ...road,
-      mileMarkers: {
+      milemarkers: {
         min: before!,
         max: closest,
       }
@@ -37,7 +44,7 @@ export async function pointAndRoad2Milemarker({point, road }: {point: Point, roa
   }
   return {
     ...road,
-    mileMarkers: {
+    milemarkers: {
       min: closest,
       max: after!,
     },

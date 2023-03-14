@@ -27,11 +27,12 @@ document.addEventListener('DOMContentLoaded', async() => {
       roadamesTest(libsundertest);
 
       info('gps2road tests');
-      gps2roadTest(libsundertest);
+      await gps2roadTest(libsundertest);
       
       info('All tests successful');
     } catch(e: any) {
       info('FAILED: tests threw exception: ', e);
+      throw e;
     }
   }
 

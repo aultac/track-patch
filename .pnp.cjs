@@ -5650,10 +5650,12 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["@overleaf/o-error", "npm:3.4.0"],\
             ["@track-patch/lib", "workspace:lib"],\
             ["@tsconfig/node16", "npm:1.0.3"],\
+            ["@turf/turf", "npm:6.5.0"],\
             ["@types/debug", "npm:4.1.7"],\
             ["@types/event-stream", "npm:4.0.0"],\
             ["@types/geojson", "npm:7946.0.10"],\
             ["@types/jsonstream", "npm:0.8.31"],\
+            ["@types/latlon-geohash", "npm:2.0.0"],\
             ["@types/node", "npm:17.0.45"],\
             ["commander", "npm:9.5.0"],\
             ["csv-parse", "npm:5.3.6"],\
@@ -5663,10 +5665,10 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["event-stream", "npm:4.0.1"],\
             ["fgdb", "npm:1.0.0"],\
             ["jsonstream", "npm:1.0.3"],\
+            ["latlon-geohash", "npm:2.0.0"],\
             ["linebyline", "npm:1.3.0"],\
             ["mkdirp", "npm:2.1.5"],\
             ["p-map", "npm:5.5.0"],\
-            ["shape2geohash", "npm:1.2.6"],\
             ["typescript", "patch:typescript@npm%3A4.9.5#~builtin<compat/typescript>::version=4.9.5&hash=23ec76"]\
           ],\
           "linkType": "SOFT"\
@@ -18408,15 +18410,6 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "linkType": "HARD"\
         }]\
       ]],\
-      ["ngeohash", [\
-        ["npm:0.6.3", {\
-          "packageLocation": "./.yarn/cache/ngeohash-npm-0.6.3-c3a08d2d86-563a6c4035.zip/node_modules/ngeohash/",\
-          "packageDependencies": [\
-            ["ngeohash", "npm:0.6.3"]\
-          ],\
-          "linkType": "HARD"\
-        }]\
-      ]],\
       ["no-case", [\
         ["npm:3.0.4", {\
           "packageLocation": "./.yarn/cache/no-case-npm-3.0.4-12884c3d98-0b2ebc113d.zip/node_modules/no-case/",\
@@ -22955,26 +22948,6 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "linkType": "HARD"\
         }]\
       ]],\
-      ["shape2geohash", [\
-        ["npm:1.2.6", {\
-          "packageLocation": "./.yarn/cache/shape2geohash-npm-1.2.6-03c13b0371-1824ed5bda.zip/node_modules/shape2geohash/",\
-          "packageDependencies": [\
-            ["shape2geohash", "npm:1.2.6"],\
-            ["@turf/area", "npm:6.5.0"],\
-            ["@turf/bbox", "npm:6.5.0"],\
-            ["@turf/bbox-polygon", "npm:6.5.0"],\
-            ["@turf/boolean-overlap", "npm:6.5.0"],\
-            ["@turf/boolean-point-in-polygon", "npm:6.5.0"],\
-            ["@turf/boolean-within", "npm:6.5.0"],\
-            ["@turf/envelope", "npm:6.5.0"],\
-            ["@turf/helpers", "npm:6.5.0"],\
-            ["@turf/intersect", "npm:6.5.0"],\
-            ["@turf/line-split", "npm:6.5.0"],\
-            ["ngeohash", "npm:0.6.3"]\
-          ],\
-          "linkType": "HARD"\
-        }]\
-      ]],\
       ["shebang-command", [\
         ["npm:2.0.0", {\
           "packageLocation": "./.yarn/cache/shebang-command-npm-2.0.0-eb2b01921d-6b52fe8727.zip/node_modules/shebang-command/",\
@@ -25761,6 +25734,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["@types/react-dom", "npm:18.0.11"],\
             ["@types/rfdc", "npm:1.1.0"],\
             ["@vitejs/plugin-react", "virtual:99d67232e7505d5ef5eceb61f5899bbb6ea0e597ad649ac5f377406a35f9032ea15d66076cb59eb125337b7b56f9c72b6bec9e4e46e4358fdadc0115f47810b5#npm:3.1.0"],\
+            ["dayjs", "npm:1.11.7"],\
             ["debug", "virtual:ac3d8e680759ce54399273724d44e041d6c9b73454d191d411a8c44bb27e22f02aaf6ed9d3ad0ac1c298eac4833cff369c9c7b84c573016112c4f84be2cd8543#npm:4.3.4"],\
             ["gh-pages", "npm:4.0.0"],\
             ["isomorphic-fetch", "npm:3.0.0"],\

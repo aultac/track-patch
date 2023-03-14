@@ -1,13 +1,17 @@
 import { runInAction, action } from 'mobx';
-import { parse, ParseStepResult } from 'papaparse';
 import { state, ActivityMessage } from './state';
 import log from '../log';
-import type { Feature, FeatureCollection, GeoJSON, LineString } from 'geojson';
-import { assertWorkOrder, DayTracks, vehicletracks, WorkOrder } from '@track-patch/lib';
+import type { FeatureCollection, GeoJSON } from 'geojson';
+import { assertWorkOrder, DayTracks, Road, WorkOrder } from '@track-patch/lib';
 import readtracks from './readtracks-worker.js'; // I couldn't get this to work as a worker
 import xlsx from 'xlsx-js-style';
 import numeral from 'numeral';
+import dayjs from 'dayjs';
+import customParseFormat from 'dayjs/plugin/customParseFormat';
+import {guessRoadType, roadNameToType} from '@track-patch/gps2road/dist/roadnames';
+import { fetchMileMarkersForRoad, MileMarker } from '@track-patch/gps2road';
 
+dayjs.extend(customParseFormat);
 const { info, warn } = log.get("actions");
 
 //--------------------------------------------------------------------
@@ -161,7 +165,7 @@ export const loadKnownWorkorders = action('loadKnownWorkorders', async (file: Fi
 });
 export const saveKnownWorkorders = action('saveKnownWorkorders', async () => {
   if (!_knownWorkorders) throw new Error('Failed to save: there are no known work orders');
-  const worksheet = xlsx.utils.json_to_sheet(_knownWorkorders);
+  const worksheet = xlsx.utils.json_to_sheet(_knownWorkorders.filter(w => w.computedHours && w.computedHours > 0));
   const workbook = xlsx.utils.book_new();
   xlsx.utils.book_append_sheet(workbook, worksheet, "Validated Records (PoC)");
   xlsx.writeFile(workbook, 'validated-workorder.xlsx'); // downloads file
@@ -172,14 +176,106 @@ export const knownWorkOrdersParsing = action('knownWorkOrdersParsing', async (va
 export const validateWorkorders = action('validateWorkorders', async () => {
   if (!_knownWorkorders) throw new Error('No work orders to validate');
   for (const r of _knownWorkorders) {
-    if (r['Total Hrs']) {
-      //info('Proof-of-concept: values are generated at random');
-      // match = reported / computed, therefore computed = reported / match
-      const match = Math.random()*0.4 + 0.8; // 80% - 120%
-      const computedHours = +(r['Total Hrs']) / match;
-      r.match = numeral(match).format('0,0.00%');
-      r.computedHours = numeral(computedHours).format('0,0.0');
+    if (!r['Total Hrs']) {
+      info('No Total Hrs');
+      continue; // no reported hours means we skip this one
     }
+    const reported_hours = +(r['Total Hrs']);
+    if (isNaN(reported_hours)) {
+      info('Reported hours isNaN');
+      continue;
+    }
+
+    if (r['Resource Type'] !== 'Equipment') {
+      info('Resource Type',r['Resource Type'],'is not Equipment');
+      continue; // this is the only thing we can identify right now
+    }
+
+    const vid = +(r['Resource Name'].split('-')[0]?.trim().replace(/^0+/,'')); // no leading zeros
+    if (isNaN(vid)) {
+      info('Unable to find vehicle id',vid,'in Resource Type',r['Resource Type']);
+      continue; // we don't recognize this equipment number
+    }
+
+    const workorderday = dayjs(r['Work Date'],'M/D/YY');
+    if (!workorderday.isValid()) {
+      info('Work Date',r['Work Date'],'invalid');
+      continue; // invalid dates don't work either
+    }
+    const day = workorderday.format('YYYY-MM-DD');
+
+    if (!r['Route (Ref)']) {
+      info('No Route (Ref)')
+      continue; // need a route ref to know what road it is
+    }
+    let road = roadNameToType(r['Route (Ref)']);
+    info('Identified road', road, 'from Route (Ref)',r['Route (Ref)']);
+
+    // Grab the mile marker for start post and end post for this road,
+    // Road may or may not have mile markers
+    let startpost: MileMarker | null = null;
+    let endpost: MileMarker | null = null;
+    if (r['Start Post'] && r['End Post'] && r['Start Offset'] && r['End Offset']) {
+      const milemarkers = await fetchMileMarkersForRoad({ road });
+      if (!milemarkers || milemarkers.length < 1) {
+        info('Found no mile markers for road');
+        continue; // can't asses time without knowing the mile markers
+      }
+      startpost = milemarkers.find(m => m.number === +(r['Start Post']!)) || null;
+      endpost = milemarkers.find(m => m.number === +(r['End Post']!)) || null;
+      if (!startpost) {
+        info('Found no startpost');
+        continue; // we don't have a post for this, but the workorder specified one, so skip this one too
+      }
+      if (!endpost) {
+        info('Found no endpost');
+        continue;  // we don't have a post for this, but the workorder specified one, so skip this one too
+      }
+      // ensure consistent ordering (startpost is less than endpost)
+      if (startpost.number > endpost.number) {
+        const tmp = startpost;
+        endpost = startpost;
+        startpost = tmp;
+      }
+    }
+
+    const dt = daytracks()?.[day]?.[vid];
+    if (dt) {
+      let computedSeconds = 0;
+      // A vehicle is considerd to be on a part of a road from the current point until the next point unless the next point is more than 5 mins away.
+      for (const [index, point] of dt.track.entries()) {
+        if (!point.road) continue; // cannot contribute working time if this point was not on a known road.
+
+        // Is this point on the road section of interest?
+        if (point.road.type !== road.type) continue;
+        if (point.road.number !== road.number) continue;
+        if (startpost && endpost) {
+          if (!point.road.milemarkers) continue;
+          if (startpost.number > point.road.milemarkers.max.number) continue;
+          if (endpost.number < point.road.milemarkers.min.number) continue;
+        }
+        
+        // If we actually ever get here, then things match and we can compute time
+        if (index >= dt.track.length - 1) {
+          computedSeconds += 5 * 60; // last point counts for 5 mins no matter what
+          continue;
+        }
+        const next = dt.track[index+1]!;
+        let duration = next.time.unix() - point.time.unix();
+        if (duration > 5 * 60) duration = 5 * 60;
+        computedSeconds += duration;
+      }
+      const computedHours = computedSeconds / 3600;
+      const match = computedHours ? reported_hours / computedHours : 0;
+      r.match = numeral(match).format('0,0.00%');
+      r.computedHours = numeral(computedHours).format('0,0.00');
+      r.differenceHours = numeral(reported_hours - computedHours).format('0,0.00');
+      info('WE ACTUALLY HAVE A COMPUTED HOURS!!!',computedHours);
+
+    } else {
+      info('No track fonud for day',day,'and vehicleid',vid);
+    }
+
   }
   saveKnownWorkorders();
 });

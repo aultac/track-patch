@@ -20,12 +20,15 @@ export type MileMarker = Point & {
     number: number;
 };
 export type Road = RoadTypeInfo & {
-    mileMarkers?: {
+    milemarkers?: {
         min: MileMarker;
         max: MileMarker;
     };
     geojson?: GeoJSON;
 };
+export declare function assertPoint(o: any): asserts o is Point;
+export declare function assertMileMarker(o: any): asserts o is MileMarker;
+export declare function assertRoad(o: any): asserts o is Road;
 export type PointWithRoad = {
     point: Point;
     road: Road;
@@ -39,9 +42,10 @@ export type RoadType = 'INTERSTATE' | 'STATE' | 'LOCAL' | 'UNKNOWN';
 export type RoadTypeInfo = {
     name: string;
     type: RoadType;
-    number?: string;
+    number?: number;
     ramp?: true;
 };
+export declare function assertRoadTypeInfo(o: any): asserts o is RoadTypeInfo;
 export type RoadGeoJSON = Feature & {
     properties: RoadNameProperties;
 };

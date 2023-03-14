@@ -47,13 +47,15 @@ export const ConfigPane = observer(function ConfigPane() {
   return (
     <div style={{ width: '30vw', height: '90vh', padding: '5px' }} >
 
-      <Autocomplete 
-        style={{marginTop: '10px', marginBottom: '5px'}}
-        options={state.geojsonviz.files}  
-        value={state.geojsonviz.selectedFile} 
-        onChange={(evt, value) => actions.selectGeojsonVizFile(value as string)}
-        renderInput={(params) => <TextField {...params} label="Load Road Tile" />}
-      />
+      { !window.location.toString().match(/debug/) ? <React.Fragment /> :
+        <Autocomplete 
+          style={{marginTop: '10px', marginBottom: '5px'}}
+          options={state.geojsonviz.files}  
+          value={state.geojsonviz.selectedFile} 
+          onChange={(evt, value) => actions.selectGeojsonVizFile(value as string)}
+          renderInput={(params) => <TextField {...params} label="Load Road Tile" />}
+        />
+      }
 
       <div style={{ padding: '10px', margin: '5px', height: '20%', alignItems: 'center', justifyContent: 'center', display: 'flex', border: '3px dashed #000088', borderRadius: '3px' }}
         onDragOver={handleFile({ filetype: 'tracks', eventtype: 'drag' })}

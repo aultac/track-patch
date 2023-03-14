@@ -4,7 +4,7 @@ import { state, ActivityMessage } from './state';
 import log from '../log';
 import type { Feature, FeatureCollection, GeoJSON, LineString } from 'geojson';
 import { DayTracks, vehicletracks } from '@track-patch/lib';
-import { gps2road } from '@track-patch/gps2road';
+import { gps2road, Point, Road } from '@track-patch/gps2road';
 import pLimit from 'p-limit';
 import uniqolor from 'uniqolor';
 
@@ -49,27 +49,33 @@ export default async function(
 
   parsingState('roads');
   numRowsParsed(0);
-/*
+
   // Batch things in concurrent batches of 10000 each, and run 100 in parallel in each batch
-  const limit = pLimit(100);
+  const limit = pLimit(1000);
   let pointsqueue: ReturnType<typeof limit>[] = [];
+  let pointsmissingroads: Point[] = [];
   // Now find the roads/milemarkers for every point:
   let rownum = 0;
   for (const [day, vehicles] of Object.entries(daytracks)) {
     for (const [vid, vinfo] of Object.entries(vehicles)) {
+      let prevroad: Road | null = null;
       for (const [index, point] of vinfo.track.entries()) {
+        /*
         if (pointsqueue.length >= 10000) {
           info('Running batch...');
           await Promise.all(pointsqueue); // run the batch
           pointsqueue = [];
         }
+        */
         pointsqueue.push(limit(async () => { 
-          const road = await gps2road({ point });
-          if (road) point.road = road;
-          else {
-            info('Did not find road for point', point, 'at index',index,'for vehicle',vid,'on day',day);
+          const road = await gps2road({ point, hintroad: prevroad });
+          if (road) {
+            point.road = road;
+            prevroad = road;
+          } else {
+            pointsmissingroads.push(point);
           }
-          if (!(rownum++ % 10000)) numRowsParsed(rownum);
+          if (!(rownum++ % 1000)) numRowsParsed(rownum);
         }));
       }
     }
@@ -77,8 +83,15 @@ export default async function(
   if (pointsqueue.length > 0) {
     await Promise.all(pointsqueue);
   }
+  if (pointsmissingroads.length > 0) {
+    info('points missing roads =', pointsmissingroads, ' and as geojson = ', JSON.stringify({
+      type: 'FeatureCollection',
+      features: pointsmissingroads.map(p => ({ type: 'Feature', properties: {}, geometry: { type: 'Point', coordinates: [ p.lon, p.lat ] } }))
+    }));
+  }
+
   // Everything that could figure out a road should now have a road
-*/
+
   parsingState('geojson');
   numRowsParsed(0);
   daytracksGeoJSON = daytracksToGeoJSON(daytracks, numRowsParsed);

@@ -48,7 +48,7 @@ export function roadNameToType(geofulladdress) {
         if (!numbermatches) {
             throw new Error(`ERROR: Road name (${name}) matched as INTERSTATE, but there was no number in the string`);
         }
-        ret.number = numbermatches[1];
+        ret.number = +(numbermatches[1]);
         if (isRamp(name))
             ret.ramp = true;
         return ret;
@@ -60,7 +60,7 @@ export function roadNameToType(geofulladdress) {
         if (!numbermatches) {
             throw new Error(`ERROR: Road name (${name}) matched as STATE, but there was no number in the string`);
         }
-        ret.number = numbermatches[1];
+        ret.number = +(numbermatches[1]);
         if (isRamp(name))
             ret.ramp = true;
         return ret;
@@ -79,7 +79,7 @@ export function roadNameToType(geofulladdress) {
         if (!numbermatches) {
             throw new Error(`ERROR: Road name (${name}) matched as a INTERSTATE through isRamp, but there was no number in the string`);
         }
-        ret.number = numbermatches[1];
+        ret.number = +(numbermatches[1]);
         ret.ramp = true;
         return ret;
     }
