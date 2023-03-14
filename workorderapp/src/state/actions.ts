@@ -165,7 +165,7 @@ export const loadKnownWorkorders = action('loadKnownWorkorders', async (file: Fi
 });
 export const saveKnownWorkorders = action('saveKnownWorkorders', async () => {
   if (!_knownWorkorders) throw new Error('Failed to save: there are no known work orders');
-  const worksheet = xlsx.utils.json_to_sheet(_knownWorkorders.filter(w => w.computedHours && w.computedHours > 0));
+  const worksheet = xlsx.utils.json_to_sheet(_knownWorkorders.filter(w => w.computedHours && +(w.computedHours) > 0));
   const workbook = xlsx.utils.book_new();
   xlsx.utils.book_append_sheet(workbook, worksheet, "Validated Records (PoC)");
   xlsx.writeFile(workbook, 'validated-workorder.xlsx'); // downloads file
