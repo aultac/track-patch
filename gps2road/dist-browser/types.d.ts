@@ -21,8 +21,14 @@ export type MileMarker = Point & {
 };
 export type Road = RoadTypeInfo & {
     milemarkers?: {
-        min: MileMarker;
-        max: MileMarker;
+        min: {
+            post: MileMarker;
+            offset: number;
+        };
+        max: {
+            post: MileMarker;
+            offset: number;
+        };
     };
     geojson?: GeoJSON;
 };

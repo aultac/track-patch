@@ -23,6 +23,7 @@ export async function pointAndRoad2Milemarker({point, road }: {point: Point, roa
 
   // Now find the marker before and after the closest marker and decide which is closer
   const closest = mindist.marker!;
+  const closestdist = mindist.dist;
 
   // They are sorted in thisroadmarkers, so now get before/after by just index+1-1
   const before = mindist.index > 0 ? thisroadmarkers[mindist.index-1] : null;
@@ -33,20 +34,34 @@ export async function pointAndRoad2Milemarker({point, road }: {point: Point, roa
   if (before) beforedist = distance([point.lon, point.lat], [before.lon, before.lat], { units: 'feet' });
   if (after) afterdist = distance([point.lon, point.lat], [after.lon, after.lat], { units: 'feet' });
 
+  // If the point is closer to the post numbered before the closest post, then it's between before and closest (closest is max)
   if (beforedist < afterdist) {
     return {
       ...road,
       milemarkers: {
-        min: before!,
-        max: closest,
+        min: {
+          post: before!,
+          offset: beforedist / 5280.0, // in miles
+        },
+        max: {
+          post: closest,
+          offset: -closestdist / 5280.0, // negative b/c it is "before" the max numbered post
+        },
       }
     };
   }
+  // Otherwise, the point is closer to the point after the closest post than the one before the closest post (closest is min)
   return {
     ...road,
     milemarkers: {
-      min: closest,
-      max: after!,
+      min: {
+        post: closest,
+        offset: closestdist / 5280.0,
+      },
+      max: {
+        post: after!,
+        offset: -afterdist / 5280.0, // negative b/c it is "before" the max-numbered post
+      },
     },
   }
 }

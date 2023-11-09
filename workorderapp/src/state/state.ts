@@ -1,8 +1,5 @@
 import { observable } from 'mobx';
 import log from '../log';
-
-import type { DayTracks, VehicleDayTracks, VehicleDayTrack, Track, Point } from '@track-patch/lib';
-
 import geojsonvizfiles from './geojsonvizfiles.json';
 
 const { info, warn } = log.get('state');
@@ -12,8 +9,9 @@ export type ActivityMessage = {
   type: 'good' | 'bad',
 };
 
-
 export type BigData = { rev: number };
+
+export type ParsingState = '' | 'tracks' | 'roads' | 'geojson' | 'preprocessed' | 'error' | 'done'; // tracks, roads, geojson, preprocessed
 
 export type State = {
   page: 'map',
@@ -30,7 +28,7 @@ export type State = {
     inprogress: boolean,
     estimatedRows: number,
     currentNumRows: number,
-    state: string, // tracks, roads, geojson
+    state: ParsingState,
   },
 
   validating: {
@@ -43,6 +41,12 @@ export type State = {
     orders: BigData,
     validated: boolean,
   },
+
+  createdWorkOrders: {
+    parsing: boolean,
+    vehicleActivities: BigData,
+    workorders: BigData,
+  }
 
   daytracks: BigData,
   daytracksGeoJSON: BigData,
@@ -84,6 +88,11 @@ export const state = observable<State>({
     parsing: false,
     orders: { rev: 0 },
     validated: false,
+  },
+  createdWorkOrders: {
+    parsing: false,
+    vehicleActivities: { rev: 0 },
+    workorders: { rev: 0 },
   },
   validating: {
     inprogress: false,

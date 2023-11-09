@@ -36,7 +36,6 @@ export async function gps2road({point, hintroad}: { point: Point, hintroad?: Roa
   if (hintroad && hintroad.geojson && hintroad.geojson.type === 'Feature') {
     const dist = distanceToLineStringOrMultiLineString(point, hintroad.geojson.geometry);
     if (dist <= MAXROADWIDTH_FEET) {
-      info('Using hintroad!!!!');
       return await pointAndRoad2Milemarker({ point, road: hintroad });
     }
   }

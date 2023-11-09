@@ -15,7 +15,7 @@ export const ConfigPane = observer(function ConfigPane() {
 
   const [ inzone, setInzone ] = React.useState<Boolean>(false);
 
-  const handleFile = ({filetype, eventtype, inout} : { filetype: 'tracks' | 'workorders', eventtype: 'drop' | 'drag', inout?: boolean }): React.DragEventHandler  => async (evt) => {
+  const handleFile = ({filetype, eventtype, inout} : { filetype: 'tracks' | 'workorders' | 'vehicleactivities', eventtype: 'drop' | 'drag', inout?: boolean }): React.DragEventHandler  => async (evt) => {
     evt.preventDefault();
     evt.stopPropagation();
     switch(eventtype) {
@@ -33,16 +33,22 @@ export const ConfigPane = observer(function ConfigPane() {
           info('No files dropped!');
           return;
         }
-        if (filetype === 'tracks') {
-          actions.parsingInProgress(true);
-          actions.loadDayTracks(files[0]!);
-        } else {
-          actions.knownWorkOrdersParsing(true);
-          actions.loadKnownWorkorders(files[0]!);
-          actions.knownWorkOrdersParsing(false);
+        switch(filetype) {
+          case 'tracks': 
+            actions.parsingInProgress(true);
+            actions.loadDayTracks(files[0]!);
+          break;
+          case 'workorders': 
+            actions.loadKnownWorkorders(files[0]!);
+          break;
+          case 'vehicleactivities': 
+            actions.loadVehicleActivities(files[0]!);
+          break;
         }
       }
     };
+
+  const numrows = state.parsing.currentNumRows;
 
   return (
     <div style={{ width: '30vw', height: '90vh', padding: '5px' }} >
@@ -52,7 +58,7 @@ export const ConfigPane = observer(function ConfigPane() {
           style={{marginTop: '10px', marginBottom: '5px'}}
           options={state.geojsonviz.files}  
           value={state.geojsonviz.selectedFile} 
-          onChange={(evt, value) => actions.selectGeojsonVizFile(value as string)}
+          onChange={(_evt, value) => actions.selectGeojsonVizFile(value as string)}
           renderInput={(params) => <TextField {...params} label="Load Road Tile" />}
         />
       }
@@ -66,10 +72,23 @@ export const ConfigPane = observer(function ConfigPane() {
         {
           !state.parsing.inprogress && !state.daytracks.rev ? 'Drop GPS tracks file here.' :
           <div style={{flexGrow: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center'}}>
-            <div>Loaded {numeral(state.parsing.currentNumRows).format('0,0')} Points ({state.parsing.state})</div>
-            <div style={{flexGrow: 1, width: '100%'}}>
-              <LinearProgress variant="determinate" value={100 * state.parsing.currentNumRows / (state.parsing.estimatedRows || 1)} />
-            </div>
+            { state.parsing.state === 'roads'
+              ? <div>Identifying roads: {numeral(numrows).format('0,0')} Points</div>
+              : state.parsing.state === 'preprocessed'
+                ? <div>Loading preprocessd tracks...</div>
+                : <div>Loaded {numeral(numrows).format('0,0')} Points ({state.parsing.state})</div>
+            }
+
+            { state.parsing.state !== 'preprocessed'
+              ? <div style={{flexGrow: 1, width: '100%'}}>
+                  <LinearProgress variant="determinate" value={100 * numrows / (state.parsing.estimatedRows || 1)} />
+                </div>
+              : <React.Fragment />
+            }
+
+            { state.parsing.inprogress ? <React.Fragment/> : 
+              <Button onClick={() => actions.exportProcessedTracks() }>Export Processed Tracks</Button>
+            }
           </div>
         }
       </div>
@@ -81,10 +100,13 @@ export const ConfigPane = observer(function ConfigPane() {
         onDragLeave={handleFile({ filetype: 'workorders', eventtype: 'drag', inout: false })}
       >
         {
-          !state.knownWorkorders.parsing && !state.knownWorkorders.orders.rev ? 'Drop work orders spreadsheet here to validate.' :
-          <div style={{flexGrow: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center'}}>
-            <div>Loaded {numeral(actions.numKnownWorkorders()).format('0,0')} Work Orders</div>
-          </div>
+          state.knownWorkorders.parsing 
+          ? 'Reading work orders...'
+          : !state.knownWorkorders.orders.rev 
+            ? 'Drop work orders spreadsheet here to validate.'
+            : <div style={{flexGrow: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center'}}>
+                <div>Loaded {numeral(actions.numKnownWorkorders()).format('0,0')} Work Orders</div>
+              </div>
         }
       </div>
 
@@ -98,6 +120,37 @@ export const ConfigPane = observer(function ConfigPane() {
           Validate Work Orders (PoC)
         </Button>
       </div>
+
+
+      <div style={{ padding: '10px', margin: '5px', height: '20%', alignItems: 'center', justifyContent: 'center', display: 'flex', border: '3px dashed #008800', borderRadius: '3px' }}
+        onDragOver={handleFile({ filetype: 'vehicleactivities', eventtype: 'drag' })}
+        onDrop={handleFile({ filetype: 'vehicleactivities', eventtype: 'drop' })}
+        onDragEnter={handleFile({ filetype: 'vehicleactivities', eventtype: 'drag', inout: true })}
+        onDragLeave={handleFile({ filetype: 'vehicleactivities', eventtype: 'drag', inout: false })}
+      >
+        {
+          state.createdWorkOrders.parsing 
+          ? 'Reading vehicle activities...'
+          : !state.createdWorkOrders.vehicleActivities.rev 
+            ? 'Drop vehicle activities spreadsheet here.'
+            : <div style={{flexGrow: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center'}}>
+                <div>Found {numeral((actions.vehicleActivities() || []).length).format('0,0')} Vehicle Activities</div>
+              </div>
+        }
+      </div>
+
+      <div style={{ alignItems: 'center', justifyContent: 'center', display: 'flex' }}>
+        <Button 
+          style={{ flexGrow: 1 }}
+          onClick={() => actions.createWorkOrders()} 
+          variant="contained" 
+          disabled={!actions.vehicleActivities() || !actions.daytracks() }
+        >
+          Create Work Records from GPS Tracks (PoC)
+        </Button>
+      </div>
+
+
 
 
     </div>

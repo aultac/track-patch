@@ -1,21 +1,23 @@
 import { runInAction, action } from 'mobx';
-import { state, ActivityMessage } from './state';
+import { state, ActivityMessage, ParsingState } from './state';
 import log from '../log';
 import type { FeatureCollection, GeoJSON } from 'geojson';
-import { assertWorkOrder, DayTracks, Road, WorkOrder } from '@track-patch/lib';
+import { assertWorkOrder, DayTracks, WorkOrder } from '@track-patch/lib';
 import readtracks from './readtracks-worker.js'; // I couldn't get this to work as a worker
 import xlsx from 'xlsx-js-style';
 import numeral from 'numeral';
 import dayjs from 'dayjs';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
-import {guessRoadType, roadNameToType} from '@track-patch/gps2road/dist/roadnames';
-import { fetchMileMarkersForRoad, MileMarker } from '@track-patch/gps2road';
+import { FileReader } from '@tanker/file-reader';
+import { downloadBlob } from './downloadBlob';
+import { assertRoadSegment, computeSecondsOnRoadSegmentForVehicleOnDay, saveWorkorders, vehicleidFromResourceName } from './workorder_helpers';
+import allRoadSegments from './workorder_roadsegments.json';
 
 dayjs.extend(customParseFormat);
 const { info, warn } = log.get("actions");
 
 //--------------------------------------------------------------------
-// Working with static json files:
+// GeoJSON, Roads, and MileMarkers
 //--------------------------------------------------------------------
 
 // Helper function to fetch a geojson asset:
@@ -116,7 +118,7 @@ export const parsingEstimatedRows = action('parsingEstimatedRows', (val: typeof 
 export const parsingCurrentNumRows = action('parsingCurrentNumRows', (val: typeof state['parsing']['currentNumRows']): void => {
   state.parsing.currentNumRows = val;
 });
-export const parsingState = action('parsingState', (val: string) => {
+export const parsingState = action('parsingState', (val: ParsingState) => {
   state.parsing.state = val;
 });
 let _daytracks: DayTracks | null = null;
@@ -127,6 +129,50 @@ export function daytracksGeoJSON() { return _daytracksGeojson; }
 export const loadDayTracks = action('loadDayTracks', async (file: File) => {
   parsingInProgress(true);
   parsingEstimatedRows(file.size / 240); // seems to be around 240 bytes/record
+
+  // Read the already-processes JSON tracks
+  if (file.name.match(/\.json$/)) {
+    info('Parsing input file',file.name,'as JSON...');
+    parsingState('preprocessed');
+    parsingInProgress(true);
+    const f = new FileReader(file);
+    try {
+      const resultstr = await f.readAsText();
+      const result = JSON.parse(resultstr);
+      if (!result || typeof result.daytracks !== 'object') {
+        throw new Error('No daytracks present.');
+      }
+      if (typeof result.daytracksGeoJSON !== 'object') {
+        throw new Error('No daytracksGeoJSON present.');
+      }
+      _daytracks = result.daytracks as DayTracks;
+      _daytracksGeojson = result.daytracksGeoJSON as FeatureCollection;
+      // Count number of points from VehicleDayTracks
+      let numpoints = 0;
+      for (const vehicles of Object.values(_daytracks)) {   // { '2023-01-01': { '61001': { id: '...', ..., track: [ ...points... ] } } }
+        for (const vehicle_info of Object.values(vehicles)) {
+          numpoints += vehicle_info.track.length;
+          // Convert all the "time" fields back to dayjs:
+          for (const p of vehicle_info.track) {
+            if (typeof p.time === 'string') {
+              p.time = dayjs(p.time);
+            }
+          }
+        }
+      }
+      runInAction(() => state.daytracks.rev++);
+      runInAction(() => state.daytracksGeoJSON.rev++);
+      parsingCurrentNumRows(numpoints);
+      parsingEstimatedRows(numpoints);
+      parsingState('done');
+      parsingInProgress(false);
+    } catch(e: any) {
+      warn('FAIL: could not parse pre-processed JSON file.  Error was: ', e);
+      parsingState('error');
+      parsingInProgress(false);
+    }
+    return; // rest of parsing code is for CSV
+  }
 
   const result = await readtracks({
     file,
@@ -143,15 +189,32 @@ export const loadDayTracks = action('loadDayTracks', async (file: File) => {
   runInAction(() => { state.daytracks.rev++ });
   runInAction(() => { state.daytracksGeoJSON.rev++ });
 });
+export const exportProcessedTracks = action('exportProcessedTracks', async () => {
+  const output = { 
+    daytracks: _daytracks,
+    daytracksGeoJSON: _daytracksGeojson,
+  };
+  const blob = new Blob([ JSON.stringify(output) ], { type: 'application/json' });
+  info('Downloading processed tracks...');  
+  downloadBlob(blob, 'processed-tracks.json');
+});
 
 
+
+//-----------------------------------------------------------
+// Work Orders (spreadsheet):
+//-----------------------------------------------------------
 
 let _knownWorkorders: WorkOrder[] | null = null;
 export function knownWorkorders() { return _knownWorkorders };
 export function numKnownWorkorders() { return _knownWorkorders ? _knownWorkorders.length : 0 }
 export const loadKnownWorkorders = action('loadKnownWorkorders', async (file: File) => {
+  knownWorkOrdersParsing(true);
+  info('Reading workorders file...');
   const wb = xlsx.read(await file.arrayBuffer());
+  info('sheet_to_json workorders...');
   const records = xlsx.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { raw: false });
+  info('assert proper workorders...');
   _knownWorkorders = records.filter((r,index) => {
     try { 
       assertWorkOrder(r);
@@ -162,17 +225,12 @@ export const loadKnownWorkorders = action('loadKnownWorkorders', async (file: Fi
     return true;
   }) as WorkOrder[];
   runInAction(() => { state.knownWorkorders.orders.rev++ });
-});
-export const saveKnownWorkorders = action('saveKnownWorkorders', async () => {
-  if (!_knownWorkorders) throw new Error('Failed to save: there are no known work orders');
-  const worksheet = xlsx.utils.json_to_sheet(_knownWorkorders.filter(w => w.computedHours && +(w.computedHours) > 0));
-  const workbook = xlsx.utils.book_new();
-  xlsx.utils.book_append_sheet(workbook, worksheet, "Validated Records (PoC)");
-  xlsx.writeFile(workbook, 'validated-workorder.xlsx'); // downloads file
+  knownWorkOrdersParsing(false);
 });
 export const knownWorkOrdersParsing = action('knownWorkOrdersParsing', async (val: boolean) => {
   state.knownWorkorders.parsing = val;
 });
+
 export const validateWorkorders = action('validateWorkorders', async () => {
   if (!_knownWorkorders) throw new Error('No work orders to validate');
   for (const r of _knownWorkorders) {
@@ -191,9 +249,9 @@ export const validateWorkorders = action('validateWorkorders', async () => {
       continue; // this is the only thing we can identify right now
     }
 
-    const vid = +(r['Resource Name'].split('-')[0]?.trim().replace(/^0+/,'')); // no leading zeros
-    if (isNaN(vid)) {
-      info('Unable to find vehicle id',vid,'in Resource Type',r['Resource Type']);
+    const vid = vehicleidFromResourceName(r['Resource Name'] || '')
+    if (!vid) {
+      info('Unable to find vehicle id',vid,'in Resource Name',r['Resource Name']);
       continue; // we don't recognize this equipment number
     }
 
@@ -204,78 +262,90 @@ export const validateWorkorders = action('validateWorkorders', async () => {
     }
     const day = workorderday.format('YYYY-MM-DD');
 
-    if (!r['Route (Ref)']) {
-      info('No Route (Ref)')
-      continue; // need a route ref to know what road it is
-    }
-    let road = roadNameToType(r['Route (Ref)']);
-    info('Identified road', road, 'from Route (Ref)',r['Route (Ref)']);
-
-    // Grab the mile marker for start post and end post for this road,
-    // Road may or may not have mile markers
-    let startpost: MileMarker | null = null;
-    let endpost: MileMarker | null = null;
-    if (r['Start Post'] && r['End Post'] && r['Start Offset'] && r['End Offset']) {
-      const milemarkers = await fetchMileMarkersForRoad({ road });
-      if (!milemarkers || milemarkers.length < 1) {
-        info('Found no mile markers for road');
-        continue; // can't asses time without knowing the mile markers
-      }
-      startpost = milemarkers.find(m => m.number === +(r['Start Post']!)) || null;
-      endpost = milemarkers.find(m => m.number === +(r['End Post']!)) || null;
-      if (!startpost) {
-        info('Found no startpost');
-        continue; // we don't have a post for this, but the workorder specified one, so skip this one too
-      }
-      if (!endpost) {
-        info('Found no endpost');
-        continue;  // we don't have a post for this, but the workorder specified one, so skip this one too
-      }
-      // ensure consistent ordering (startpost is less than endpost)
-      if (startpost.number > endpost.number) {
-        const tmp = startpost;
-        endpost = startpost;
-        startpost = tmp;
-      }
-    }
-
-    const dt = daytracks()?.[day]?.[vid];
-    if (dt) {
-      let computedSeconds = 0;
-      // A vehicle is considerd to be on a part of a road from the current point until the next point unless the next point is more than 5 mins away.
-      for (const [index, point] of dt.track.entries()) {
-        if (!point.road) continue; // cannot contribute working time if this point was not on a known road.
-
-        // Is this point on the road section of interest?
-        if (point.road.type !== road.type) continue;
-        if (point.road.number !== road.number) continue;
-        if (startpost && endpost) {
-          if (!point.road.milemarkers) continue;
-          if (startpost.number > point.road.milemarkers.max.number) continue;
-          if (endpost.number < point.road.milemarkers.min.number) continue;
-        }
-        
-        // If we actually ever get here, then things match and we can compute time
-        if (index >= dt.track.length - 1) {
-          computedSeconds += 5 * 60; // last point counts for 5 mins no matter what
-          continue;
-        }
-        const next = dt.track[index+1]!;
-        let duration = next.time.unix() - point.time.unix();
-        if (duration > 5 * 60) duration = 5 * 60;
-        computedSeconds += duration;
-      }
-      const computedHours = computedSeconds / 3600;
-      const match = computedHours ? reported_hours / computedHours : 0;
-      r.match = numeral(match).format('0,0.00%');
-      r.computedHours = numeral(computedHours).format('0,0.00');
-      r.differenceHours = numeral(reported_hours - computedHours).format('0,0.00');
-      info('WE ACTUALLY HAVE A COMPUTED HOURS!!!',computedHours);
-
-    } else {
-      info('No track fonud for day',day,'and vehicleid',vid);
-    }
-
+    const computedSeconds = await computeSecondsOnRoadSegmentForVehicleOnDay({ seg: r, vehicleid: vid, day });
+    const computedHours = computedSeconds / 3600;
+    const match = computedHours ? reported_hours / computedHours : 0;
+    r.match = numeral(match).format('0,0.00%');
+    r.computedHours = numeral(computedHours).format('0,0.00');
+    r.differenceHours = numeral(reported_hours - computedHours).format('0,0.00');
+    info('WE ACTUALLY HAVE A COMPUTED HOURS!!!',computedHours);
   }
-  saveKnownWorkorders();
+  saveWorkorders('validated-workorders.xlsx', _knownWorkorders.filter(w => w.computedHours && +(w.computedHours) > 0));
+});
+
+
+//---------------------------------------------------------------------
+// Creating work orders from a list of vehicles with activity and day
+//---------------------------------------------------------------------
+export type VehicleActivity = {
+  'Resource Name': string,
+  'Activity': string,
+  'Subactivity': string,
+  'Work Date': string,
+};
+export function assertVehicleActivity(o: any): asserts o is VehicleActivity {
+  if (!o || typeof o !== 'object') throw `assertVehicleActivity: must be an object`;
+  if (typeof o['Resource Name'] !== 'string') throw `assertVehicleActivity: must have a Resource Name`;
+  if (typeof o['Activity'] !== 'string') throw `assertVehicleActivity: must have a Activity`;
+  if (typeof o['Subactivity'] !== 'string') throw `assertVehicleActivity: must have a Subactivity`;
+  if (typeof o['Work Date'] !== 'string') throw `assertVehicleActivity: must have a Work Date`;
+  if ('Total Hrs' in o && typeof o['Total Hrs'] !== 'number') throw `assertVehicleActivity: if Total Hrs is present, it must be a number`;
+}
+let _vehicleActivities: VehicleActivity[] | null = null;
+export const vehicleActivities = action('vehicleActivities', () => {
+  return _vehicleActivities;
+});
+export const loadVehicleActivities = action('loadVehicleActivities', async (file: File) => {
+  runInAction(() => { state.createdWorkOrders.parsing = true; });
+  const wb = xlsx.read(await file.arrayBuffer());
+  const records = xlsx.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { raw: false });
+  _vehicleActivities = records.filter((r,index) => {
+    try { 
+      assertVehicleActivity(r);
+    } catch(e: any) {
+      info('WARNING: line',index+1,'in vehicle activities sheet', r, 'was not a valid vehicle activity:', e);
+      return false;
+    }
+    return true;
+  }) as VehicleActivity[];
+  runInAction(() => { state.createdWorkOrders.vehicleActivities.rev++ });
+  runInAction(() => { state.createdWorkOrders.parsing = false; });
+});
+
+let _createdWorkOrders: WorkOrder[] | null = null;
+export const createdWorkOrders = action('createdWorkOrders', () => _createdWorkOrders);
+export const createWorkOrders = action('createWorkorders', async () => {
+  if (!_vehicleActivities) {
+    info('createWorkorders: No vehicleActivities to work with');
+    return;
+  }
+  _createdWorkOrders = [];
+  for (const va of _vehicleActivities) {
+    const vehicleid = vehicleidFromResourceName(va['Resource Name']);
+    const date = dayjs(va['Work Date'],'M/D/YY');
+    if (!date.isValid()) {
+      info('Work Date',va['Work Date'],'invalid');
+      continue; // invalid dates don't work
+    }
+    const day = date.format('YYYY-MM-DD');
+
+    for (const seg of Object.values(allRoadSegments)) {
+      assertRoadSegment(seg);
+      const computedSeconds = await computeSecondsOnRoadSegmentForVehicleOnDay({ seg, vehicleid, day });
+      if (computedSeconds) {
+        _createdWorkOrders.push({
+          ...va,
+          ...seg,
+          'Total Hrs': '' + (computedSeconds / 3600.0),
+          'Measurement Unit': 'MHR - WORK HR',
+          'Resource Type': 'Equipment',
+          'Asset Type': 'Snow Route', // I think this probably should have been with the road segment originally.  Hardcoding for now.  TODO
+          'WO#': '',
+        });
+      }
+    }
+  }
+  info('Created work orders: ', _createdWorkOrders);
+  runInAction(() => state.createdWorkOrders.workorders.rev++);
+  saveWorkorders('created-workorders.xlsx', _createdWorkOrders);
 });

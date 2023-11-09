@@ -1,6 +1,6 @@
 import { runInAction, action } from 'mobx';
 import { parse, ParseStepResult } from 'papaparse';
-import { state, ActivityMessage } from './state';
+import { state, ActivityMessage, ParsingState } from './state';
 import log from '../log';
 import type { Feature, FeatureCollection, GeoJSON, LineString } from 'geojson';
 import { DayTracks, vehicletracks } from '@track-patch/lib';
@@ -12,7 +12,7 @@ const { info } = log.get('state/readtracks-worker');
 
 export default async function(
   {file,parsingState,numRowsParsed}:
-  {file: File, parsingState: (st: string) => void, numRowsParsed: (num: number) => void }
+  {file: File, parsingState: (st: ParsingState) => void, numRowsParsed: (num: number) => void }
 ): Promise<{ 
   daytracks: DayTracks | null,
   daytracksGeoJSON: FeatureCollection | null
@@ -75,7 +75,7 @@ export default async function(
           } else {
             pointsmissingroads.push(point);
           }
-          if (!(rownum++ % 1000)) numRowsParsed(rownum);
+          if (!(++rownum % 1000)) numRowsParsed(rownum);
         }));
       }
     }
@@ -96,7 +96,7 @@ export default async function(
   numRowsParsed(0);
   daytracksGeoJSON = daytracksToGeoJSON(daytracks, numRowsParsed);
 
-  parsingState('Done');
+  parsingState('done');
   return { daytracks, daytracksGeoJSON };
 };
 

@@ -23,17 +23,34 @@ export function assertRoad(o) {
     if ('milemarkers' in o) {
         if (!o.milemarkers || typeof o.milemarkers !== 'object')
             throw new Error('MileMarkers on a road must be an object');
-        if (!('min' in o.milemarkers))
+        if (!('min' in o.milemarkers) || typeof o.milemarkers.min !== 'object' || !o.milemarkers.min)
             throw new Error('MileMarker in road must have a min');
-        assertMileMarker(o.milemarkers.min);
-        if (!('max' in o.milemarkers))
+        if (!('offset' in o.milemarkers.min) || typeof o.milemarkers.min.offset !== 'number')
+            throw new Error(`MileMarker min must have an offset from the post`);
+        if (!('post' in o.milemarkers.min))
+            throw new Error('min milemarker must have a post');
+        assertMileMarker(o.milemarkers.min.post);
+        if (!('max' in o.milemarkers) || typeof o.milemarkers.max !== 'object' || !o.milemarkers.max)
             throw new Error('MileMarker in road must have a max');
+        if (!('offset' in o.milemarkers.max) || typeof o.milemarkers.max.offset !== 'number')
+            throw new Error(`MileMarker max must have an offset from the post`);
+        if (!('post' in o.milemarkers.max))
+            throw new Error('max milemarker must have a post');
         assertMileMarker(o.milemarkers.max);
     }
     ;
-    // skipping geojson for now
 }
 export function assertRoadTypeInfo(o) {
+    if (!o || typeof o !== 'object')
+        throw `assertRoadTypeInfo: must be an object`;
+    if (typeof o.name !== 'string')
+        throw `assertRoadTypeInfo: must have a name`;
+    if (o.type !== 'INTERSTATE' && o.type !== 'STATE' && o.type !== 'LOCAL' && o.type !== 'UNKNOWN')
+        throw `assertRoadTypeInfo: type ${o.type} must be either INTERSTATE, STATE, LOCAL, or UNKNOWN`;
+    if (typeof o.number !== 'number')
+        throw `assertRoadTypeInfo: road number must be an actual number`;
+    if ('ramp' in o && typeof o.ramp !== 'boolean')
+        throw `assertRoadTypeInfo: if ramp is present, it must be a boolean.  It is ${o.ramp} instead.`;
 }
 export function assertRoadGeoJSON(obj) {
     if (!obj || typeof obj !== 'object')

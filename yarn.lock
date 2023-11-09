@@ -3248,6 +3248,25 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@tanker/file-reader@npm:^4.0.0":
+  version: 4.0.0
+  resolution: "@tanker/file-reader@npm:4.0.0"
+  dependencies:
+    "@tanker/global-this": 4.0.0
+    tslib: ^2.3.1
+  checksum: 2b5f3c664b8b4c27b979d55c88b99e824294925a0d680db4136f1ec757f763f2f29127dbe351807abc806e386706887afee7c379c80a105fa32eb31255e6dd47
+  languageName: node
+  linkType: hard
+
+"@tanker/global-this@npm:4.0.0":
+  version: 4.0.0
+  resolution: "@tanker/global-this@npm:4.0.0"
+  dependencies:
+    tslib: ^2.3.1
+  checksum: e364ab04c7ef273af3a8a0159d3bd63e14889b609c23506669492caa32ffce6acbc316bad088fafaa7d5114a2f571133d707677bc186b56e478d7a1eacf12504
+  languageName: node
+  linkType: hard
+
 "@testing-library/dom@npm:^8.0.0":
   version: 8.20.0
   resolution: "@testing-library/dom@npm:8.20.0"
@@ -19963,6 +19982,7 @@ __metadata:
     "@fontsource/oleo-script": ^4.5.8
     "@mui/icons-material": ^5.11.0
     "@mui/material": ^5.11.0
+    "@tanker/file-reader": ^4.0.0
     "@track-patch/constants": "workspace:^"
     "@track-patch/gps2road": "workspace:^"
     "@track-patch/lib": "workspace:^"

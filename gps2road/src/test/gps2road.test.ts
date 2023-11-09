@@ -50,8 +50,8 @@ export default async function roadnamesTest(lib: typeof mainlib) {
 
   info('check all multi-point paths for correct identification');
   throw new Error('No tests written yet for paths.  Get demo working first.');
-  for (const p of paths) {
-  }
+  //for (const p of paths) {
+  //}
 
   info('passed all examples through roadNameToType');
 }
@@ -68,8 +68,8 @@ function isSameRoad(result: any, expected: Record<string, any>): string[] {
   if (result.type !== expected.type) errs.push(`result.type (${result.type}) !== expected.type(${expected.type})`);
   if (typeof expected.milemarkers !== typeof result.milemarkers) errs.push(`typeof result.milemarkers (${typeof result.milemarkers}) !== typeof expected.milemarkers(${typeof expected.milemarkers})`);
   if (expected.milemarkers) {
-    if (result.milemarkers?.min.number !== expected.milemarkers.min.number) errs.push(`result.milemarkers.min.number (${result.milemarkers?.min.number}) !== expected.milemarkers.min.number (${expected.milemarkers.min.number})`);
-    if (result.milemarkers?.max.number !== expected.milemarkers.max.number) errs.push(`result.milemarkers.max.number (${result.milemarkers?.max.number}) !== expected.milemarkers.max.number (${expected.milemarkers.max.number})`);
+    if (result.milemarkers?.min.post.number !== expected.milemarkers.min.number) errs.push(`result.milemarkers.min.number (${result.milemarkers?.min.post.number}) !== expected.milemarkers.min.number (${expected.milemarkers.min.post.number})`);
+    if (result.milemarkers?.max.post.number !== expected.milemarkers.max.number) errs.push(`result.milemarkers.max.number (${result.milemarkers?.max.post.number}) !== expected.milemarkers.max.number (${expected.milemarkers.max.post.number})`);
   }
   return errs;
 }

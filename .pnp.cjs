@@ -5468,6 +5468,27 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "linkType": "HARD"\
         }]\
       ]],\
+      ["@tanker/file-reader", [\
+        ["npm:4.0.0", {\
+          "packageLocation": "./.yarn/cache/@tanker-file-reader-npm-4.0.0-703becd201-2b5f3c664b.zip/node_modules/@tanker/file-reader/",\
+          "packageDependencies": [\
+            ["@tanker/file-reader", "npm:4.0.0"],\
+            ["@tanker/global-this", "npm:4.0.0"],\
+            ["tslib", "npm:2.5.0"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["@tanker/global-this", [\
+        ["npm:4.0.0", {\
+          "packageLocation": "./.yarn/cache/@tanker-global-this-npm-4.0.0-80c30fe403-e364ab04c7.zip/node_modules/@tanker/global-this/",\
+          "packageDependencies": [\
+            ["@tanker/global-this", "npm:4.0.0"],\
+            ["tslib", "npm:2.5.0"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
       ["@testing-library/dom", [\
         ["npm:8.20.0", {\
           "packageLocation": "./.yarn/cache/@testing-library-dom-npm-8.20.0-afe79da119-1e599129a2.zip/node_modules/@testing-library/dom/",\
@@ -25720,6 +25741,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["@fontsource/oleo-script", "npm:4.5.8"],\
             ["@mui/icons-material", "virtual:99d67232e7505d5ef5eceb61f5899bbb6ea0e597ad649ac5f377406a35f9032ea15d66076cb59eb125337b7b56f9c72b6bec9e4e46e4358fdadc0115f47810b5#npm:5.11.11"],\
             ["@mui/material", "virtual:99d67232e7505d5ef5eceb61f5899bbb6ea0e597ad649ac5f377406a35f9032ea15d66076cb59eb125337b7b56f9c72b6bec9e4e46e4358fdadc0115f47810b5#npm:5.11.12"],\
+            ["@tanker/file-reader", "npm:4.0.0"],\
             ["@track-patch/constants", "workspace:constants"],\
             ["@track-patch/gps2road", "workspace:gps2road"],\
             ["@track-patch/lib", "workspace:lib"],\
