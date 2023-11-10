@@ -135,6 +135,10 @@ export const ConfigPane = observer(function ConfigPane() {
             ? 'Drop vehicle activities spreadsheet here.'
             : <div style={{flexGrow: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center'}}>
                 <div>Found {numeral((actions.vehicleActivities() || []).length).format('0,0')} Vehicle Activities</div>
+                { state.createdWorkOrders.workorders.rev > 0 
+                  ? <div>Successfully created {numeral(actions.createdWorkOrders()?.length || 0).format('0,0')} Work Orders</div>
+                  : <React.Fragment/>
+                }
               </div>
         }
       </div>
@@ -142,9 +146,12 @@ export const ConfigPane = observer(function ConfigPane() {
       <div style={{ alignItems: 'center', justifyContent: 'center', display: 'flex' }}>
         <Button 
           style={{ flexGrow: 1 }}
-          onClick={() => actions.createWorkOrders()} 
+          onClick={() => { 
+            if (state.createdWorkOrders.parsing) return;
+            actions.createWorkOrders() 
+          } }
           variant="contained" 
-          disabled={!actions.vehicleActivities() || !actions.daytracks() }
+          disabled={!actions.vehicleActivities() || !actions.daytracks() || state.createdWorkOrders.parsing || state.createdWorkOrders.workorders.rev > 0}
         >
           Create Work Records from GPS Tracks (PoC)
         </Button>
