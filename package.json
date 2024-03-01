@@ -1,6 +1,6 @@
 {
   "name": "track-patch",
-  "packageManager": "yarn@3.4.1",
+  "packageManager": "yarn@4.1.0",
   "private": true,
   "workspaces": [
     "cli",
