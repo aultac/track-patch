@@ -49,7 +49,7 @@ export const NavBar = observer(() => {
           <Box sx={{ flexGrow: 1 }}>
           </Box>
 
-          { /*
+          {
           <Box>
             <IconButton size="large" onClick={handleMenu} color="inherit">
               <MenuIcon />
@@ -68,10 +68,11 @@ export const NavBar = observer(() => {
               open={Boolean(anchorEl)}
               onClose={handleClose}
             >
+                { /* @ts-ignore */ }
               <MenuItem onClick={menuClicked('roadsmap')}>Roads Map Mode</MenuItem>
             </Menu>
           </Box>
-          */ }
+           }
         </Toolbar>
       </Container>
     </AppBar>

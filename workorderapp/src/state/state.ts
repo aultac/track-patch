@@ -48,6 +48,7 @@ export type State = {
     workorders: BigData,
   }
 
+  filteredDaytracks: BigData,
   daytracks: BigData,
   daytracksGeoJSON: BigData,
   roads: BigData,
@@ -100,6 +101,7 @@ export const state = observable<State>({
   },
   roads: { rev: 0 },
   milemarkers: { rev: 0 },
+  filteredDaytracks: { rev: 0 },
   daytracks: { rev: 0 },
   daytracksGeoJSON: { rev: 0 },
   hover: {

@@ -11,6 +11,7 @@ import customParseFormat from 'dayjs/plugin/customParseFormat';
 import { FileReader } from '@tanker/file-reader';
 import { downloadBlob } from './downloadBlob';
 import { assertRoadSegment, computeSecondsOnRoadSegmentForVehicleOnDay, saveWorkorders, vehicleidFromResourceName } from './workorder_helpers';
+import { geohash } from '@track-patch/gps2road';
 import allRoadSegments from './workorder_roadsegments.json';
 
 dayjs.extend(customParseFormat);
@@ -42,6 +43,10 @@ export const loadRoads = action('loadRoads', async (filename: string) => {
   _roads = await loadGeoJSON(`roads-by-geohash/${filename}`);
   runInAction(() => { state.roads.rev++ });
 });
+export const loadRoadsForTrack = action('loadRoadsForFilteredTrack', async () => {
+
+});
+
 let _milemarkers: GeoJSON | null = null;
 export function milemarkers() { return _milemarkers; }
 export const loadMilemarkers = action('loadMilemarkers', async () => {
@@ -121,6 +126,21 @@ export const parsingCurrentNumRows = action('parsingCurrentNumRows', (val: typeo
 export const parsingState = action('parsingState', (val: ParsingState) => {
   state.parsing.state = val;
 });
+let _filteredDayTracks: DayTracks | null = null;
+export function filteredDayTracks() { return _filteredDayTracks; }
+export const filterDayTracks = action('filterDayTracks', ({vehicleid, day}: { vehicleid: string, day: string }) => {
+  if (!_daytracks) {
+    _filteredDayTracks = null;
+    return;
+  }
+  _filteredDayTracks = {};
+  const daytrack = _daytracks[day];
+  if (!daytracks) return;
+  const vdt = daytrack[vehicleid];
+  if (!vdt) return;
+  _filteredDayTracks[day] = { [vehicleid]: vdt };
+});
+
 let _daytracks: DayTracks | null = null;
 export function daytracks() { return _daytracks; }
 let _daytracksGeojson: FeatureCollection | null = null;
