@@ -126,20 +126,7 @@ export const parsingCurrentNumRows = action('parsingCurrentNumRows', (val: typeo
 export const parsingState = action('parsingState', (val: ParsingState) => {
   state.parsing.state = val;
 });
-let _filteredDayTracks: DayTracks | null = null;
-export function filteredDayTracks() { return _filteredDayTracks; }
-export const filterDayTracks = action('filterDayTracks', ({vehicleid, day}: { vehicleid: string, day: string }) => {
-  if (!_daytracks) {
-    _filteredDayTracks = null;
-    return;
-  }
-  _filteredDayTracks = {};
-  const daytrack = _daytracks[day];
-  if (!daytracks) return;
-  const vdt = daytrack[vehicleid];
-  if (!vdt) return;
-  _filteredDayTracks[day] = { [vehicleid]: vdt };
-});
+
 
 let _daytracks: DayTracks | null = null;
 export function daytracks() { return _daytracks; }
@@ -210,15 +197,96 @@ export const loadDayTracks = action('loadDayTracks', async (file: File) => {
   runInAction(() => { state.daytracksGeoJSON.rev++ });
 });
 export const exportProcessedTracks = action('exportProcessedTracks', async () => {
-  const output = { 
+  const output = {
     daytracks: _daytracks,
     daytracksGeoJSON: _daytracksGeojson,
   };
   const blob = new Blob([ JSON.stringify(output) ], { type: 'application/json' });
-  info('Downloading processed tracks...');  
+  info('Downloading processed tracks...');
   downloadBlob(blob, 'processed-tracks.json');
 });
 
+
+let _filteredDayTracks: DayTracks | null = null;
+let _originalDayTracks: DayTracks | null = null;
+export function filteredDayTracks() { return _filteredDayTracks; }
+export const filterDayTracks = action('filterDayTracks', ({ vehicleid, day }: { vehicleid: string, day: string }) => {
+  if (!_daytracks) {
+    _filteredDayTracks = null;
+    return;
+  }
+  _filteredDayTracks = {};
+  const daytrack = _daytracks[day];
+  if (!daytracks) return;
+  const vdt = daytrack[vehicleid];
+  if (!vdt) return;
+  _filteredDayTracks[day] = { [vehicleid]: vdt };
+  runInAction(() => { state.filteredDayTracks.rev++ });
+  
+});
+
+
+let _filteredGeoJSON: FeatureCollection | null = null;
+let _originalGeoJSON: FeatureCollection | null = null;
+export function filteredGeoJSON() { return _filteredGeoJSON; }
+export const filterGeoJSON = action('filterGeoJSON', ({ vid, day }: { vid: string, day: string }) => {
+    if (!_daytracksGeojson) {
+        _filteredDayTracks = null;
+        return;
+    }
+    
+    // Filter the daytracksGeoJSON based on vid and day
+    const filteredFeatures = _daytracksGeojson.features.filter(feature => {
+        // Check if the feature belongs to the specified vid and day
+        return feature.properties?.vid === vid && feature.properties?.day === day;
+    });
+
+    // Create a new FeatureCollection with the filtered features
+    const filteredGeoJSON: FeatureCollection = {
+        type: 'FeatureCollection',
+        features: filteredFeatures,
+    };
+
+    // Update the filteredGeoJSON state
+    runInAction(() => { _filteredGeoJSON = filteredGeoJSON; });
+    runInAction(() => { state.filteredGeoJSON.rev++ });
+});
+
+export const updateMap = action(() => {
+    _originalGeoJSON = _daytracksGeojson;
+    _originalDayTracks = _daytracks;
+    _daytracks = _filteredDayTracks;
+    _daytracksGeojson = _filteredGeoJSON;
+    runInAction(() => { state.daytracks.rev++ });
+    runInAction(() => { state.daytracksGeoJSON.rev++ });
+
+});
+
+export const resetMap = action(() => {
+  _daytracks = _originalDayTracks;
+  _daytracksGeojson = _originalGeoJSON;
+  runInAction(() => { state.daytracks.rev++ });
+  runInAction(() => { state.daytracksGeoJSON.rev++ });
+});
+
+
+export const getDateList = action(() => {
+  if (!_daytracks) return [];
+  return Object.keys(_daytracks);
+});
+
+export const getVehicleIDsForDate = action((date: string) => {
+  if (!_daytracks || !_daytracks[date]) return [];
+  return Object.keys(_daytracks[date]);
+});
+
+export const updateChosenDate = action('updateChosenDate', (date: string | null) => {
+  state.chosenDate = date;
+});
+
+export const updateChosenVehicleID = action('updateChosenVehicleID', (vehicleID: string | null) => {
+  state.chosenVehicleID = vehicleID;
+});
 
 
 //-----------------------------------------------------------
@@ -236,7 +304,7 @@ export const loadKnownWorkorders = action('loadKnownWorkorders', async (file: Fi
   const records = xlsx.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { raw: false });
   info('assert proper workorders...');
   _knownWorkorders = records.filter((r,index) => {
-    try { 
+    try {
       assertWorkOrder(r);
     } catch(e: any) {
       info('WARNING: line',index+1,'in work orders sheet was not a valid work order:', e.message);
@@ -265,19 +333,19 @@ export const validateWorkorders = action('validateWorkorders', async () => {
     }
 
     if (r['Resource Type'] !== 'Equipment') {
-      info('Resource Type',r['Resource Type'],'is not Equipment');
+      info('Resource Type', r['Resource Type'], 'is not Equipment');
       continue; // this is the only thing we can identify right now
     }
 
     const vid = vehicleidFromResourceName(r['Resource Name'] || '')
     if (!vid) {
-      info('Unable to find vehicle id',vid,'in Resource Name',r['Resource Name']);
+      info('Unable to find vehicle id', vid, 'in Resource Name', r['Resource Name']);
       continue; // we don't recognize this equipment number
     }
 
-    const workorderday = dayjs(r['Work Date'],'M/D/YY');
+    const workorderday = dayjs(r['Work Date'], 'M/D/YY');
     if (!workorderday.isValid()) {
-      info('Work Date',r['Work Date'],'invalid');
+      info('Work Date', r['Work Date'], 'invalid');
       continue; // invalid dates don't work either
     }
     const day = workorderday.format('YYYY-MM-DD');
@@ -288,7 +356,7 @@ export const validateWorkorders = action('validateWorkorders', async () => {
     r.match = numeral(match).format('0,0.00%');
     r.computedHours = numeral(computedHours).format('0,0.00');
     r.differenceHours = numeral(reported_hours - computedHours).format('0,0.00');
-    info('WE ACTUALLY HAVE A COMPUTED HOURS!!!',computedHours);
+    info('WE ACTUALLY HAVE A COMPUTED HOURS!!!', computedHours);
   }
   saveWorkorders('validated-workorders.xlsx', _knownWorkorders.filter(w => w.computedHours && +(w.computedHours) > 0));
 });
@@ -319,11 +387,11 @@ export const loadVehicleActivities = action('loadVehicleActivities', async (file
   runInAction(() => { state.createdWorkOrders.parsing = true; });
   const wb = xlsx.read(await file.arrayBuffer());
   const records = xlsx.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { raw: false });
-  _vehicleActivities = records.filter((r,index) => {
-    try { 
+  _vehicleActivities = records.filter((r, index) => {
+    try {
       assertVehicleActivity(r);
-    } catch(e: any) {
-      info('WARNING: line',index+1,'in vehicle activities sheet', r, 'was not a valid vehicle activity:', e);
+    } catch (e: any) {
+      info('WARNING: line', index + 1, 'in vehicle activities sheet', r, 'was not a valid vehicle activity:', e);
       return false;
     }
     return true;
@@ -342,9 +410,9 @@ export const createWorkOrders = action('createWorkorders', async () => {
   _createdWorkOrders = [];
   for (const va of _vehicleActivities) {
     const vehicleid = vehicleidFromResourceName(va['Resource Name']);
-    const date = dayjs(va['Work Date'],'M/D/YY');
+    const date = dayjs(va['Work Date'], 'M/D/YY');
     if (!date.isValid()) {
-      info('Work Date',va['Work Date'],'invalid');
+      info('Work Date', va['Work Date'], 'invalid');
       continue; // invalid dates don't work
     }
     const day = date.format('YYYY-MM-DD');
@@ -369,3 +437,4 @@ export const createWorkOrders = action('createWorkorders', async () => {
   runInAction(() => state.createdWorkOrders.workorders.rev++);
   saveWorkorders('created-workorders.xlsx', _createdWorkOrders);
 });
+

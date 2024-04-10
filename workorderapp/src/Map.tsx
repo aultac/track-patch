@@ -5,9 +5,7 @@ import ReactMapGl, { Source, Layer, MapLayerMouseEvent } from 'react-map-gl';
 import { context } from './state';
 import { MapHoverInfo } from './MapHoverInfo';
 import type { GeoJSON, FeatureCollection, Feature, LineString} from 'geojson';
-import * as MapRoads from './MapRoads';
-import {DayTracks, VehicleDayTrack} from '@track-patch/lib';
-import uniqolor from 'uniqolor';
+
 
 const { info, warn } = log.get('map');
 
@@ -15,8 +13,11 @@ const MAPBOX_TOKEN = 'pk.eyJ1IjoiYXVsdGFjIiwiYSI6ImNsMXA4MzU3NTAzbzUzZW55ajhiM2F
 
 const bad = { color: 'red' };
 const good = { color: 'green' };
+
 export const Map = observer(function Map() {
   const { state, actions } = React.useContext(context);
+
+  
 
   //-------------------------------------------------------------------
   // Filter any roads/milemarkers if available:
@@ -45,7 +46,8 @@ export const Map = observer(function Map() {
     tracks = null;
   }
 
-
+  console.log("Filter GEOJSON", actions.daytracksGeoJSON())
+  console.log("Filter Daytracks", actions.daytracksGeoJSON())
   //------------------------------------------------------------
   // Mouse Events:
   const onHover = React.useCallback((evt: MapLayerMouseEvent) => {
@@ -78,8 +80,8 @@ export const Map = observer(function Map() {
       mapboxAccessToken={MAPBOX_TOKEN}
       initialViewState={{
         longitude: -86.8,
-        latitude: 39.5,
-        zoom: 4.5
+        latitude: 39.8,
+        zoom: 6.3
       }}
       style={{width: '70vw', height: '90vh'}}
       mapStyle="mapbox://styles/mapbox/satellite-streets-v11"
@@ -113,12 +115,18 @@ export const Map = observer(function Map() {
     { !tracks ? <React.Fragment /> :
       <Source type="geojson" data={tracks as any}>
         <Layer id="tracks" type="line" paint={{
-          'line-color': [ 'get', 'color' ],
+          'line-color': '#FF00FF',
           'line-width': 2,
+        }} />
+        <Layer id="tracks-dots" type="circle" paint={{
+          'circle-radius': 4,
+          'circle-color': '#FF0000',
         }} />
       </Source>
 
     }
+
+    
 
 
     </ReactMapGl>

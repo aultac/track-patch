@@ -11,8 +11,8 @@ export const initialize = action('initialize', async () => {
 
 
   // Loads some hard-coded roads
-  await loadRoads('dp7t9.json');
-  await loadMilemarkers();
+  // await loadRoads('dp7t9.json');
+  // await loadMilemarkers();
 
 });
 

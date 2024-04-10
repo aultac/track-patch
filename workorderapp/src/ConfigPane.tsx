@@ -2,7 +2,7 @@ import React from 'react';
 import { observer } from 'mobx-react-lite';
 import log from './log';
 import { context } from './state';
-import { Button, LinearProgress, Select, Autocomplete, MenuItem, TextField } from '@mui/material';
+import { Button, LinearProgress, Select, Autocomplete, MenuItem, TextField, SelectChangeEvent } from '@mui/material';
 import numeral from 'numeral';
 
 const { info, warn } = log.get('config-pane');
@@ -14,6 +14,39 @@ export const ConfigPane = observer(function ConfigPane() {
   const { state, actions } = React.useContext(context);
 
   const [ inzone, setInzone ] = React.useState<Boolean>(false);
+
+  const [selectedDate, setSelectedDate] = React.useState(state.chosenDate);
+  const [selectedVehicle, setSelectedVehicle] = React.useState<string | null>(state.chosenVehicleID);
+
+  const dateList = actions.getDateList();
+  const vehicleList = actions.getVehicleIDsForDate(selectedDate || '');
+
+  const handleChangeDate = (event: SelectChangeEvent<string | null>) => {
+    const selectedDate = event.target.value as string;
+    setSelectedDate(selectedDate);
+    actions.updateChosenDate(selectedDate); // Update chosenDate in state
+
+    // Reset selected vehicle when date changes
+    setSelectedVehicle('');
+    actions.updateChosenVehicleID('');
+  };
+
+  const handleChangeVehicle = (event: SelectChangeEvent<string | null>) => {
+    const selectedVehicle = event.target.value as string | null;
+    setSelectedVehicle(selectedVehicle);
+    actions.updateChosenVehicleID(selectedVehicle); // Update chosenVehicleID in state
+    
+    if(state.chosenDate !== null && state.chosenVehicleID != null){
+      actions.filterDayTracks({vehicleid: state.chosenVehicleID, day: state.chosenDate});
+      actions.filterGeoJSON({vid: state.chosenVehicleID, day: state.chosenDate})
+      actions.updateMap();
+    }
+  };
+
+  const handleReset = () => {
+    // Reset selected date and vehicle
+    actions.resetMap();
+  };
 
   const handleFile = ({filetype, eventtype, inout} : { filetype: 'tracks' | 'workorders' | 'vehicleactivities', eventtype: 'drop' | 'drag', inout?: boolean }): React.DragEventHandler  => async (evt) => {
     evt.preventDefault();
@@ -49,6 +82,7 @@ export const ConfigPane = observer(function ConfigPane() {
     };
 
   const numrows = state.parsing.currentNumRows;
+  
 
   return (
     <div style={{ width: '30vw', height: '90vh', padding: '5px' }} >
@@ -157,7 +191,45 @@ export const ConfigPane = observer(function ConfigPane() {
         </Button>
       </div>
 
+      <div style={{ position: 'fixed', bottom: 35, right: 20 }}>
+        <Select
+          value={selectedDate}
+          onChange={handleChangeDate}
+          displayEmpty
+        >
+          <MenuItem value="" disabled>Select Date</MenuItem>
+          {actions.getDateList().map(date => (
+            <MenuItem key={date} value={date}>
+              {date}
+            </MenuItem>
+          ))}
+        </Select>
+      </div>
 
+      <div style={{ position: 'fixed', bottom: 35, right: 150 }}>
+        <Button 
+          style={{ marginRight: '10px' }} // Adjust styling as needed
+          variant="outlined" 
+          onClick={handleReset}
+        >
+          Reset
+        </Button>
+      </div>
+
+      <div style={{ position: 'fixed', bottom: 35, right: 250 }}>
+        <Select
+          value={selectedVehicle}
+          onChange={handleChangeVehicle}
+          displayEmpty
+        >
+          <MenuItem value="" disabled>Select Vehicle</MenuItem>
+          {vehicleList.map(vehicle => (
+            <MenuItem key={vehicle} value={vehicle}>
+              {vehicle}
+            </MenuItem>
+          ))}
+        </Select>
+      </div>
 
 
     </div>

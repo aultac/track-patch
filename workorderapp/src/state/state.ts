@@ -48,7 +48,8 @@ export type State = {
     workorders: BigData,
   }
 
-  filteredDaytracks: BigData,
+  filteredDayTracks: BigData,
+  filteredGeoJSON: BigData,
   daytracks: BigData,
   daytracksGeoJSON: BigData,
   roads: BigData,
@@ -67,6 +68,9 @@ export type State = {
     features: any[],
     active: boolean,
   },
+
+  chosenDate: string | null, // Type can be adjusted based on the actual type of dates in day tracks
+  chosenVehicleID: string | null, // Type can be adjusted based on the actual type of vehicle IDs in day tracks
 
 };
 
@@ -101,7 +105,8 @@ export const state = observable<State>({
   },
   roads: { rev: 0 },
   milemarkers: { rev: 0 },
-  filteredDaytracks: { rev: 0 },
+  filteredDayTracks: { rev: 0 },
+  filteredGeoJSON: {rev: 0},
   daytracks: { rev: 0 },
   daytracksGeoJSON: { rev: 0 },
   hover: {
@@ -116,5 +121,8 @@ export const state = observable<State>({
     selectedFile: "dp4cc.json",
     files: geojsonvizfiles,
   },
+
+  chosenDate: '',
+  chosenVehicleID: ''
 });
 
