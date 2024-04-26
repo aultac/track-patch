@@ -122,11 +122,9 @@ export const Map = observer(function Map() {
               ['linear'],
               ['line-progress'],
               0,
-              'blue',
+              'red',
               state.sliderValue,
-              'cyan',
-              1,
-              'red'
+              'rgba(0, 0, 0, 0)'
             ],
           }} />
           {/* <Layer id="tracks-dots" type="circle" paint={{

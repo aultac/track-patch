@@ -125,6 +125,6 @@ export const state = observable<State>({
 
   chosenDate: '',
   chosenVehicleID: '',
-  sliderValue: 0,
+  sliderValue: 1,
 });
 
