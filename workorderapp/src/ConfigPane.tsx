@@ -7,13 +7,13 @@ import numeral from 'numeral';
 
 const { info, warn } = log.get('config-pane');
 
-const columns = [ 'LATITUDE', 'LONGITUDE', 'COMMISION_NUMBER', 'SPEED_MILES_PER_HOUR', 'VEHICLE_HEADING', 'VEHICLE_ID', 'VEHICLE_TIMESTAMP_GMT' ];
+const columns = ['LATITUDE', 'LONGITUDE', 'COMMISION_NUMBER', 'SPEED_MILES_PER_HOUR', 'VEHICLE_HEADING', 'VEHICLE_ID', 'VEHICLE_TIMESTAMP_GMT'];
 const columnIndexMap: { [columnName: string]: number } = {}; // fill this in when header is parsed
 
 export const ConfigPane = observer(function ConfigPane() {
   const { state, actions } = React.useContext(context);
 
-  const [ inzone, setInzone ] = React.useState<Boolean>(false);
+  const [inzone, setInzone] = React.useState<Boolean>(false);
 
   const [selectedDate, setSelectedDate] = React.useState(state.chosenDate);
   const [selectedVehicle, setSelectedVehicle] = React.useState<string | null>(state.chosenVehicleID);
@@ -35,58 +35,58 @@ export const ConfigPane = observer(function ConfigPane() {
     const selectedVehicle = event.target.value as string | null;
     setSelectedVehicle(selectedVehicle);
     actions.updateChosenVehicleID(selectedVehicle); // Update chosenVehicleID in state
-    
-    if(state.chosenDate !== null && state.chosenVehicleID != null){
-      actions.filterDayTracks({vehicleid: state.chosenVehicleID, day: state.chosenDate});
-      actions.filterGeoJSON({vid: state.chosenVehicleID, day: state.chosenDate})
+
+    if (state.chosenDate !== null && state.chosenVehicleID != null) {
+      actions.filterDayTracks({ vehicleid: state.chosenVehicleID, day: state.chosenDate });
+      actions.filterGeoJSON({ vid: state.chosenVehicleID, day: state.chosenDate })
       //actions.updateMap();
     }
   };
 
-  const handleFile = ({filetype, eventtype, inout} : { filetype: 'tracks' | 'workorders' | 'vehicleactivities', eventtype: 'drop' | 'drag', inout?: boolean }): React.DragEventHandler  => async (evt) => {
+  const handleFile = ({ filetype, eventtype, inout }: { filetype: 'tracks' | 'workorders' | 'vehicleactivities', eventtype: 'drop' | 'drag', inout?: boolean }): React.DragEventHandler => async (evt) => {
     evt.preventDefault();
     evt.stopPropagation();
-    switch(eventtype) {
+    switch (eventtype) {
 
       case 'drag':
         if (inzone !== inout) {
           setInzone(inout || false);
           if (inout) evt.dataTransfer.dropEffect = "copy"; // makes a green plus on mac
         }
-      break;
+        break;
 
       case 'drop':
-        const files = [ ...evt.dataTransfer.files ]; // It is dumb that I have to do this
+        const files = [...evt.dataTransfer.files]; // It is dumb that I have to do this
         if (files.length < 1) {
           info('No files dropped!');
           return;
         }
-        switch(filetype) {
-          case 'tracks': 
+        switch (filetype) {
+          case 'tracks':
             actions.parsingInProgress(true);
             actions.loadDayTracks(files[0]!);
-          break;
-          case 'workorders': 
+            break;
+          case 'workorders':
             actions.loadKnownWorkorders(files[0]!);
-          break;
-          case 'vehicleactivities': 
+            break;
+          case 'vehicleactivities':
             actions.loadVehicleActivities(files[0]!);
-          break;
+            break;
         }
-      }
-    };
+    }
+  };
 
   const numrows = state.parsing.currentNumRows;
-  
+
 
   return (
     <div style={{ width: '30vw', height: '90vh', padding: '5px' }} >
 
-      { !window.location.toString().match(/debug/) ? <React.Fragment /> :
-        <Autocomplete 
-          style={{marginTop: '10px', marginBottom: '5px'}}
-          options={state.geojsonviz.files}  
-          value={state.geojsonviz.selectedFile} 
+      {!window.location.toString().match(/debug/) ? <React.Fragment /> :
+        <Autocomplete
+          style={{ marginTop: '10px', marginBottom: '5px' }}
+          options={state.geojsonviz.files}
+          value={state.geojsonviz.selectedFile}
           onChange={(_evt, value) => actions.selectGeojsonVizFile(value as string)}
           renderInput={(params) => <TextField {...params} label="Load Road Tile" />}
         />
@@ -100,25 +100,25 @@ export const ConfigPane = observer(function ConfigPane() {
       >
         {
           !state.parsing.inprogress && !state.daytracks.rev ? 'Drop GPS tracks file here.' :
-          <div style={{flexGrow: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center'}}>
-            { state.parsing.state === 'roads'
-              ? <div>Identifying roads: {numeral(numrows).format('0,0')} Points</div>
-              : state.parsing.state === 'preprocessed'
-                ? <div>Loading preprocessd tracks...</div>
-                : <div>Loaded {numeral(numrows).format('0,0')} Points ({state.parsing.state})</div>
-            }
+            <div style={{ flexGrow: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+              {state.parsing.state === 'roads'
+                ? <div>Identifying roads: {numeral(numrows).format('0,0')} Points</div>
+                : state.parsing.state === 'preprocessed'
+                  ? <div>Loading preprocessd tracks...</div>
+                  : <div>Loaded {numeral(numrows).format('0,0')} Points ({state.parsing.state})</div>
+              }
 
-            { state.parsing.state !== 'preprocessed'
-              ? <div style={{flexGrow: 1, width: '100%'}}>
+              {state.parsing.state !== 'preprocessed'
+                ? <div style={{ flexGrow: 1, width: '100%' }}>
                   <LinearProgress variant="determinate" value={100 * numrows / (state.parsing.estimatedRows || 1)} />
                 </div>
-              : <React.Fragment />
-            }
+                : <React.Fragment />
+              }
 
-            { state.parsing.inprogress ? <React.Fragment/> : 
-              <Button onClick={() => actions.exportProcessedTracks() }>Export Processed Tracks</Button>
-            }
-          </div>
+              {state.parsing.inprogress ? <React.Fragment /> :
+                <Button onClick={() => actions.exportProcessedTracks()}>Export Processed Tracks</Button>
+              }
+            </div>
         }
       </div>
 
@@ -129,22 +129,22 @@ export const ConfigPane = observer(function ConfigPane() {
         onDragLeave={handleFile({ filetype: 'workorders', eventtype: 'drag', inout: false })}
       >
         {
-          state.knownWorkorders.parsing 
-          ? 'Reading work orders...'
-          : !state.knownWorkorders.orders.rev 
-            ? 'Drop work orders spreadsheet here to validate.'
-            : <div style={{flexGrow: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center'}}>
+          state.knownWorkorders.parsing
+            ? 'Reading work orders...'
+            : !state.knownWorkorders.orders.rev
+              ? 'Drop work orders spreadsheet here to validate.'
+              : <div style={{ flexGrow: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
                 <div>Loaded {numeral(actions.numKnownWorkorders()).format('0,0')} Work Orders</div>
               </div>
         }
       </div>
 
       <div style={{ alignItems: 'center', justifyContent: 'center', display: 'flex' }}>
-        <Button 
+        <Button
           style={{ flexGrow: 1 }}
-          onClick={() => actions.validateWorkorders()} 
-          variant="contained" 
-          disabled={!actions.knownWorkorders() || !actions.daytracks() }
+          onClick={() => actions.validateWorkorders()}
+          variant="contained"
+          disabled={!actions.knownWorkorders() || !actions.daytracks()}
         >
           Validate Work Orders (PoC)
         </Button>
@@ -158,28 +158,28 @@ export const ConfigPane = observer(function ConfigPane() {
         onDragLeave={handleFile({ filetype: 'vehicleactivities', eventtype: 'drag', inout: false })}
       >
         {
-          state.createdWorkOrders.parsing 
-          ? 'Reading vehicle activities...'
-          : !state.createdWorkOrders.vehicleActivities.rev 
-            ? 'Drop vehicle activities spreadsheet here.'
-            : <div style={{flexGrow: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center'}}>
+          state.createdWorkOrders.parsing
+            ? 'Reading vehicle activities...'
+            : !state.createdWorkOrders.vehicleActivities.rev
+              ? 'Drop vehicle activities spreadsheet here.'
+              : <div style={{ flexGrow: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
                 <div>Found {numeral((actions.vehicleActivities() || []).length).format('0,0')} Vehicle Activities</div>
-                { state.createdWorkOrders.workorders.rev > 0 
+                {state.createdWorkOrders.workorders.rev > 0
                   ? <div>Successfully created {numeral(actions.createdWorkOrders()?.length || 0).format('0,0')} Work Orders</div>
-                  : <React.Fragment/>
+                  : <React.Fragment />
                 }
               </div>
         }
       </div>
 
       <div style={{ alignItems: 'center', justifyContent: 'center', display: 'flex' }}>
-        <Button 
+        <Button
           style={{ flexGrow: 1 }}
-          onClick={() => { 
+          onClick={() => {
             if (state.createdWorkOrders.parsing) return;
-            actions.createWorkOrders() 
-          } }
-          variant="contained" 
+            actions.createWorkOrders()
+          }}
+          variant="contained"
           disabled={!actions.vehicleActivities() || !actions.daytracks() || state.createdWorkOrders.parsing || state.createdWorkOrders.workorders.rev > 0}
         >
           Create Work Records from GPS Tracks (PoC)
@@ -209,12 +209,13 @@ export const ConfigPane = observer(function ConfigPane() {
         >
           <MenuItem value="" disabled>Select Vehicle</MenuItem>
           {vehicleList.map(vehicle => (
-            <MenuItem key={vehicle} value={vehicle}>
-              {vehicle}
+            <MenuItem key={vehicle.vehicleId} value={vehicle.vehicleId}>
+              {vehicle.vehicleId} ({numeral(vehicle.count).format('0,0')} points)
             </MenuItem>
           ))}
         </Select>
       </div>
+
 
 
     </div>

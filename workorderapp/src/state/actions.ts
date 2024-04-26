@@ -208,7 +208,6 @@ export const exportProcessedTracks = action('exportProcessedTracks', async () =>
 
 
 let _filteredDayTracks: DayTracks | null = null;
-let _originalDayTracks: DayTracks | null = null;
 export function filteredDayTracks() { return _filteredDayTracks; }
 export const filterDayTracks = action('filterDayTracks', ({ vehicleid, day }: { vehicleid: string, day: string }) => {
   if (!_daytracks) {
@@ -227,7 +226,6 @@ export const filterDayTracks = action('filterDayTracks', ({ vehicleid, day }: { 
 
 
 let _filteredGeoJSON: FeatureCollection | null = null;
-let _originalGeoJSON: FeatureCollection | null = null;
 export function filteredGeoJSON() { return _filteredGeoJSON; }
 export const filterGeoJSON = action('filterGeoJSON', ({ vid, day }: { vid: string, day: string }) => {
     if (!_daytracksGeojson) {
@@ -261,8 +259,12 @@ export const getDateList = action(() => {
 
 export const getVehicleIDsForDate = action((date: string) => {
   if (!_daytracks || !_daytracks[date]) return [];
-  return Object.keys(_daytracks[date]);
+  return Object.entries(_daytracks[date]).map(([vehicleId, vehicleData]) => ({
+    vehicleId,
+    count: vehicleData.track.length // Assuming `track` is an array of points
+  }));
 });
+
 
 export const updateChosenDate = action('updateChosenDate', (date: string | null) => {
   state.chosenDate = date;
