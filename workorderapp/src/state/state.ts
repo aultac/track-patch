@@ -72,6 +72,7 @@ export type State = {
   chosenDate: string | null, // Type can be adjusted based on the actual type of dates in day tracks
   chosenVehicleID: string | null, // Type can be adjusted based on the actual type of vehicle IDs in day tracks
 
+  sliderValue: number,
 };
 
 export const state = observable<State>({
@@ -123,6 +124,7 @@ export const state = observable<State>({
   },
 
   chosenDate: '',
-  chosenVehicleID: ''
+  chosenVehicleID: '',
+  sliderValue: 0,
 });
 

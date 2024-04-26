@@ -2,7 +2,7 @@ import React from 'react';
 import { observer } from 'mobx-react-lite';
 import log from './log';
 import { context } from './state';
-import { Button, LinearProgress, Select, Autocomplete, MenuItem, TextField, SelectChangeEvent } from '@mui/material';
+import { Button, LinearProgress, Select, Autocomplete, MenuItem, TextField, SelectChangeEvent, Slider } from '@mui/material';
 import numeral from 'numeral';
 
 const { info, warn } = log.get('config-pane');
@@ -14,6 +14,10 @@ export const ConfigPane = observer(function ConfigPane() {
   const { state, actions } = React.useContext(context);
 
   const [inzone, setInzone] = React.useState<Boolean>(false);
+
+  const handleSliderChange = (event: Event, newValue: number | number[]) => {
+    state.sliderValue = newValue as number; // Update the state directly
+  };
 
   const [selectedDate, setSelectedDate] = React.useState(state.chosenDate);
   const [selectedVehicle, setSelectedVehicle] = React.useState<string | null>(state.chosenVehicleID);
@@ -91,7 +95,7 @@ export const ConfigPane = observer(function ConfigPane() {
         />
       }
 
-      <div style={{ padding: '10px', margin: '5px', height: '20%', alignItems: 'center', justifyContent: 'center', display: 'flex', border: '3px dashed #000088', borderRadius: '3px' }}
+      <div style={{ padding: '5px', margin: '5px', height: '15%', alignItems: 'center', justifyContent: 'center', display: 'flex', border: '3px dashed #000088', borderRadius: '3px' }}
         onDragOver={handleFile({ filetype: 'tracks', eventtype: 'drag' })}
         onDrop={handleFile({ filetype: 'tracks', eventtype: 'drop' })}
         onDragEnter={handleFile({ filetype: 'tracks', eventtype: 'drag', inout: true })}
@@ -121,7 +125,7 @@ export const ConfigPane = observer(function ConfigPane() {
         }
       </div>
 
-      <div style={{ padding: '10px', margin: '5px', height: '20%', alignItems: 'center', justifyContent: 'center', display: 'flex', border: '3px dashed #008800', borderRadius: '3px' }}
+      <div style={{ padding: '5px', margin: '5px', height: '15%', alignItems: 'center', justifyContent: 'center', display: 'flex', border: '3px dashed #008800', borderRadius: '3px' }}
         onDragOver={handleFile({ filetype: 'workorders', eventtype: 'drag' })}
         onDrop={handleFile({ filetype: 'workorders', eventtype: 'drop' })}
         onDragEnter={handleFile({ filetype: 'workorders', eventtype: 'drag', inout: true })}
@@ -150,7 +154,7 @@ export const ConfigPane = observer(function ConfigPane() {
       </div>
 
 
-      <div style={{ padding: '10px', margin: '5px', height: '20%', alignItems: 'center', justifyContent: 'center', display: 'flex', border: '3px dashed #008800', borderRadius: '3px' }}
+      <div style={{ padding: '5px', margin: '5px', height: '15%', alignItems: 'center', justifyContent: 'center', display: 'flex', border: '3px dashed #008800', borderRadius: '3px' }}
         onDragOver={handleFile({ filetype: 'vehicleactivities', eventtype: 'drag' })}
         onDrop={handleFile({ filetype: 'vehicleactivities', eventtype: 'drop' })}
         onDragEnter={handleFile({ filetype: 'vehicleactivities', eventtype: 'drag', inout: true })}
@@ -213,6 +217,16 @@ export const ConfigPane = observer(function ConfigPane() {
             </MenuItem>
           ))}
         </Select>
+      </div>
+      <div style={{ padding: '10px', marginTop: '20px' }}>
+        <Slider
+          value={state.sliderValue}
+          onChange={handleSliderChange}
+          aria-labelledby="input-slider"
+          min={0}
+          max={1}
+          step={0.01}
+        />
       </div>
 
 

@@ -116,7 +116,24 @@ export const Map = observer(function Map() {
       <Source type="geojson" data={tracks as any}>
         <Layer id="tracks" type="line" paint={{
           'line-color': '#FF00FF',
-          'line-width': 2,
+          'line-width': 5,
+          'line-gradient': [
+            'interpolate',
+                    ['linear'],
+                    ['line-progress'],
+                    0,
+                    'blue',
+                    0.1,
+                    'royalblue',
+                    0.3,
+                    'cyan',
+                    0.5,
+                    'lime',
+                    0.7,
+                    'yellow',
+                    1,
+                    'red'
+          ],
         }} />
         <Layer id="tracks-dots" type="circle" paint={{
           'circle-radius': 4,
