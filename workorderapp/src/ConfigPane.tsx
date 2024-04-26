@@ -18,7 +18,6 @@ export const ConfigPane = observer(function ConfigPane() {
   const [selectedDate, setSelectedDate] = React.useState(state.chosenDate);
   const [selectedVehicle, setSelectedVehicle] = React.useState<string | null>(state.chosenVehicleID);
 
-  const dateList = actions.getDateList();
   const vehicleList = actions.getVehicleIDsForDate(selectedDate || '');
 
   const handleChangeDate = (event: SelectChangeEvent<string | null>) => {
