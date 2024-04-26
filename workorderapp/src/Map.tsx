@@ -41,13 +41,13 @@ export const Map = observer(function Map() {
 
   //-------------------------------------------------------------
   // show tracks if loaded
-  let tracks: FeatureCollection | null = actions.daytracksGeoJSON();
-  if (state.daytracksGeoJSON.rev < 1 || !tracks) {
+  let tracks: FeatureCollection | null = actions.filteredGeoJSON();
+  if (state.filteredGeoJSON.rev < 1 || !tracks) {
     tracks = null;
   }
 
-  console.log("Filter GEOJSON", actions.daytracksGeoJSON())
-  console.log("Filter Daytracks", actions.daytracksGeoJSON())
+  //console.log("Filter GEOJSON", actions.daytracksGeoJSON())
+  //console.log("Filter Daytracks", actions.daytracksGeoJSON())
   //------------------------------------------------------------
   // Mouse Events:
   const onHover = React.useCallback((evt: MapLayerMouseEvent) => {

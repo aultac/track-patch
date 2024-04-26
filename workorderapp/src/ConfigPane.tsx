@@ -39,13 +39,8 @@ export const ConfigPane = observer(function ConfigPane() {
     if(state.chosenDate !== null && state.chosenVehicleID != null){
       actions.filterDayTracks({vehicleid: state.chosenVehicleID, day: state.chosenDate});
       actions.filterGeoJSON({vid: state.chosenVehicleID, day: state.chosenDate})
-      actions.updateMap();
+      //actions.updateMap();
     }
-  };
-
-  const handleReset = () => {
-    // Reset selected date and vehicle
-    actions.resetMap();
   };
 
   const handleFile = ({filetype, eventtype, inout} : { filetype: 'tracks' | 'workorders' | 'vehicleactivities', eventtype: 'drop' | 'drag', inout?: boolean }): React.DragEventHandler  => async (evt) => {
@@ -204,16 +199,6 @@ export const ConfigPane = observer(function ConfigPane() {
             </MenuItem>
           ))}
         </Select>
-      </div>
-
-      <div style={{ position: 'fixed', bottom: 35, right: 150 }}>
-        <Button 
-          style={{ marginRight: '10px' }} // Adjust styling as needed
-          variant="outlined" 
-          onClick={handleReset}
-        >
-          Reset
-        </Button>
       </div>
 
       <div style={{ position: 'fixed', bottom: 35, right: 250 }}>

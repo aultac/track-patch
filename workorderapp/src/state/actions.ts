@@ -252,22 +252,6 @@ export const filterGeoJSON = action('filterGeoJSON', ({ vid, day }: { vid: strin
     runInAction(() => { state.filteredGeoJSON.rev++ });
 });
 
-export const updateMap = action(() => {
-    _originalGeoJSON = _daytracksGeojson;
-    _originalDayTracks = _daytracks;
-    _daytracks = _filteredDayTracks;
-    _daytracksGeojson = _filteredGeoJSON;
-    runInAction(() => { state.daytracks.rev++ });
-    runInAction(() => { state.daytracksGeoJSON.rev++ });
-
-});
-
-export const resetMap = action(() => {
-  _daytracks = _originalDayTracks;
-  _daytracksGeojson = _originalGeoJSON;
-  runInAction(() => { state.daytracks.rev++ });
-  runInAction(() => { state.daytracksGeoJSON.rev++ });
-});
 
 
 export const getDateList = action(() => {
