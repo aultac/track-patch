@@ -1,10 +1,10 @@
 import React from 'react';
 import { observer } from 'mobx-react-lite';
 import log from './log';
-import ReactMapGl, { Source, Layer, MapLayerMouseEvent } from 'react-map-gl';
+import ReactMapGl, { Source, Layer, MapLayerMouseEvent, ViewState } from 'react-map-gl';
 import { context } from './state';
 import { MapHoverInfo } from './MapHoverInfo';
-import type { GeoJSON, FeatureCollection, Feature, LineString } from 'geojson';
+import type { GeoJSON, FeatureCollection, LineString } from 'geojson';
 
 
 const { info, warn } = log.get('map');
@@ -16,8 +16,14 @@ const good = { color: 'green' };
 
 export const Map = observer(function Map() {
   const { state, actions } = React.useContext(context);
-
-
+  const [viewport, setViewport] = React.useState<ViewState>({
+    longitude: -86.8,
+    latitude: 39.8,
+    zoom: 6.3,
+    bearing: 0,
+    pitch: 0,
+    padding: {top: 0, bottom: 0, right: 0, left: 0}
+  });
 
   //-------------------------------------------------------------------
   // Filter any roads/milemarkers if available:
@@ -45,6 +51,19 @@ export const Map = observer(function Map() {
   if (state.filteredGeoJSON.rev < 1 || !tracks) {
     tracks = null;
   }
+
+  React.useEffect(() => {
+    if (tracks && tracks.features.length > 0) {
+      const firstTrack = tracks.features[0];
+      const firstCoordinate = (firstTrack.geometry as LineString).coordinates[0];
+      setViewport({
+        ...viewport,
+        longitude: firstCoordinate[0],
+        latitude: firstCoordinate[1],
+        zoom: 9.3 // Adjust zoom level as necessary
+      });
+    }
+  }, [tracks]);
 
   //console.log("Filter GEOJSON", actions.daytracksGeoJSON())
   //console.log("Filter Daytracks", actions.daytracksGeoJSON())
@@ -78,11 +97,7 @@ export const Map = observer(function Map() {
   return (
     <ReactMapGl
       mapboxAccessToken={MAPBOX_TOKEN}
-      initialViewState={{
-        longitude: -86.8,
-        latitude: 39.8,
-        zoom: 6.3
-      }}
+      {...viewport}
       style={{ width: '70vw', height: '90vh' }}
       mapStyle="mapbox://styles/mapbox/satellite-streets-v11"
       onClick={onClick}
@@ -134,9 +149,6 @@ export const Map = observer(function Map() {
         </Source>
 
       }
-
-
-
 
     </ReactMapGl>
   );
