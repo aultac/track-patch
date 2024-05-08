@@ -30,7 +30,7 @@ const loadGeoJSON = action('loadGeoJSON', async (path: string): Promise<GeoJSON 
     if (response.status >= 400) throw new Error(`Failed to fetch data from ${path}`);
     info('Getting JSON from response');
     return await response.json();
-  } catch(e: any) {
+  } catch (e: any) {
     warn('ERROR: failed to fetch roads data.  Error was: ', e);
     activity(`ERROR: Failed to fetch and load roads.geojson, error was: ${e.toString()}`);
   }
@@ -76,7 +76,7 @@ export const search = action('search', async (search: string) => {
 // Basic State updates
 //---------------------------------------------------
 
-export const page = action('page', (page: typeof state.page): void  => {
+export const page = action('page', (page: typeof state.page): void => {
   state.page = page;
 });
 
@@ -86,18 +86,18 @@ export const popActivity = action('popActivity', () => {
 });
 export const activity = action('activity', (msg: string | string[] | ActivityMessage | ActivityMessage[], type: ActivityMessage['type'] = 'good') => {
   if (!Array.isArray(msg)) {
-    msg = [ msg ] as string[] | ActivityMessage[];
+    msg = [msg] as string[] | ActivityMessage[];
   }
   // Make sure evey element is an activity message (convert strings):
   let msgs: ActivityMessage[] = msg.map((m: any) => {
     if (typeof m === 'object' && 'msg' in m && typeof m.msg === 'string') {
       return m as ActivityMessage;
     } else {
-      return { msg: m, type} as ActivityMessage;
+      return { msg: m, type } as ActivityMessage;
     }
   });
-  info(msgs.map(m=>m.msg).join('\n'));
-  state.activityLog = [...state.activityLog, ...msgs ];
+  info(msgs.map(m => m.msg).join('\n'));
+  state.activityLog = [...state.activityLog, ...msgs];
   setTimeout(popActivity, 5000);
 });
 
@@ -130,8 +130,10 @@ export const parsingState = action('parsingState', (val: ParsingState) => {
 
 let _daytracks: DayTracks | null = null;
 export function daytracks() { return _daytracks; }
+
 let _daytracksGeojson: FeatureCollection | null = null;
 export function daytracksGeoJSON() { return _daytracksGeojson; }
+
 // This populates both _daytracks and _daytracksGeojson
 export const loadDayTracks = action('loadDayTracks', async (file: File) => {
   parsingInProgress(true);
@@ -139,7 +141,7 @@ export const loadDayTracks = action('loadDayTracks', async (file: File) => {
 
   // Read the already-processes JSON tracks
   if (file.name.match(/\.json$/)) {
-    info('Parsing input file',file.name,'as JSON...');
+    info('Parsing input file', file.name, 'as JSON...');
     parsingState('preprocessed');
     parsingInProgress(true);
     const f = new FileReader(file);
@@ -173,7 +175,7 @@ export const loadDayTracks = action('loadDayTracks', async (file: File) => {
       parsingEstimatedRows(numpoints);
       parsingState('done');
       parsingInProgress(false);
-    } catch(e: any) {
+    } catch (e: any) {
       warn('FAIL: could not parse pre-processed JSON file.  Error was: ', e);
       parsingState('error');
       parsingInProgress(false);
@@ -196,12 +198,13 @@ export const loadDayTracks = action('loadDayTracks', async (file: File) => {
   runInAction(() => { state.daytracks.rev++ });
   runInAction(() => { state.daytracksGeoJSON.rev++ });
 });
+
 export const exportProcessedTracks = action('exportProcessedTracks', async () => {
   const output = {
     daytracks: _daytracks,
     daytracksGeoJSON: _daytracksGeojson,
   };
-  const blob = new Blob([ JSON.stringify(output) ], { type: 'application/json' });
+  const blob = new Blob([JSON.stringify(output)], { type: 'application/json' });
   info('Downloading processed tracks...');
   downloadBlob(blob, 'processed-tracks.json');
 });
@@ -221,33 +224,33 @@ export const filterDayTracks = action('filterDayTracks', ({ vehicleid, day }: { 
   if (!vdt) return;
   _filteredDayTracks[day] = { [vehicleid]: vdt };
   runInAction(() => { state.filteredDayTracks.rev++ });
-  
+
 });
 
 
 let _filteredGeoJSON: FeatureCollection | null = null;
 export function filteredGeoJSON() { return _filteredGeoJSON; }
 export const filterGeoJSON = action('filterGeoJSON', ({ vid, day }: { vid: string, day: string }) => {
-    if (!_daytracksGeojson) {
-        _filteredDayTracks = null;
-        return;
-    }
-    
-    // Filter the daytracksGeoJSON based on vid and day
-    const filteredFeatures = _daytracksGeojson.features.filter(feature => {
-        // Check if the feature belongs to the specified vid and day
-        return feature.properties?.vid === vid && feature.properties?.day === day;
-    });
+  if (!_daytracksGeojson) {
+    _filteredDayTracks = null;
+    return;
+  }
 
-    // Create a new FeatureCollection with the filtered features
-    const filteredGeoJSON: FeatureCollection = {
-        type: 'FeatureCollection',
-        features: filteredFeatures,
-    };
+  // Filter the daytracksGeoJSON based on vid and day
+  const filteredFeatures = _daytracksGeojson.features.filter(feature => {
+    // Check if the feature belongs to the specified vid and day
+    return feature.properties?.vid === vid && feature.properties?.day === day;
+  });
 
-    // Update the filteredGeoJSON state
-    runInAction(() => { _filteredGeoJSON = filteredGeoJSON; });
-    runInAction(() => { state.filteredGeoJSON.rev++ });
+  // Create a new FeatureCollection with the filtered features
+  const filteredGeoJSON: FeatureCollection = {
+    type: 'FeatureCollection',
+    features: filteredFeatures,
+  };
+
+  // Update the filteredGeoJSON state
+  runInAction(() => { _filteredGeoJSON = filteredGeoJSON; });
+  runInAction(() => { state.filteredGeoJSON.rev++ });
 });
 
 
@@ -289,11 +292,11 @@ export const loadKnownWorkorders = action('loadKnownWorkorders', async (file: Fi
   info('sheet_to_json workorders...');
   const records = xlsx.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { raw: false });
   info('assert proper workorders...');
-  _knownWorkorders = records.filter((r,index) => {
+  _knownWorkorders = records.filter((r, index) => {
     try {
       assertWorkOrder(r);
-    } catch(e: any) {
-      info('WARNING: line',index+1,'in work orders sheet was not a valid work order:', e.message);
+    } catch (e: any) {
+      info('WARNING: line', index + 1, 'in work orders sheet was not a valid work order:', e.message);
       return false;
     }
     return true;
