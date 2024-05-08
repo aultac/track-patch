@@ -64,7 +64,7 @@ export const Map = observer(function Map() {
         ...viewport,
         longitude: firstCoordinate[0],
         latitude: firstCoordinate[1],
-        zoom: 9.3 // Adjust zoom level as necessary
+        zoom: 10 // Adjust zoom level as necessary
       });
     }
   }, [tracks]);
