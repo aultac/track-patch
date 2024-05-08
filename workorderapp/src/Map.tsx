@@ -1,7 +1,7 @@
 import React from 'react';
 import { observer } from 'mobx-react-lite';
 import log from './log';
-import ReactMapGl, { Source, Layer, MapLayerMouseEvent, ViewState } from 'react-map-gl';
+import ReactMapGl, { Source, Layer, MapLayerMouseEvent, ViewState, Marker } from 'react-map-gl';
 import { context } from './state';
 import { MapHoverInfo } from './MapHoverInfo';
 import type { GeoJSON, FeatureCollection, LineString } from 'geojson';
@@ -22,7 +22,7 @@ export const Map = observer(function Map() {
     zoom: 6.3,
     bearing: 0,
     pitch: 0,
-    padding: {top: 0, bottom: 0, right: 0, left: 0}
+    padding: { top: 0, bottom: 0, right: 0, left: 0 }
   });
 
   //-------------------------------------------------------------------
@@ -30,6 +30,7 @@ export const Map = observer(function Map() {
   // Access the rev so we are updated when it changes.  Have to access it BEFORE !geojson or it might not re-render
   let roads: FeatureCollection | null = actions.roads() as FeatureCollection;
   let milemarkers: GeoJSON | null = actions.milemarkers();
+
   if (state.roads.rev < 1 || !roads) {
     roads = null;
   }
@@ -44,7 +45,6 @@ export const Map = observer(function Map() {
     };
   }
 
-
   //-------------------------------------------------------------
   // show tracks if loaded
   let tracks: FeatureCollection | null = actions.filteredGeoJSON();
@@ -52,10 +52,14 @@ export const Map = observer(function Map() {
     tracks = null;
   }
 
+  const [lastTrackCoordinate, setLastTrackCoordinate] = React.useState([-86.8, 39.8]);
+  const [firstTrackCoordinate, setFirstTrackCoordinate] = React.useState([-86.8, 39.8]);
+
   React.useEffect(() => {
     if (tracks && tracks.features.length > 0) {
       const firstTrack = tracks.features[0];
       const firstCoordinate = (firstTrack.geometry as LineString).coordinates[0];
+      setFirstTrackCoordinate([firstCoordinate[0], firstCoordinate[1]]);
       setViewport({
         ...viewport,
         longitude: firstCoordinate[0],
@@ -65,8 +69,18 @@ export const Map = observer(function Map() {
     }
   }, [tracks]);
 
-  //console.log("Filter GEOJSON", actions.daytracksGeoJSON())
-  //console.log("Filter Daytracks", actions.daytracksGeoJSON())
+  console.log(tracks)
+
+  React.useEffect(() => {
+    if (tracks && tracks.features.length > 0) {
+      const lastTrack = tracks.features[tracks.features.length - 1];
+      const total_coord = (lastTrack.geometry as LineString).coordinates.length
+      const lastCoordinate = (lastTrack.geometry as LineString).coordinates[total_coord - 1];
+      setLastTrackCoordinate([lastCoordinate[0], lastCoordinate[1]]);
+    }
+  }, [tracks]);
+
+
   //------------------------------------------------------------
   // Mouse Events:
   const onHover = React.useCallback((evt: MapLayerMouseEvent) => {
@@ -136,19 +150,26 @@ export const Map = observer(function Map() {
               'interpolate',
               ['linear'],
               ['line-progress'],
-              0,
-              'red',
-              state.sliderValue,
-              'rgba(0, 0, 0, 0)'
+              0, 'red',               // Start at 0 with red
+              state.sliderValue, 'red',    // Continue with red until the slider value
+              state.sliderValue + 0.01, 'rgba(0, 0, 0, 0)' // Transition to transparent immediately after slider value
             ],
           }} />
-          {/* <Layer id="tracks-dots" type="circle" paint={{
-            'circle-radius': 4,
-            'circle-color': '#FF0000',
-          }} /> */}
         </Source>
-
       }
+
+
+      {firstTrackCoordinate && (
+        <Marker longitude={firstTrackCoordinate[0]} latitude={firstTrackCoordinate[1]}>
+          <div style={{ backgroundColor: 'pink', borderRadius: '50%', width: '20px', height: '20px', border: '3px solid white' }} />
+        </Marker>
+      )}
+
+      {lastTrackCoordinate && (
+        <Marker longitude={lastTrackCoordinate[0]} latitude={lastTrackCoordinate[1]}>
+          <div style={{ backgroundColor: 'blue', borderRadius: '50%', width: '20px', height: '20px', border: '3px solid white' }} />
+        </Marker>
+      )}
 
     </ReactMapGl>
   );
