@@ -4,7 +4,7 @@ import log from './log';
 import ReactMapGl, { Source, Layer, MapLayerMouseEvent, ViewState, Marker } from 'react-map-gl';
 import { context } from './state';
 import { MapHoverInfo } from './MapHoverInfo';
-import type { GeoJSON, FeatureCollection, LineString } from 'geojson';
+import type { GeoJSON, FeatureCollection, LineString, Position } from 'geojson';
 
 
 const { info, warn } = log.get('map');
@@ -57,15 +57,43 @@ export const Map = observer(function Map() {
 
   React.useEffect(() => {
     if (tracks && tracks.features.length > 0) {
+      const allCoordinates = tracks.features.reduce((acc, feature) => {
+        const coordinates = (feature.geometry as LineString).coordinates;
+        return acc.concat(coordinates);
+      }, [] as Position[]);
+  
+      const minLongitude = Math.min(...allCoordinates.map(coord => coord[0]));
+      const maxLongitude = Math.max(...allCoordinates.map(coord => coord[0]));
+      const minLatitude = Math.min(...allCoordinates.map(coord => coord[1]));
+      const maxLatitude = Math.max(...allCoordinates.map(coord => coord[1]));
+  
+      const padding = 50; // Adjust padding as necessary
+      const longitude = (minLongitude + maxLongitude) / 2;
+      const latitude = (minLatitude + maxLatitude) / 2;
+      const zoom = Math.max(
+        0,
+        Math.min(
+          20,
+          Math.log2(360 / ((maxLongitude - minLongitude) * Math.cos((maxLatitude + minLatitude) / 2 * Math.PI / 180))) - 1
+        )
+      );
+  
+      setViewport({
+        ...viewport,
+        longitude,
+        latitude,
+        zoom: Math.floor(zoom+1), // Adjust zoom level as necessary
+      });
+    }
+  }, [tracks]);
+  
+  
+
+  React.useEffect(() => {
+    if (tracks && tracks.features.length > 0) {
       const firstTrack = tracks.features[0];
       const firstCoordinate = (firstTrack.geometry as LineString).coordinates[0];
       setFirstTrackCoordinate([firstCoordinate[0], firstCoordinate[1]]);
-      setViewport({
-        ...viewport,
-        longitude: firstCoordinate[0],
-        latitude: firstCoordinate[1],
-        zoom: 10 // Adjust zoom level as necessary
-      });
     }
   }, [tracks]);
 
@@ -141,33 +169,50 @@ export const Map = observer(function Map() {
         </Source>
       }
 
-      {!tracks ? <React.Fragment /> :
-        <Source type="geojson" data={tracks as any} lineMetrics={true}>
-          <Layer id="tracks" type="line" paint={{
-            'line-color': 'red',
-            'line-width': 10,
-            'line-gradient': [
-              'interpolate',
-              ['linear'],
-              ['line-progress'],
-              0, 'red',               // Start at 0 with red
-              state.sliderValue, 'red',    // Continue with red until the slider value
-              state.sliderValue + 0.01, 'rgba(0, 0, 0, 0)' // Transition to transparent immediately after slider value
-            ],
-          }} />
-        </Source>
+      {
+        !tracks ? (
+          <React.Fragment />
+        ) : (
+          <Source type="geojson" data={tracks as any} lineMetrics={true}>
+            <Layer
+              id="tracks"
+              type="line"
+              paint={{
+                'line-color': 'red',
+                'line-width': [
+                  'interpolate',
+                  ['linear'],
+                  ['line-progress'],
+                  0,
+                  5
+                ],
+                'line-gradient': [
+                  'interpolate',
+                  ['linear'],
+                  ['line-progress'],
+                  0,
+                  'red', // Start at red
+                  state.sliderValue,
+                  'blue', // Continue with red until the slider value
+                  state.sliderValue + 0.01,
+                  'rgba(0, 0, 0, 0)', // Transition to transparent immediately after slider value
+                ],
+              }}
+            />
+          </Source>
+        )
       }
 
 
       {firstTrackCoordinate && (
         <Marker longitude={firstTrackCoordinate[0]} latitude={firstTrackCoordinate[1]}>
-          <div style={{ backgroundColor: 'pink', borderRadius: '50%', width: '20px', height: '20px', border: '3px solid white' }} />
+          <div style={{ backgroundColor: 'pink', borderRadius: '50%', width: '10px', height: '10px', border: '3px solid white' }} />
         </Marker>
       )}
 
       {lastTrackCoordinate && (
         <Marker longitude={lastTrackCoordinate[0]} latitude={lastTrackCoordinate[1]}>
-          <div style={{ backgroundColor: 'blue', borderRadius: '50%', width: '20px', height: '20px', border: '3px solid white' }} />
+          <div style={{ backgroundColor: 'blue', borderRadius: '50%', width: '10px', height: '10px', border: '3px solid white' }} />
         </Marker>
       )}
 

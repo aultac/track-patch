@@ -310,6 +310,7 @@ export const knownWorkOrdersParsing = action('knownWorkOrdersParsing', async (va
 
 export const validateWorkorders = action('validateWorkorders', async () => {
   if (!_knownWorkorders) throw new Error('No work orders to validate');
+  //console.log(_knownWorkorders)
   for (const r of _knownWorkorders) {
     if (!r['Total Hrs']) {
       info('No Total Hrs');
@@ -338,8 +339,8 @@ export const validateWorkorders = action('validateWorkorders', async () => {
       continue; // invalid dates don't work either
     }
     const day = workorderday.format('YYYY-MM-DD');
-
     const computedSeconds = await computeSecondsOnRoadSegmentForVehicleOnDay({ seg: r, vehicleid: vid, day });
+    //console.log(vid, day, computedSeconds, r['WO#'], r['Route (Ref)'])
     const computedHours = computedSeconds / 3600;
     const match = computedHours ? reported_hours / computedHours : 0;
     r.match = numeral(match).format('0,0.00%');
