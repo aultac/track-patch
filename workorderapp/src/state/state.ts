@@ -85,6 +85,7 @@ export type State = {
   chosenVehicleID: string | null, // Type can be adjusted based on the actual type of vehicle IDs in day tracks
 
   sliderValue: number,
+  checkbox: boolean
 };
 
 export const state = observable<State>({
@@ -139,5 +140,6 @@ export const state = observable<State>({
   chosenDate: '',
   chosenVehicleID: '',
   sliderValue: 0.5,
+  checkbox: true
 });
 

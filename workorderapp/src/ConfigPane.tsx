@@ -12,7 +12,7 @@ export const ConfigPane = observer(function ConfigPane() {
 
   const [inzone, setInzone] = React.useState<Boolean>(false);
 
-  const [isVisible, setIsVisible] = React.useState(false);
+  const [isVisible, setIsVisible] = React.useState(state.checkbox);
 
   // Toggle visibility based on checkbox
   const handleCheckboxChange = (event: React.ChangeEvent<HTMLInputElement>) => {
