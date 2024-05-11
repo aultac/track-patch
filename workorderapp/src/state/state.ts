@@ -9,6 +9,17 @@ export type ActivityMessage = {
   type: 'good' | 'bad',
 };
 
+export type VehicleDayTrackSeg = {
+  day: string;
+  vid: number;
+  seg: string;
+  track: number[][];
+  startTime: string,
+  endTime: string,
+  ctime: number,
+  rtime: number
+};
+
 export type BigData = { rev: number };
 
 export type ParsingState = '' | 'tracks' | 'roads' | 'geojson' | 'preprocessed' | 'error' | 'done'; // tracks, roads, geojson, preprocessed
@@ -54,6 +65,7 @@ export type State = {
   daytracksGeoJSON: BigData,
   roads: BigData,
   milemarkers: BigData,
+  roadSegTracksForVOnD: BigData,
 
   geojsonviz: {
     selectedFile: string,
@@ -110,6 +122,7 @@ export const state = observable<State>({
   filteredGeoJSON: {rev: 0},
   daytracks: { rev: 0 },
   daytracksGeoJSON: { rev: 0 },
+  roadSegTracksForVOnD: { rev: 0},
   hover: {
     x: 0,
     y: 0,

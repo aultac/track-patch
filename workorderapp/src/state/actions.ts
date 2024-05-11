@@ -1,5 +1,5 @@
 import { runInAction, action } from 'mobx';
-import { state, ActivityMessage, ParsingState } from './state';
+import { state, ActivityMessage, ParsingState, VehicleDayTrackSeg } from './state';
 import log from '../log';
 import type { FeatureCollection, GeoJSON } from 'geojson';
 import { assertWorkOrder, DayTracks, WorkOrder } from '@track-patch/lib';
@@ -10,7 +10,7 @@ import dayjs from 'dayjs';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
 import { FileReader } from '@tanker/file-reader';
 import { downloadBlob } from './downloadBlob';
-import { assertRoadSegment, computeSecondsOnRoadSegmentForVehicleOnDay, saveWorkorders, vehicleidFromResourceName } from './workorder_helpers';
+import { assertRoadSegment, computePointsOnRoadSegmentForVehicleOnDay, computeSecondsOnRoadSegmentForVehicleOnDay, saveWorkorders, vehicleidFromResourceName } from './workorder_helpers';
 import { geohash } from '@track-patch/gps2road';
 import allRoadSegments from './workorder_roadsegments.json';
 
@@ -209,6 +209,93 @@ export const exportProcessedTracks = action('exportProcessedTracks', async () =>
   downloadBlob(blob, 'processed-tracks.json');
 });
 
+//-----------------------------------------------------------
+// Work Orders (spreadsheet):
+//-----------------------------------------------------------
+
+let _knownWorkorders: WorkOrder[] | null = null;
+export function knownWorkorders() { return _knownWorkorders };
+export function numKnownWorkorders() { return _knownWorkorders ? _knownWorkorders.length : 0 }
+export const loadKnownWorkorders = action('loadKnownWorkorders', async (file: File) => {
+  knownWorkOrdersParsing(true);
+  info('Reading workorders file...');
+  const wb = xlsx.read(await file.arrayBuffer());
+  info('sheet_to_json workorders...');
+  const records = xlsx.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { raw: false });
+  info('assert proper workorders...');
+  _knownWorkorders = records.filter((r, index) => {
+    try {
+      assertWorkOrder(r);
+    } catch (e: any) {
+      info('WARNING: line', index + 1, 'in work orders sheet was not a valid work order:', e.message);
+      return false;
+    }
+    return true;
+  }) as WorkOrder[];
+  runInAction(() => { state.knownWorkorders.orders.rev++ });
+  knownWorkOrdersParsing(false);
+});
+export const knownWorkOrdersParsing = action('knownWorkOrdersParsing', async (val: boolean) => {
+  state.knownWorkorders.parsing = val;
+});
+
+
+let _filteredknownWorkorders: WorkOrder[] | null = null;
+
+let _roadSegTracksForVOnD: VehicleDayTrackSeg [] = [];
+export function roadSegTracksForVOnD() { return _roadSegTracksForVOnD};
+
+export const validateWorkorders = action('validateWorkorders', async () => {
+  if (!_knownWorkorders) throw new Error('No work orders to validate');
+
+  //console.log(_knownWorkorders)
+  for (const r of _knownWorkorders) {
+
+    if (r['Resource Type'] !== 'Equipment') {
+      info('Resource Type', r['Resource Type'], 'is not Equipment');
+      continue; // this is the only thing we can identify right now
+    }
+
+    if (!r['Total Hrs']) {
+      info('No Total Hrs');
+      continue; // no reported hours means we skip this one
+    }
+    const reported_hours = +(r['Total Hrs']);
+    if (isNaN(reported_hours)) {
+      info('Reported hours isNaN');
+      continue;
+    }
+
+    const vid = vehicleidFromResourceName(r['Resource Name'] || '')
+    if (!vid) {
+      info('Unable to find vehicle id', vid, 'in Resource Name', r['Resource Name']);
+      continue; // we don't recognize this equipment number
+    }
+
+    const workorderday = dayjs(r['Work Date'], 'M/D/YY');
+    if (!workorderday.isValid()) {
+      info('Work Date', r['Work Date'], 'invalid');
+      continue; // invalid dates don't work either
+    }
+    const day = workorderday.format('YYYY-MM-DD');
+    const computedSeconds = await computeSecondsOnRoadSegmentForVehicleOnDay({ seg: r, vehicleid: vid, day });
+    const computedPoints = await computePointsOnRoadSegmentForVehicleOnDay({ seg: r, vehicleid: vid, day });
+    const computedHours = computedSeconds / 3600;
+    const match = computedHours ? reported_hours / computedHours : 0;
+    if (computedPoints !==  null && computedHours > 0){
+      computedPoints.ctime = computedHours;
+      computedPoints.rtime = reported_hours;
+      _roadSegTracksForVOnD?.push(computedPoints);
+    }
+    r.match = numeral(match).format('0,0.00%');
+    r.computedHours = numeral(computedHours).format('0,0.00');
+    r.differenceHours = numeral(reported_hours - computedHours).format('0,0.00');
+    info('WE ACTUALLY HAVE A COMPUTED HOURS!!!', computedHours);
+  }
+  _filteredknownWorkorders = _knownWorkorders.filter(w => w.computedHours && +(w.computedHours) > 0)
+  saveWorkorders('validated-workorders.xlsx', _knownWorkorders.filter(w => w.computedHours && +(w.computedHours) > 0));
+});
+
 
 let _filteredDayTracks: DayTracks | null = null;
 export function filteredDayTracks() { return _filteredDayTracks; }
@@ -226,7 +313,6 @@ export const filterDayTracks = action('filterDayTracks', ({ vehicleid, day }: { 
   runInAction(() => { state.filteredDayTracks.rev++ });
 
 });
-
 
 let _filteredGeoJSON: FeatureCollection | null = null;
 export function filteredGeoJSON() { return _filteredGeoJSON; }
@@ -263,20 +349,23 @@ export const getDateList = action(() => {
 export const getVehicleIDsForDate = action((date: string) => {
   if (!_daytracks || !_daytracks[date]) return [];
 
-  const worders = filteredknownWorkorders();
-  
+  const worders = _filteredknownWorkorders;
+
   if (worders) {
     const vehicleDataMap = new Map<string, { computedHrs: number, totalHrs: number }>();
 
-    worders.forEach(wo => {
+    // Filter work orders by date
+    const wordersForDate = worders.filter(wo => dayjs(wo['Work Date'], 'M/D/YY').format('YYYY-MM-DD') === date);
+
+    wordersForDate.forEach(wo => {
       const vehicleId = vehicleidFromResourceName(wo['Resource Name'] || '').toString();
       const computedHrs = parseFloat(wo.computedHours || '0');
       const totalHrs = parseFloat(wo['Total Hrs'] || '0');
-      
+
       if (!vehicleDataMap.has(vehicleId)) {
         vehicleDataMap.set(vehicleId, { computedHrs: 0, totalHrs: 0 });
       }
-      
+
       const existingData = vehicleDataMap.get(vehicleId);
       if (existingData) {
         vehicleDataMap.set(vehicleId, {
@@ -287,6 +376,7 @@ export const getVehicleIDsForDate = action((date: string) => {
     });
 
     return Object.entries(_daytracks[date])
+      .filter(([vehicleId]) => vehicleDataMap.has(vehicleId))
       .map(([vehicleId, vehicleData]) => {
         const { computedHrs, totalHrs } = vehicleDataMap.get(vehicleId) || { computedHrs: 0, totalHrs: 0 };
 
@@ -309,7 +399,6 @@ export const getVehicleIDsForDate = action((date: string) => {
 
 
 
-
 export const updateChosenDate = action('updateChosenDate', (date: string | null) => {
   state.chosenDate = date;
 });
@@ -318,86 +407,6 @@ export const updateChosenVehicleID = action('updateChosenVehicleID', (vehicleID:
   state.chosenVehicleID = vehicleID;
 });
 
-
-//-----------------------------------------------------------
-// Work Orders (spreadsheet):
-//-----------------------------------------------------------
-
-let _knownWorkorders: WorkOrder[] | null = null;
-export function knownWorkorders() { return _knownWorkorders };
-export function numKnownWorkorders() { return _knownWorkorders ? _knownWorkorders.length : 0 }
-export const loadKnownWorkorders = action('loadKnownWorkorders', async (file: File) => {
-  knownWorkOrdersParsing(true);
-  info('Reading workorders file...');
-  const wb = xlsx.read(await file.arrayBuffer());
-  info('sheet_to_json workorders...');
-  const records = xlsx.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { raw: false });
-  info('assert proper workorders...');
-  _knownWorkorders = records.filter((r, index) => {
-    try {
-      assertWorkOrder(r);
-    } catch (e: any) {
-      info('WARNING: line', index + 1, 'in work orders sheet was not a valid work order:', e.message);
-      return false;
-    }
-    return true;
-  }) as WorkOrder[];
-  runInAction(() => { state.knownWorkorders.orders.rev++ });
-  knownWorkOrdersParsing(false);
-});
-export const knownWorkOrdersParsing = action('knownWorkOrdersParsing', async (val: boolean) => {
-  state.knownWorkorders.parsing = val;
-});
-
-
-let _filteredknownWorkorders: WorkOrder[] | null = null;
-export function filteredknownWorkorders() { return _filteredknownWorkorders };
-
-
-export const validateWorkorders = action('validateWorkorders', async () => {
-  if (!_knownWorkorders) throw new Error('No work orders to validate');
-
-  //console.log(_knownWorkorders)
-  for (const r of _knownWorkorders) {
-    if (!r['Total Hrs']) {
-      info('No Total Hrs');
-      continue; // no reported hours means we skip this one
-    }
-    const reported_hours = +(r['Total Hrs']);
-    if (isNaN(reported_hours)) {
-      info('Reported hours isNaN');
-      continue;
-    }
-
-    if (r['Resource Type'] !== 'Equipment') {
-      info('Resource Type', r['Resource Type'], 'is not Equipment');
-      continue; // this is the only thing we can identify right now
-    }
-
-    const vid = vehicleidFromResourceName(r['Resource Name'] || '')
-    if (!vid) {
-      info('Unable to find vehicle id', vid, 'in Resource Name', r['Resource Name']);
-      continue; // we don't recognize this equipment number
-    }
-
-    const workorderday = dayjs(r['Work Date'], 'M/D/YY');
-    if (!workorderday.isValid()) {
-      info('Work Date', r['Work Date'], 'invalid');
-      continue; // invalid dates don't work either
-    }
-    const day = workorderday.format('YYYY-MM-DD');
-    const computedSeconds = await computeSecondsOnRoadSegmentForVehicleOnDay({ seg: r, vehicleid: vid, day });
-    //console.log(vid, day, computedSeconds, r['WO#'], r['Route (Ref)'])
-    const computedHours = computedSeconds / 3600;
-    const match = computedHours ? reported_hours / computedHours : 0;
-    r.match = numeral(match).format('0,0.00%');
-    r.computedHours = numeral(computedHours).format('0,0.00');
-    r.differenceHours = numeral(reported_hours - computedHours).format('0,0.00');
-    info('WE ACTUALLY HAVE A COMPUTED HOURS!!!', computedHours);
-  }
-  _filteredknownWorkorders = _knownWorkorders.filter(w => w.computedHours && +(w.computedHours) > 0)
-  saveWorkorders('validated-workorders.xlsx', _knownWorkorders.filter(w => w.computedHours && +(w.computedHours) > 0));
-});
 
 
 //---------------------------------------------------------------------

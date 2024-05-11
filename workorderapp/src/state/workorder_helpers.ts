@@ -1,5 +1,6 @@
 import xlsx from 'xlsx-js-style';
-import { WorkOrder, VehicleDayTrackSeg } from '@track-patch/lib';
+import { WorkOrder } from '@track-patch/lib';
+import { VehicleDayTrackSeg } from './state';
 import {roadNameToType} from '@track-patch/gps2road/dist/roadnames';
 import { fetchMileMarkersForRoad, MileMarker } from '@track-patch/gps2road';
 import { daytracks } from './actions';
@@ -265,8 +266,8 @@ export async function computePointsOnRoadSegmentForVehicleOnDay({ seg, vehicleid
   const dt = daytracks()?.[day]?.[vehicleid];
   if (!dt) return retData;;
   let computedPoints = [];
-  let startTime: number = 0;
-  let endTime: number = 0;
+  let startTime: string = 'NA';
+  let endTime: string = 'NA';
   // A vehicle is considerd to be on a part of a road from the current point until the next point unless the next point is more than 5 mins away.
 
   for (const [index, point] of dt.track.entries()) {
@@ -291,17 +292,21 @@ export async function computePointsOnRoadSegmentForVehicleOnDay({ seg, vehicleid
     }
     computedPoints.push([point.lat, point.lon])
     if (index === 0){
-      startTime = point.time.unix();
+      startTime = point.time.toString();
     }
     if(index === dt.track.length - 1){
-      endTime = point.time.unix()
+      endTime = point.time.toString();
     }
   }
   retData = {
     day: day,
     vid: vehicleid,
     seg: seg['Route (Ref)'],
-    track: computedPoints
+    track: computedPoints,
+    startTime: startTime,
+    endTime: endTime,
+    ctime: -1.0,
+    rtime: -1.0
   }
   return retData;
 }
