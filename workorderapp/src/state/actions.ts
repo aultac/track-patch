@@ -353,8 +353,10 @@ export const knownWorkOrdersParsing = action('knownWorkOrdersParsing', async (va
 let _filteredknownWorkorders: WorkOrder[] | null = null;
 export function filteredknownWorkorders() { return _filteredknownWorkorders };
 
+
 export const validateWorkorders = action('validateWorkorders', async () => {
   if (!_knownWorkorders) throw new Error('No work orders to validate');
+
   //console.log(_knownWorkorders)
   for (const r of _knownWorkorders) {
     if (!r['Total Hrs']) {

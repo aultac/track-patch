@@ -12,6 +12,13 @@ export const ConfigPane = observer(function ConfigPane() {
 
   const [inzone, setInzone] = React.useState<Boolean>(false);
 
+  const [isVisible, setIsVisible] = React.useState(false);
+
+  // Toggle visibility based on checkbox
+  const handleCheckboxChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setIsVisible(event.target.checked);
+  };
+
   const handleSliderChange = (event: Event, newValue: number | number[]) => {
     state.sliderValue = newValue as number; // Update the state directly
   };
@@ -150,40 +157,67 @@ export const ConfigPane = observer(function ConfigPane() {
         </Button>
       </div>
 
+      <div>
+      <label>
+        <input
+          type="checkbox"
+          checked={isVisible}
+          onChange={handleCheckboxChange}
+        /> Create WorkOrders
+      </label>
 
-      <div style={{ padding: '5px', margin: '5px', height: '15%', alignItems: 'center', justifyContent: 'center', display: 'flex', border: '3px dashed #008800', borderRadius: '3px' }}
-        onDragOver={handleFile({ filetype: 'vehicleactivities', eventtype: 'drag' })}
-        onDrop={handleFile({ filetype: 'vehicleactivities', eventtype: 'drop' })}
-        onDragEnter={handleFile({ filetype: 'vehicleactivities', eventtype: 'drag', inout: true })}
-        onDragLeave={handleFile({ filetype: 'vehicleactivities', eventtype: 'drag', inout: false })}
-      >
-        {
-          state.createdWorkOrders.parsing
-            ? 'Reading vehicle activities...'
-            : !state.createdWorkOrders.vehicleActivities.rev
-              ? 'Drop vehicle activities spreadsheet here.'
-              : <div style={{ flexGrow: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-                <div>Found {numeral((actions.vehicleActivities() || []).length).format('0,0')} Vehicle Activities</div>
-                {state.createdWorkOrders.workorders.rev > 0
-                  ? <div>Successfully created {numeral(actions.createdWorkOrders()?.length || 0).format('0,0')} Work Orders</div>
-                  : <React.Fragment />
-                }
-              </div>
-        }
-      </div>
-
-      <div style={{ alignItems: 'center', justifyContent: 'center', display: 'flex' }}>
-        <Button
-          style={{ flexGrow: 1 }}
-          onClick={() => {
-            if (state.createdWorkOrders.parsing) return;
-            actions.createWorkOrders()
+      {isVisible && (
+        <div>
+          {/* Your draggable div */}
+          <div style={{
+            padding: '25px', margin: '5px', height: '15%', alignItems: 'center',
+            justifyContent: 'center', display: 'flex', border: '3px dashed #008800', borderRadius: '3px'
           }}
-          variant="contained"
-          disabled={!actions.vehicleActivities() || !actions.daytracks() || state.createdWorkOrders.parsing || state.createdWorkOrders.workorders.rev > 0}
-        >
-          Create Work Records from GPS Tracks (PoC)
-        </Button>
+            onDragOver={() => console.log('Drag over')} // Replace these handlers with your actual functions
+            onDrop={() => console.log('Drop')}
+            onDragEnter={() => console.log('Drag enter')}
+            onDragLeave={() => console.log('Drag leave')}
+          >
+            {/* Dynamic content based on state */}
+            {/* Assuming state.createdWorkOrders.parsing is a placeholder for actual state management logic */}
+            {true  // Placeholder condition, replace with actual state check
+              ? 'Reading vehicle activities...'
+              : true  // Another placeholder condition
+                ? 'Drop vehicle activities spreadsheet here.'
+                : <div style={{ flexGrow: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                  <div>Found {numeral(([] || []).length).format('0,0')} Vehicle Activities</div>
+                  {true  // Placeholder condition
+                    ? <div>Successfully created {numeral(([] || 0).length).format('0,0')} Work Orders</div>
+                    : <React.Fragment />
+                  }
+                </div>
+            }
+          </div>
+
+          {/* Button to create work records */}
+          <div style={{ alignItems: 'center', justifyContent: 'center', display: 'flex' }}>
+            <Button
+              style={{ flexGrow: 1 }}
+              onClick={() => console.log('Create Work Orders')}  // Replace with your actual function
+              variant="contained"
+              disabled={true}  // Replace with actual condition
+            >
+              Create Work Records from GPS Tracks (PoC)
+            </Button>
+          </div>
+        </div>
+      )}
+    </div>
+
+    <div style={{ padding: '10px', marginBottom: '10px' }}>
+        <Slider
+          value={state.sliderValue}
+          onChange={handleSliderChange}
+          aria-labelledby="input-slider"
+          min={0}
+          max={1}
+          step={0.001}
+        />
       </div>
 
       <div style={{ position: 'fixed', bottom: 65, right: 50 }}>
@@ -224,20 +258,6 @@ export const ConfigPane = observer(function ConfigPane() {
           </div>
         )}
       </div>
-
-
-      <div style={{ padding: '10px', marginTop: '20px' }}>
-        <Slider
-          value={state.sliderValue}
-          onChange={handleSliderChange}
-          aria-labelledby="input-slider"
-          min={0}
-          max={1}
-          step={0.001}
-        />
-      </div>
-
-
 
     </div>
   );
