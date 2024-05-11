@@ -82,7 +82,7 @@ export const Map = observer(function Map() {
         ...viewport,
         longitude,
         latitude,
-        zoom: Math.floor(zoom+1), // Adjust zoom level as necessary
+        zoom: Math.floor(zoom), // Adjust zoom level as necessary
       });
     }
   }, [tracks]);

@@ -262,11 +262,52 @@ export const getDateList = action(() => {
 
 export const getVehicleIDsForDate = action((date: string) => {
   if (!_daytracks || !_daytracks[date]) return [];
-  return Object.entries(_daytracks[date]).map(([vehicleId, vehicleData]) => ({
-    vehicleId,
-    count: vehicleData.track.length // Assuming `track` is an array of points
-  }));
+
+  const worders = filteredknownWorkorders();
+  
+  if (worders) {
+    const vehicleDataMap = new Map<string, { computedHrs: number, totalHrs: number }>();
+
+    worders.forEach(wo => {
+      const vehicleId = vehicleidFromResourceName(wo['Resource Name'] || '').toString();
+      const computedHrs = parseFloat(wo.computedHours || '0');
+      const totalHrs = parseFloat(wo['Total Hrs'] || '0');
+      
+      if (!vehicleDataMap.has(vehicleId)) {
+        vehicleDataMap.set(vehicleId, { computedHrs: 0, totalHrs: 0 });
+      }
+      
+      const existingData = vehicleDataMap.get(vehicleId);
+      if (existingData) {
+        vehicleDataMap.set(vehicleId, {
+          computedHrs: existingData.computedHrs + computedHrs,
+          totalHrs: existingData.totalHrs + totalHrs
+        });
+      }
+    });
+
+    return Object.entries(_daytracks[date])
+      .map(([vehicleId, vehicleData]) => {
+        const { computedHrs, totalHrs } = vehicleDataMap.get(vehicleId) || { computedHrs: 0, totalHrs: 0 };
+
+        return {
+          vehicleId,
+          count: vehicleData.track.length, // Assuming `track` is an array of points
+          computedHrs,
+          totalHrs
+        };
+      });
+  } else {
+    return Object.entries(_daytracks[date]).map(([vehicleId, vehicleData]) => ({
+      vehicleId,
+      count: vehicleData.track.length, // Assuming `track` is an array of points
+      computedHrs: 0,
+      totalHrs: 0 // Default computed and total hours when knownWorkorders is null
+    }));
+  }
 });
+
+
 
 
 export const updateChosenDate = action('updateChosenDate', (date: string | null) => {
@@ -308,6 +349,10 @@ export const knownWorkOrdersParsing = action('knownWorkOrdersParsing', async (va
   state.knownWorkorders.parsing = val;
 });
 
+
+let _filteredknownWorkorders: WorkOrder[] | null = null;
+export function filteredknownWorkorders() { return _filteredknownWorkorders };
+
 export const validateWorkorders = action('validateWorkorders', async () => {
   if (!_knownWorkorders) throw new Error('No work orders to validate');
   //console.log(_knownWorkorders)
@@ -348,6 +393,7 @@ export const validateWorkorders = action('validateWorkorders', async () => {
     r.differenceHours = numeral(reported_hours - computedHours).format('0,0.00');
     info('WE ACTUALLY HAVE A COMPUTED HOURS!!!', computedHours);
   }
+  _filteredknownWorkorders = _knownWorkorders.filter(w => w.computedHours && +(w.computedHours) > 0)
   saveWorkorders('validated-workorders.xlsx', _knownWorkorders.filter(w => w.computedHours && +(w.computedHours) > 0));
 });
 

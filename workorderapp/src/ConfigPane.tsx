@@ -7,9 +7,6 @@ import numeral from 'numeral';
 
 const { info, warn } = log.get('config-pane');
 
-const columns = ['LATITUDE', 'LONGITUDE', 'COMMISION_NUMBER', 'SPEED_MILES_PER_HOUR', 'VEHICLE_HEADING', 'VEHICLE_ID', 'VEHICLE_TIMESTAMP_GMT'];
-const columnIndexMap: { [columnName: string]: number } = {}; // fill this in when header is parsed
-
 export const ConfigPane = observer(function ConfigPane() {
   const { state, actions } = React.useContext(context);
 
@@ -189,11 +186,12 @@ export const ConfigPane = observer(function ConfigPane() {
         </Button>
       </div>
 
-      <div style={{ position: 'fixed', bottom: 35, right: 20 }}>
+      <div style={{ position: 'fixed', bottom: 65, right: 50 }}>
         <Select
           value={selectedDate}
           onChange={handleChangeDate}
           displayEmpty
+          style={{ marginRight: '10px' }} // Add spacing between the two Select components
         >
           <MenuItem value="" disabled>Select Date</MenuItem>
           {actions.getDateList().map(date => (
@@ -202,13 +200,12 @@ export const ConfigPane = observer(function ConfigPane() {
             </MenuItem>
           ))}
         </Select>
-      </div>
 
-      <div style={{ position: 'fixed', bottom: 35, right: 250 }}>
         <Select
           value={selectedVehicle}
           onChange={handleChangeVehicle}
           displayEmpty
+          style={{ marginRight: '10px' }} // Add spacing between the two Select components
         >
           <MenuItem value="" disabled>Select Vehicle</MenuItem>
           {vehicleList.map(vehicle => (
@@ -218,6 +215,17 @@ export const ConfigPane = observer(function ConfigPane() {
           ))}
         </Select>
       </div>
+
+      <div style={{ position: 'fixed', bottom: 10, right: 90 }}>
+        {selectedVehicle && (
+          <div>
+            Computed Hrs: {vehicleList.find(v => v.vehicleId === selectedVehicle)?.computedHrs.toFixed(2)},
+            Reported Hrs: {vehicleList.find(v => v.vehicleId === selectedVehicle)?.totalHrs.toFixed(2)}
+          </div>
+        )}
+      </div>
+
+
       <div style={{ padding: '10px', marginTop: '20px' }}>
         <Slider
           value={state.sliderValue}
