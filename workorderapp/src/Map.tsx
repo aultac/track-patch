@@ -54,7 +54,7 @@ export const Map = observer(function Map() {
   }
 
   let roadSegPoints: FeatureCollection | null = actions.roadSegPoints();
-  if (state.roadSegPoints.rev < 1 || !roadSegPoints){
+  if (state.roadSegPoints.rev < 1 || !roadSegPoints) {
     roadSegPoints = null;
   }
 
@@ -211,9 +211,9 @@ export const Map = observer(function Map() {
         )
       }
 
-      {!roadSegPoints ? <React.Fragment /> :
+      {roadSegPoints ? <React.Fragment /> :
         <Source type="geojson" data={roadSegPoints as any}>
-          <Layer id="segFeatureCollection" type="line" paint={{
+          <Layer id="roadSegPoints" type="line" paint={{
             'line-color': 'black',
             'line-width': 15,
           }} />
