@@ -53,9 +53,9 @@ export const Map = observer(function Map() {
     tracks = null;
   }
 
-  let roadSegPoints: FeatureCollection | null = actions.roadSegPoints();
-  if (state.roadSegPoints.rev < 1 || !roadSegPoints) {
-    roadSegPoints = null;
+  let troadSegPoints: FeatureCollection | null = actions.roadSegPoints();
+  if (state.roadSegPoints.rev < 1 || !troadSegPoints) {
+    troadSegPoints = null;
   }
 
   const [lastTrackCoordinate, setLastTrackCoordinate] = React.useState([-86.8, 39.8]);
@@ -140,9 +140,9 @@ export const Map = observer(function Map() {
   if (roads) interactiveLayerIds.push('roads');
   if (milemarkers) interactiveLayerIds.push('milemarkers');
   if (tracks) interactiveLayerIds.push('tracks');
-  if (roadSegPoints) interactiveLayerIds.push('roadSegPoints')
+  if (troadSegPoints) interactiveLayerIds.push('troadSegPoints')
 
-  console.log('AAAAAA', roadSegPoints, tracks);
+  console.log('AAAAAA', troadSegPoints, tracks);
 
   return (
     <ReactMapGl
@@ -211,9 +211,9 @@ export const Map = observer(function Map() {
         )
       }
 
-      {roadSegPoints ? <React.Fragment /> :
-        <Source type="geojson" data={roadSegPoints as any}>
-          <Layer id="roadSegPoints" type="line" paint={{
+      {troadSegPoints ? <React.Fragment /> :
+        <Source type="geojson" data={troadSegPoints as any}>
+          <Layer id="troadSegPoints" type="line" paint={{
             'line-color': 'black',
             'line-width': 15,
           }} />
