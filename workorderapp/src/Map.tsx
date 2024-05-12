@@ -5,6 +5,7 @@ import ReactMapGl, { Source, Layer, MapLayerMouseEvent, ViewState, Marker } from
 import { context } from './state';
 import { MapHoverInfo } from './MapHoverInfo';
 import type { GeoJSON, FeatureCollection, LineString, Position } from 'geojson';
+import { VehicleDayTrackSeg } from './state/state';
 
 
 const { info, warn } = log.get('map');
@@ -52,6 +53,11 @@ export const Map = observer(function Map() {
     tracks = null;
   }
 
+  let roadSegPoints: FeatureCollection | null = actions.roadSegPoints();
+  if (state.roadSegPoints.rev < 1 || !roadSegPoints){
+    roadSegPoints = null;
+  }
+
   const [lastTrackCoordinate, setLastTrackCoordinate] = React.useState([-86.8, 39.8]);
   const [firstTrackCoordinate, setFirstTrackCoordinate] = React.useState([-86.8, 39.8]);
 
@@ -61,12 +67,12 @@ export const Map = observer(function Map() {
         const coordinates = (feature.geometry as LineString).coordinates;
         return acc.concat(coordinates);
       }, [] as Position[]);
-  
+
       const minLongitude = Math.min(...allCoordinates.map(coord => coord[0]));
       const maxLongitude = Math.max(...allCoordinates.map(coord => coord[0]));
       const minLatitude = Math.min(...allCoordinates.map(coord => coord[1]));
       const maxLatitude = Math.max(...allCoordinates.map(coord => coord[1]));
-  
+
       const padding = 50; // Adjust padding as necessary
       const longitude = (minLongitude + maxLongitude) / 2;
       const latitude = (minLatitude + maxLatitude) / 2;
@@ -77,7 +83,7 @@ export const Map = observer(function Map() {
           Math.log2(360 / ((maxLongitude - minLongitude) * Math.cos((maxLatitude + minLatitude) / 2 * Math.PI / 180))) - 1
         )
       );
-  
+
       setViewport({
         ...viewport,
         longitude,
@@ -86,8 +92,8 @@ export const Map = observer(function Map() {
       });
     }
   }, [tracks]);
-  
-  
+
+
 
   React.useEffect(() => {
     if (tracks && tracks.features.length > 0) {
@@ -97,7 +103,6 @@ export const Map = observer(function Map() {
     }
   }, [tracks]);
 
-  console.log(tracks)
 
   React.useEffect(() => {
     if (tracks && tracks.features.length > 0) {
@@ -135,6 +140,9 @@ export const Map = observer(function Map() {
   if (roads) interactiveLayerIds.push('roads');
   if (milemarkers) interactiveLayerIds.push('milemarkers');
   if (tracks) interactiveLayerIds.push('tracks');
+  if (roadSegPoints) interactiveLayerIds.push('roadSegPoints')
+
+  console.log('AAAAAA', roadSegPoints, tracks);
 
   return (
     <ReactMapGl
@@ -201,6 +209,16 @@ export const Map = observer(function Map() {
             />
           </Source>
         )
+      }
+
+      {!roadSegPoints ? <React.Fragment /> :
+        <Source type="geojson" data={roadSegPoints as any}>
+          <Layer id="segFeatureCollection" type="line" paint={{
+            'line-color': 'black',
+            'line-width': 15,
+          }} />
+        </Source>
+
       }
 
 

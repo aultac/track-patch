@@ -214,7 +214,7 @@ export const ConfigPane = observer(function ConfigPane() {
               value={state.sliderValue}
               onChange={handleSliderChange}
               aria-labelledby="input-slider"
-              min={0}
+              min={0.001}
               max={1}
               step={0.001}
             />
@@ -270,6 +270,7 @@ export const ConfigPane = observer(function ConfigPane() {
                   <th style={{ border: '1px solid #ddd', padding: '5px', textAlign: 'left' }}>Segment Name</th>
                   <th style={{ border: '1px solid #ddd', padding: '5px', textAlign: 'left' }}>Computed Hrs</th>
                   <th style={{ border: '1px solid #ddd', padding: '5px', textAlign: 'left' }}>Reported Hrs</th>
+                  <th style={{ border: '1px solid #ddd', padding: '5px', textAlign: 'left' }}>Computed Track: {state.csegment}</th>
                 </tr>
               </thead>
               <tbody>
@@ -280,6 +281,17 @@ export const ConfigPane = observer(function ConfigPane() {
                       <td style={{ border: '1px solid #ddd', padding: '5px', textAlign: 'left' }}>{track.seg}</td>
                       <td style={{ border: '1px solid #ddd', padding: '5px', textAlign: 'left' }}>{track.ctime.toFixed(2)}</td>
                       <td style={{ border: '1px solid #ddd', padding: '5px', textAlign: 'left' }}>{track.rtime.toFixed(2)}</td>
+                      <td style={{ border: '1px solid #ddd', padding: '5px', textAlign: 'left' }}>
+                        <input
+                          type="radio"
+                          name="selectedSegment"
+                          onChange={() => {
+                            actions.updateCsegment(track.seg);
+                            actions.getRoadSegPoints();
+                          }}
+                          checked={state.csegment === track.seg}
+                        />
+                      </td>
                     </tr>
                   ))}
               </tbody>

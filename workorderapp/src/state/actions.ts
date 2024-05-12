@@ -13,6 +13,7 @@ import { downloadBlob } from './downloadBlob';
 import { assertRoadSegment, computePointsOnRoadSegmentForVehicleOnDay, computeSecondsOnRoadSegmentForVehicleOnDay, saveWorkorders, vehicleidFromResourceName } from './workorder_helpers';
 import { geohash } from '@track-patch/gps2road';
 import allRoadSegments from './workorder_roadsegments.json';
+import uniqolor from 'uniqolor';
 
 dayjs.extend(customParseFormat);
 const { info, warn } = log.get("actions");
@@ -238,7 +239,6 @@ export const loadKnownWorkorders = action('loadKnownWorkorders', async (file: Fi
 export const knownWorkOrdersParsing = action('knownWorkOrdersParsing', async (val: boolean) => {
   state.knownWorkorders.parsing = val;
 });
-
 
 let _filteredknownWorkorders: WorkOrder[] | null = null;
 
@@ -485,3 +485,35 @@ export const createWorkOrders = action('createWorkorders', async () => {
   saveWorkorders('created-workorders.xlsx', _createdWorkOrders);
 });
 
+export const updateCsegment = action('updateCsegment', (stateValue: string) => {
+  state.csegment = stateValue;
+});
+
+let _roadSegPoints: FeatureCollection | null = null;
+export function roadSegPoints() { return _roadSegPoints; }
+export const getRoadSegPoints = action('getRoadSegPoints', () => {
+
+  let froadSegments = _roadSegTracksForVOnD.filter(item => item.day === state.chosenDate);
+  froadSegments = froadSegments.filter(item => item.vid.toString() === state.chosenVehicleID);
+  froadSegments = froadSegments.filter(item => item.seg === state.csegment);
+  const roadSegPoints: FeatureCollection = {
+    type: 'FeatureCollection',
+    features: [],
+  }
+  for (const [index, tseg] of Object.entries(froadSegments)){
+    roadSegPoints.features.push({
+      type: 'Feature',
+      properties: {
+        day: tseg.day,
+        vid: tseg.vid.toString(),
+        color: uniqolor(tseg.vid).color,
+      },
+      geometry: {
+        type: 'LineString',
+        coordinates: tseg.track,
+      }
+    });
+  }
+  runInAction(() => { _roadSegPoints = roadSegPoints; });
+  runInAction(() => { state.roadSegPoints.rev++ });
+});

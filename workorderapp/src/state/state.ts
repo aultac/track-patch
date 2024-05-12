@@ -65,7 +65,7 @@ export type State = {
   daytracksGeoJSON: BigData,
   roads: BigData,
   milemarkers: BigData,
-  roadSegTracksForVOnD: BigData,
+  roadSegPoints: BigData,
 
   geojsonviz: {
     selectedFile: string,
@@ -85,7 +85,8 @@ export type State = {
   chosenVehicleID: string | null, // Type can be adjusted based on the actual type of vehicle IDs in day tracks
 
   sliderValue: number,
-  checkbox: boolean
+  checkbox: boolean,
+  csegment: string,
 };
 
 export const state = observable<State>({
@@ -123,7 +124,7 @@ export const state = observable<State>({
   filteredGeoJSON: {rev: 0},
   daytracks: { rev: 0 },
   daytracksGeoJSON: { rev: 0 },
-  roadSegTracksForVOnD: { rev: 0},
+  roadSegPoints: { rev: 0 },
   hover: {
     x: 0,
     y: 0,
@@ -139,7 +140,8 @@ export const state = observable<State>({
 
   chosenDate: '',
   chosenVehicleID: '',
-  sliderValue: 0.5,
-  checkbox: true
+  sliderValue: 1.0,
+  checkbox: false,
+  csegment: 'NA',
 });
 
