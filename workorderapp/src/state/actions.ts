@@ -343,8 +343,10 @@ export const filterGeoJSON = action('filterGeoJSON', ({ vid, day }: { vid: strin
 
 export const getDateList = action(() => {
   if (!_daytracks) return [];
-  return Object.keys(_daytracks);
+  const dates = Object.keys(_daytracks);
+  return dates.sort();
 });
+
 
 export const getVehicleIDsForDate = action((date: string) => {
   if (!_daytracks || !_daytracks[date]) return [];
