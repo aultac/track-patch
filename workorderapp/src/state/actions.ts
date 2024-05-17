@@ -1,7 +1,7 @@
 import { runInAction, action } from 'mobx';
 import { state, ActivityMessage, ParsingState, VehicleDayTrackSeg } from './state';
 import log from '../log';
-import type { FeatureCollection, GeoJSON } from 'geojson';
+import type { FeatureCollection, GeoJSON, Position } from 'geojson';
 import { assertWorkOrder, DayTracks, WorkOrder } from '@track-patch/lib';
 import readtracks from './readtracks-worker.js'; // I couldn't get this to work as a worker
 import xlsx from 'xlsx-js-style';
@@ -14,6 +14,8 @@ import { assertRoadSegment, computePointsOnRoadSegmentForVehicleOnDay, computeSe
 import { geohash } from '@track-patch/gps2road';
 import allRoadSegments from './workorder_roadsegments.json';
 import uniqolor from 'uniqolor';
+import { LineString } from '@turf/turf';
+import { mapRef } from '../Map';
 
 dayjs.extend(customParseFormat);
 const { info, warn } = log.get("actions");
@@ -80,6 +82,43 @@ export const search = action('search', async (search: string) => {
 export const page = action('page', (page: typeof state.page): void => {
   state.page = page;
 });
+
+export const setViewport = action('setViewport', (viewport: typeof state.viewport) => {
+  state.viewport = viewport;
+  if (mapRef) {
+    mapRef.current?.fitBounds(viewport);
+  }
+});
+export const recenterMapOnFilteredGeoJSON = action('recenterMapOnFilteredGeoJSON', () => {
+  const tracks = filteredGeoJSON();
+  if (!tracks || tracks.features.length > 0) return;
+  const allCoordinates = tracks.features.reduce((acc, feature) => {
+    const coordinates = (feature.geometry as LineString).coordinates;
+    return acc.concat(coordinates);
+  }, [] as Position[]);
+
+  const minLongitude = Math.min(...allCoordinates.map(coord => coord[0]));
+  const maxLongitude = Math.max(...allCoordinates.map(coord => coord[0]));
+  const minLatitude = Math.min(...allCoordinates.map(coord => coord[1]));
+  const maxLatitude = Math.max(...allCoordinates.map(coord => coord[1]));
+
+  const longitude = (minLongitude + maxLongitude) / 2;
+  const latitude = (minLatitude + maxLatitude) / 2;
+  const zoom = Math.max(
+    0,
+    Math.min(
+      20,
+      Math.log2(360 / ((maxLongitude - minLongitude) * Math.cos((maxLatitude + minLatitude) / 2 * Math.PI / 180))) - 1
+    )
+  );
+
+  setViewport({
+    ...state.viewport,
+    longitude,
+    latitude,
+    zoom: Math.floor(zoom), // Adjust zoom level as necessary
+  });
+})
 
 export const popActivity = action('popActivity', () => {
   if (state.activityLog.length < 1) return;
@@ -337,6 +376,7 @@ export const filterGeoJSON = action('filterGeoJSON', ({ vid, day }: { vid: strin
   // Update the filteredGeoJSON state
   runInAction(() => { _filteredGeoJSON = filteredGeoJSON; });
   runInAction(() => { state.filteredGeoJSON.rev++ });
+  recenterMapOnFilteredGeoJSON();
 });
 
 

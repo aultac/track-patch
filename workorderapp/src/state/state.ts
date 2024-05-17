@@ -28,6 +28,14 @@ export type State = {
   page: 'map',
   activityLog: ActivityMessage[],
   search: string,
+  viewport: {
+    longitude: number,
+    latitude: number,
+    zoom: number,
+    bearing: number,
+    pitch: number,
+    padding: { left: number, right: number, top: number, bottom: number },
+  }
 
   show: {
     roads: Boolean,
@@ -98,6 +106,14 @@ export const state = observable<State>({
   },
   activityLog: [],
   search: '',
+  viewport: {
+    longitude: -86.8,
+    latitude: 39.8,
+    zoom: 6.3,
+    bearing: 0,
+    pitch: 0,
+    padding: { left: 0, right: 0, top: 0, bottom: 0},
+  },
   parsing: {
     inprogress: false,
     estimatedRows: 0,

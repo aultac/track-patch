@@ -1,7 +1,7 @@
 import React from 'react';
 import { observer } from 'mobx-react-lite';
 import log from './log';
-import ReactMapGl, { Source, Layer, MapLayerMouseEvent, ViewState, Marker } from 'react-map-gl';
+import ReactMapGl, { Source, Layer, MapLayerMouseEvent, Marker, MapRef } from 'react-map-gl';
 import { context } from './state';
 import { MapHoverInfo } from './MapHoverInfo';
 import type { GeoJSON, FeatureCollection, LineString, Position } from 'geojson';
@@ -15,17 +15,10 @@ const MAPBOX_TOKEN = 'pk.eyJ1IjoiYXVsdGFjIiwiYSI6ImNsMXA4MzU3NTAzbzUzZW55ajhiM2F
 const bad = { color: 'red' };
 const good = { color: 'green' };
 
+export let mapRef: React.MutableRefObject<MapRef | undefined> | null = null;
 export const Map = observer(function Map() {
+  mapRef = React.useRef<MapRef>()!;
   const { state, actions } = React.useContext(context);
-  const [viewport, setViewport] = React.useState<ViewState>({
-    longitude: -86.8,
-    latitude: 39.8,
-    zoom: 6.3,
-    bearing: 0,
-    pitch: 0,
-    padding: { top: 0, bottom: 0, right: 0, left: 0 }
-  });
-
   //-------------------------------------------------------------------
   // Filter any roads/milemarkers if available:
   // Access the rev so we are updated when it changes.  Have to access it BEFORE !geojson or it might not re-render
@@ -84,8 +77,8 @@ export const Map = observer(function Map() {
         )
       );
 
-      setViewport({
-        ...viewport,
+      actions.setViewport({
+        ...state.viewport,
         longitude,
         latitude,
         zoom: Math.floor(zoom), // Adjust zoom level as necessary
@@ -147,7 +140,7 @@ export const Map = observer(function Map() {
   return (
     <ReactMapGl
       mapboxAccessToken={MAPBOX_TOKEN}
-      {...viewport}
+      initialViewState={state.viewport}
       style={{ width: '70vw', height: '90vh' }}
       mapStyle="mapbox://styles/mapbox/satellite-streets-v11"
       onClick={onClick}
