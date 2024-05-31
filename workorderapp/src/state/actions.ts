@@ -10,7 +10,7 @@ import dayjs from 'dayjs';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
 import { FileReader } from '@tanker/file-reader';
 import { downloadBlob } from './downloadBlob';
-import { assertRoadSegment, computePointsOnRoadSegmentForVehicleOnDay, computeSecondsOnRoadSegmentForVehicleOnDay, saveWorkorders, vehicleidFromResourceName } from './workorder_helpers';
+import { assertRoadSegment, computePointsOnRoadSegmentForVehicleOnDay, computeSecondsOnRoadSegmentForVehicleOnDay, saveWorkorders, vehicleidFromResourceName , computeSecondsForVehicleOnDay} from './workorder_helpers';
 import { geohash } from '@track-patch/gps2road';
 import allRoadSegments from './workorder_roadsegments.json';
 import uniqolor from 'uniqolor';
@@ -287,9 +287,10 @@ export function roadSegTracksForVOnD() { return _roadSegTracksForVOnD};
 export const validateWorkorders = action('validateWorkorders', async () => {
   if (!_knownWorkorders) throw new Error('No work orders to validate');
 
-  //console.log(_knownWorkorders)
-  for (const r of _knownWorkorders) {
+  const workorderMap = new Map();
 
+  // Aggregate work orders by vehicle ID and day
+  for (const r of _knownWorkorders) {
     if (r['Resource Type'] !== 'Equipment') {
       info('Resource Type', r['Resource Type'], 'is not Equipment');
       continue; // this is the only thing we can identify right now
@@ -299,13 +300,14 @@ export const validateWorkorders = action('validateWorkorders', async () => {
       info('No Total Hrs');
       continue; // no reported hours means we skip this one
     }
+
     const reported_hours = +(r['Total Hrs']);
     if (isNaN(reported_hours)) {
       info('Reported hours isNaN');
       continue;
     }
 
-    const vid = vehicleidFromResourceName(r['Resource Name'] || '')
+    const vid = vehicleidFromResourceName(r['Resource Name'] || '');
     if (!vid) {
       info('Unable to find vehicle id', vid, 'in Resource Name', r['Resource Name']);
       continue; // we don't recognize this equipment number
@@ -317,23 +319,38 @@ export const validateWorkorders = action('validateWorkorders', async () => {
       continue; // invalid dates don't work either
     }
     const day = workorderday.format('YYYY-MM-DD');
-    const computedSeconds = await computeSecondsOnRoadSegmentForVehicleOnDay({ seg: r, vehicleid: vid, day });
-    const computedPoints = await computePointsOnRoadSegmentForVehicleOnDay({ seg: r, vehicleid: vid, day });
-    const computedHours = computedSeconds / 3600;
-    const match = computedHours ? reported_hours / computedHours : 0;
-    if (computedPoints !==  null && computedHours > 0){
-      computedPoints.ctime = computedHours;
-      computedPoints.rtime = reported_hours;
-      _roadSegTracksForVOnD?.push(computedPoints);
+
+    const key = `${vid}-${day}`;
+    if (!workorderMap.has(key)) {
+      workorderMap.set(key, { vid, day, totalReportedHours: 0, entries: [] });
     }
-    r.match = numeral(match).format('0,0.00%');
-    r.computedHours = numeral(computedHours).format('0,0.00');
-    r.differenceHours = numeral(reported_hours - computedHours).format('0,0.00');
-    info('WE ACTUALLY HAVE A COMPUTED HOURS!!!', computedHours);
+
+    const entry = workorderMap.get(key);
+    entry.totalReportedHours += reported_hours;
+    entry.entries.push(r);
   }
-  _filteredknownWorkorders = _knownWorkorders.filter(w => w.computedHours && +(w.computedHours) > 0)
-  saveWorkorders('validated-workorders.xlsx', _knownWorkorders.filter(w => w.computedHours && +(w.computedHours) > 0));
+
+  // Calculate computed hours for each unique vehicle ID and day
+  for (const [key, value] of workorderMap.entries()) {
+    const { vid, day, totalReportedHours, entries } = value;
+    const computedSeconds = await computeSecondsForVehicleOnDay({ vehicleid: vid, day: day });
+    const computedHours = computedSeconds / 3600;
+
+    const length = entries.length;
+
+    for (const r of entries) {
+      r.computedHours = numeral(computedHours/ length).format('0,0.00');
+      const match = (computedHours / length) ? totalReportedHours / (computedHours / length) : 0;
+      r.match = numeral(match).format('0,0.00%');
+      r.differenceHours = numeral(totalReportedHours - (computedHours / length)).format('0,0.00');
+      r.computedWOHours = numeral(computedHours).format('0,0.00');
+    }
+    info('Computed hours for vehicle ID', vid, 'on day', day, ':', computedHours);
+  }
+  _filteredknownWorkorders = _knownWorkorders.filter(w => w.computedHours && +(w.computedHours) > 0);
+  saveWorkorders('validated-workorders.xlsx', _filteredknownWorkorders);
 });
+
 
 
 let _filteredDayTracks: DayTracks | null = null;
@@ -401,7 +418,7 @@ export const getVehicleIDsForDate = action((date: string) => {
 
     wordersForDate.forEach(wo => {
       const vehicleId = vehicleidFromResourceName(wo['Resource Name'] || '').toString();
-      const computedHrs = parseFloat(wo.computedHours || '0');
+      const computedHrs = parseFloat(wo.computedWOHours || '0');
       const totalHrs = parseFloat(wo['Total Hrs'] || '0');
 
       if (!vehicleDataMap.has(vehicleId)) {
@@ -411,7 +428,7 @@ export const getVehicleIDsForDate = action((date: string) => {
       const existingData = vehicleDataMap.get(vehicleId);
       if (existingData) {
         vehicleDataMap.set(vehicleId, {
-          computedHrs: existingData.computedHrs + computedHrs,
+          computedHrs: computedHrs,
           totalHrs: existingData.totalHrs + totalHrs
         });
       }
@@ -489,6 +506,8 @@ export const loadVehicleActivities = action('loadVehicleActivities', async (file
   runInAction(() => { state.createdWorkOrders.parsing = false; });
 });
 
+
+
 let _createdWorkOrders: WorkOrder[] | null = null;
 export const createdWorkOrders = action('createdWorkOrders', () => _createdWorkOrders);
 export const createWorkOrders = action('createWorkorders', async () => {
@@ -509,7 +528,8 @@ export const createWorkOrders = action('createWorkorders', async () => {
     for (const seg of Object.values(allRoadSegments)) {
       assertRoadSegment(seg);
       const computedSeconds = await computeSecondsOnRoadSegmentForVehicleOnDay({ seg, vehicleid, day });
-      if (computedSeconds) {
+      const computedPoints = await computePointsOnRoadSegmentForVehicleOnDay({ seg, vehicleid, day });
+      if (computedSeconds > 0 && computedPoints !== null) {
         _createdWorkOrders.push({
           ...va,
           ...seg,
@@ -519,10 +539,16 @@ export const createWorkOrders = action('createWorkorders', async () => {
           'Asset Type': 'Snow Route', // I think this probably should have been with the road segment originally.  Hardcoding for now.  TODO
           'WO#': '',
         });
+        computedPoints.ctime = computedSeconds / 3600.0;
+        _roadSegTracksForVOnD?.push(computedPoints);
+      }
+      if (vehicleid === 62018 && computedSeconds > 0){
+        console.log(computedSeconds, computedPoints, seg, vehicleid, day)
       }
     }
   }
   info('Created work orders: ', _createdWorkOrders);
+  _filteredknownWorkorders = _createdWorkOrders;
   runInAction(() => state.createdWorkOrders.workorders.rev++);
   saveWorkorders('created-workorders.xlsx', _createdWorkOrders);
 });

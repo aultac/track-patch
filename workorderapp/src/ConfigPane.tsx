@@ -130,7 +130,19 @@ export const ConfigPane = observer(function ConfigPane() {
         }
       </div>
 
-      <div style={{ padding: '5px', margin: '5px', height: '15%', alignItems: 'center', justifyContent: 'center', display: 'flex', border: '3px dashed #008800', borderRadius: '3px' }}
+      <div style={{ padding: '5px' }}>
+        <label>
+          <input
+            type="checkbox"
+            checked={isVisible}
+            onChange={handleCheckboxChange}
+          /> Validate WorkOrders
+        </label>
+      </div>
+
+
+      {isVisible && (
+        <div style={{ padding: '5px', margin: '5px', height: '15%', alignItems: 'center', justifyContent: 'center', display: 'flex', border: '3px dashed #008800', borderRadius: '3px' }}
         onDragOver={handleFile({ filetype: 'workorders', eventtype: 'drag' })}
         onDrop={handleFile({ filetype: 'workorders', eventtype: 'drop' })}
         onDragEnter={handleFile({ filetype: 'workorders', eventtype: 'drag', inout: true })}
@@ -146,8 +158,10 @@ export const ConfigPane = observer(function ConfigPane() {
               </div>
         }
       </div>
+      )}
 
-      <div style={{ alignItems: 'center', justifyContent: 'center', display: 'flex' }}>
+      {isVisible && (
+        <div style={{ alignItems: 'center', justifyContent: 'center', display: 'flex' }}>
         <Button
           style={{ flexGrow: 1 }}
           onClick={() => actions.validateWorkorders()}
@@ -157,148 +171,136 @@ export const ConfigPane = observer(function ConfigPane() {
           Validate Work Orders (PoC)
         </Button>
       </div>
+      )}
+
+
+      {!isVisible && (
+        <div style={{ padding: '5px', margin: '5px', height: '15%', alignItems: 'center', justifyContent: 'center', display: 'flex', border: '3px dashed #008800', borderRadius: '3px' }}
+        onDragOver={handleFile({ filetype: 'vehicleactivities', eventtype: 'drag' })}
+        onDrop={handleFile({ filetype: 'vehicleactivities', eventtype: 'drop' })}
+        onDragEnter={handleFile({ filetype: 'vehicleactivities', eventtype: 'drag', inout: true })}
+        onDragLeave={handleFile({ filetype: 'vehicleactivities', eventtype: 'drag', inout: false })}
+      >
+        {
+          state.createdWorkOrders.parsing
+            ? 'Reading vehicle activities...'
+            : !state.createdWorkOrders.vehicleActivities.rev
+              ? 'Drop vehicle activities spreadsheet here.'
+              : <div style={{ flexGrow: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                <div>Found {numeral((actions.vehicleActivities() || []).length).format('0,0')} Vehicle Activities</div>
+                {state.createdWorkOrders.workorders.rev > 0
+                  ? <div>Successfully created {numeral(actions.createdWorkOrders()?.length || 0).format('0,0')} Work Orders</div>
+                  : <React.Fragment />
+                }
+              </div>
+        }
+      </div>
+      )}
+
+      {!isVisible && (
+        <div style={{ alignItems: 'center', justifyContent: 'center', display: 'flex' }}>
+        <Button
+          style={{ flexGrow: 1 }}
+          onClick={() => {
+            if (state.createdWorkOrders.parsing) return;
+            actions.createWorkOrders()
+          }}
+          variant="contained"
+          disabled={!actions.vehicleActivities() || !actions.daytracks() || state.createdWorkOrders.parsing || state.createdWorkOrders.workorders.rev > 0}
+        >
+          Create Work Records from GPS Tracks (PoC)
+        </Button>
+      </div>
+      )}
+
 
       <div style={{ padding: '5px' }}>
-        <label>
-          <input
-            type="checkbox"
-            checked={isVisible}
-            onChange={handleCheckboxChange}
-          /> Create WorkOrders
-        </label>
+        <Slider
+          value={state.sliderValue}
+          onChange={handleSliderChange}
+          aria-labelledby="input-slider"
+          min={0.001}
+          max={1}
+          step={0.001}
+        />
+      </div>
 
-        {isVisible && (
+      <div style={{ padding: '5px' }}>
+        <Select
+          value={selectedDate}
+          onChange={handleChangeDate}
+          displayEmpty
+          style={{ marginRight: '50px', marginLeft: '30px' }} // Add spacing between the two Select components
+        >
+          <MenuItem value="" disabled>Select Date</MenuItem>
+          {actions.getDateList().map(date => (
+            <MenuItem key={date} value={date}>
+              {date}
+            </MenuItem>
+          ))}
+        </Select>
+
+        <Select
+          value={selectedVehicle}
+          onChange={handleChangeVehicle}
+          displayEmpty
+          style={{ marginRight: '10px' }} // Add spacing between the two Select components
+        >
+          <MenuItem value="" disabled>Select Vehicle</MenuItem>
+          {vehicleList.map(vehicle => (
+            <MenuItem key={vehicle.vehicleId} value={vehicle.vehicleId}>
+              {vehicle.vehicleId} ({numeral(vehicle.count).format('0,0')} points)
+            </MenuItem>
+          ))}
+        </Select>
+      </div>
+
+
+
+      <div style={{ padding: '5px', marginLeft: '30px' }}>
+        {selectedVehicle && (
           <div>
-            {/* Your draggable div */}
-            <div style={{
-              padding: '25px', margin: '5px', height: '15%', alignItems: 'center',
-              justifyContent: 'center', display: 'flex', border: '3px dashed #008800', borderRadius: '3px'
-            }}
-              onDragOver={() => console.log('Drag over')} // Replace these handlers with your actual functions
-              onDrop={() => console.log('Drop')}
-              onDragEnter={() => console.log('Drag enter')}
-              onDragLeave={() => console.log('Drag leave')}
-            >
-              {/* Dynamic content based on state */}
-              {/* Assuming state.createdWorkOrders.parsing is a placeholder for actual state management logic */}
-              {true  // Placeholder condition, replace with actual state check
-                ? 'Reading vehicle activities...'
-                : true  // Another placeholder condition
-                  ? 'Drop vehicle activities spreadsheet here.'
-                  : <div style={{ flexGrow: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-                    <div>Found {numeral(([] || []).length).format('0,0')} Vehicle Activities</div>
-                    {true  // Placeholder condition
-                      ? <div>Successfully created {numeral(([] || 0).length).format('0,0')} Work Orders</div>
-                      : <React.Fragment />
-                    }
-                  </div>
-              }
-            </div>
-
-            {/* Button to create work records */}
-            <div style={{ alignItems: 'center', justifyContent: 'center', display: 'flex' }}>
-              <Button
-                style={{ flexGrow: 1 }}
-                onClick={() => console.log('Create Work Orders')}  // Replace with your actual function
-                variant="contained"
-                disabled={true}  // Replace with actual condition
-              >
-                Create Work Records from GPS Tracks (PoC)
-              </Button>
-            </div>
-          </div>
-        )}
-        {!isVisible && (
-          <div style={{ padding: '5px' }}>
-            <Slider
-              value={state.sliderValue}
-              onChange={handleSliderChange}
-              aria-labelledby="input-slider"
-              min={0.001}
-              max={1}
-              step={0.001}
-            />
-          </div>
-
-        )}
-        {!isVisible && (
-          <div style={{ padding: '5px' }}>
-            <Select
-              value={selectedDate}
-              onChange={handleChangeDate}
-              displayEmpty
-              style={{ marginRight: '50px', marginLeft: '30px' }} // Add spacing between the two Select components
-            >
-              <MenuItem value="" disabled>Select Date</MenuItem>
-              {actions.getDateList().map(date => (
-                <MenuItem key={date} value={date}>
-                  {date}
-                </MenuItem>
-              ))}
-            </Select>
-
-            <Select
-              value={selectedVehicle}
-              onChange={handleChangeVehicle}
-              displayEmpty
-              style={{ marginRight: '10px' }} // Add spacing between the two Select components
-            >
-              <MenuItem value="" disabled>Select Vehicle</MenuItem>
-              {vehicleList.map(vehicle => (
-                <MenuItem key={vehicle.vehicleId} value={vehicle.vehicleId}>
-                  {vehicle.vehicleId} ({numeral(vehicle.count).format('0,0')} points)
-                </MenuItem>
-              ))}
-            </Select>
-          </div>
-        )}
-        {!isVisible && (
-          <div style={{ padding: '5px', marginLeft: '30px' }}>
-            {selectedVehicle && (
-              <div>
-                Total Computed Hrs: {vehicleList.find(v => v.vehicleId === selectedVehicle)?.computedHrs.toFixed(2)},
-                Total Reported Hrs: {vehicleList.find(v => v.vehicleId === selectedVehicle)?.totalHrs.toFixed(2)}
-              </div>
-            )}
-          </div>
-        )}
-        {!isVisible && (
-          <div style={{ height: '180px', overflow: 'auto', marginLeft: '15px' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', borderRadius: '8px', overflow: 'hidden' }}>
-              <thead style={{ backgroundColor: '#f2f2f2' }}>
-                <tr>
-                  <th style={{ border: '1px solid #ddd', padding: '5px', textAlign: 'left' }}>Segment Name</th>
-                  <th style={{ border: '1px solid #ddd', padding: '5px', textAlign: 'left' }}>Computed Hrs</th>
-                  <th style={{ border: '1px solid #ddd', padding: '5px', textAlign: 'left' }}>Reported Hrs</th>
-                  <th style={{ border: '1px solid #ddd', padding: '5px', textAlign: 'left' }}>Computed Track: {state.csegment}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {roadSegments
-                  .filter(track => track.vid.toString() === selectedVehicle && track.day === selectedDate)
-                  .map((track, index) => (
-                    <tr key={index} style={{ backgroundColor: index % 2 === 0 ? '#f9f9f9' : 'white' }}>
-                      <td style={{ border: '1px solid #ddd', padding: '5px', textAlign: 'left' }}>{track.seg}</td>
-                      <td style={{ border: '1px solid #ddd', padding: '5px', textAlign: 'left' }}>{track.ctime.toFixed(2)}</td>
-                      <td style={{ border: '1px solid #ddd', padding: '5px', textAlign: 'left' }}>{track.rtime.toFixed(2)}</td>
-                      <td style={{ border: '1px solid #ddd', padding: '5px', textAlign: 'left' }}>
-                        <input
-                          type="radio"
-                          name="selectedSegment"
-                          onChange={() => {
-                            actions.updateCsegment(track.seg);
-                            actions.getRoadSegPoints();
-                          }}
-                          checked={state.csegment === track.seg}
-                        />
-                      </td>
-                    </tr>
-                  ))}
-              </tbody>
-            </table>
+            Total Computed Hrs: {vehicleList.find(v => v.vehicleId === selectedVehicle)?.computedHrs.toFixed(2)},
+            Total Reported Hrs: {vehicleList.find(v => v.vehicleId === selectedVehicle)?.totalHrs.toFixed(2)}
           </div>
         )}
       </div>
+
+
+      {!isVisible && (
+        <div style={{ height: '180px', overflow: 'auto', marginLeft: '15px' }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse', borderRadius: '8px', overflow: 'hidden' }}>
+          <thead style={{ backgroundColor: '#f2f2f2' }}>
+            <tr>
+              <th style={{ border: '1px solid #ddd', padding: '5px', textAlign: 'left' }}>Segment Name</th>
+              <th style={{ border: '1px solid #ddd', padding: '5px', textAlign: 'left' }}>Computed Hrs</th>
+              <th style={{ border: '1px solid #ddd', padding: '5px', textAlign: 'left' }}>Computed Track: {state.csegment}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {roadSegments
+              .filter(track => track.vid.toString() === selectedVehicle && track.day === selectedDate)
+              .map((track, index) => (
+                <tr key={index} style={{ backgroundColor: index % 2 === 0 ? '#f9f9f9' : 'white' }}>
+                  <td style={{ border: '1px solid #ddd', padding: '5px', textAlign: 'left' }}>{track.seg}</td>
+                  <td style={{ border: '1px solid #ddd', padding: '5px', textAlign: 'left' }}>{track.ctime.toFixed(2)}</td>
+                  <td style={{ border: '1px solid #ddd', padding: '5px', textAlign: 'left' }}>
+                    <input
+                      type="radio"
+                      name="selectedSegment"
+                      onChange={() => {
+                        actions.updateCsegment(track.seg);
+                        actions.getRoadSegPoints();
+                      }}
+                      checked={state.csegment === track.seg}
+                    />
+                  </td>
+                </tr>
+              ))}
+          </tbody>
+        </table>
+      </div>
+      )}
     </div>
   );
 

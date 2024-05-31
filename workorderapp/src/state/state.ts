@@ -157,7 +157,7 @@ export const state = observable<State>({
   chosenDate: '',
   chosenVehicleID: '',
   sliderValue: 1.0,
-  checkbox: false,
+  checkbox: true,
   csegment: 'NA',
 });
 
