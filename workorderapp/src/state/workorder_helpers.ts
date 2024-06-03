@@ -320,7 +320,7 @@ export async function computeSecondsOnRoadSegmentForVehicleOnDay({ seg, vehiclei
 
     // If we actually ever get here, then things match and we can compute time
     if (index >= dt.track.length - 1) {
-      computedSeconds += 5 * 60; // last point counts for 5 mins no matter what
+      computedSeconds += 10 * 60; // last point counts for 5 mins no matter what
       continue;
     }
     // TODO: should actually compute (using speed, or estimated speed from lat/lon/time of next point)
@@ -328,7 +328,7 @@ export async function computeSecondsOnRoadSegmentForVehicleOnDay({ seg, vehiclei
     // to the road segment of the point itself
     const next = dt.track[index+1]!;
     let duration = next.time.unix() - point.time.unix();
-    if (duration > 5 * 60) duration = 5 * 60;
+    if (duration > 10 * 60) duration = 10 * 60;
     computedSeconds += duration;
   }
   return computedSeconds;

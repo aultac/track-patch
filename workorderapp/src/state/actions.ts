@@ -86,9 +86,10 @@ export const page = action('page', (page: typeof state.page): void => {
 export const setViewport = action('setViewport', (viewport: typeof state.viewport) => {
   state.viewport = viewport;
   if (mapRef) {
-    mapRef.current?.fitBounds(viewport);
+    mapRef.current?.fitBounds([viewport.longitude, viewport.latitude]);
   }
 });
+
 export const recenterMapOnFilteredGeoJSON = action('recenterMapOnFilteredGeoJSON', () => {
   const tracks = filteredGeoJSON();
   if (!tracks || tracks.features.length > 0) return;
@@ -319,15 +320,21 @@ export const validateWorkorders = action('validateWorkorders', async () => {
       continue; // invalid dates don't work either
     }
     const day = workorderday.format('YYYY-MM-DD');
-
-    const key = `${vid}-${day}`;
-    if (!workorderMap.has(key)) {
-      workorderMap.set(key, { vid, day, totalReportedHours: 0, entries: [] });
+    const computedSeconds = await computeSecondsOnRoadSegmentForVehicleOnDay({ seg: r, vehicleid: vid, day });
+    const computedPoints = await computePointsOnRoadSegmentForVehicleOnDay({ seg: r, vehicleid: vid, day });
+    const computedDrivingHrs = await computeSecondsForVehicleOnDay({vehicleid: vid, day})
+    const computedHours = computedSeconds / 3600;
+    const match = computedHours ? reported_hours / computedHours : 0;
+    if (computedPoints !==  null && computedHours > 0){
+      computedPoints.ctime = computedHours;
+      computedPoints.rtime = reported_hours;
+      _roadSegTracksForVOnD?.push(computedPoints);
     }
-
-    const entry = workorderMap.get(key);
-    entry.totalReportedHours += reported_hours;
-    entry.entries.push(r);
+    r.match = numeral(match).format('0,0.00%');
+    r.computedHours = numeral(computedHours).format('0,0.00');
+    r.differenceHours = numeral(reported_hours - computedHours).format('0,0.00');
+    r.computedDriveHours = numeral(computedDrivingHrs/3600).format('0,0.00');
+    info('WE ACTUALLY HAVE A COMPUTED HOURS!!!', computedHours);
   }
 
   // Calculate computed hours for each unique vehicle ID and day
@@ -418,17 +425,17 @@ export const getVehicleIDsForDate = action((date: string) => {
 
     wordersForDate.forEach(wo => {
       const vehicleId = vehicleidFromResourceName(wo['Resource Name'] || '').toString();
-      const computedHrs = parseFloat(wo.computedWOHours || '0');
+      const computedHrs = parseFloat(wo.computedDriveHours || '0');
       const totalHrs = parseFloat(wo['Total Hrs'] || '0');
 
       if (!vehicleDataMap.has(vehicleId)) {
-        vehicleDataMap.set(vehicleId, { computedHrs: 0, totalHrs: 0 });
+        vehicleDataMap.set(vehicleId, { computedHrs: computedHrs, totalHrs: 0 });
       }
 
       const existingData = vehicleDataMap.get(vehicleId);
       if (existingData) {
         vehicleDataMap.set(vehicleId, {
-          computedHrs: computedHrs,
+          computedHrs: existingData.computedHrs,
           totalHrs: existingData.totalHrs + totalHrs
         });
       }

@@ -2,7 +2,9 @@ import React from 'react';
 import { observer } from 'mobx-react-lite';
 import log from './log';
 import { context } from './state';
-import { Button, LinearProgress, Select, Autocomplete, MenuItem, TextField, SelectChangeEvent, Slider } from '@mui/material';
+import { Button, LinearProgress, Select, Autocomplete } from '@mui/material';
+import { MenuItem, TextField, SelectChangeEvent, Slider } from '@mui/material';
+import {Paper, Table, TableContainer, TableCell, TableBody, TableRow, TableHead} from '@mui/material';
 import numeral from 'numeral';
 
 const { info, warn } = log.get('config-pane');
@@ -260,8 +262,135 @@ export const ConfigPane = observer(function ConfigPane() {
       <div style={{ padding: '5px', marginLeft: '30px' }}>
         {selectedVehicle && (
           <div>
-            Total Computed Hrs: {vehicleList.find(v => v.vehicleId === selectedVehicle)?.computedHrs.toFixed(2)},
-            Total Reported Hrs: {vehicleList.find(v => v.vehicleId === selectedVehicle)?.totalHrs.toFixed(2)}
+            {/* Your draggable div */}
+            <div style={{
+              padding: '25px', margin: '5px', height: '15%', alignItems: 'center',
+              justifyContent: 'center', display: 'flex', border: '3px dashed #008800', borderRadius: '3px'
+            }}
+              onDragOver={() => console.log('Drag over')} // Replace these handlers with your actual functions
+              onDrop={() => console.log('Drop')}
+              onDragEnter={() => console.log('Drag enter')}
+              onDragLeave={() => console.log('Drag leave')}
+            >
+              {/* Dynamic content based on state */}
+              {/* Assuming state.createdWorkOrders.parsing is a placeholder for actual state management logic */}
+              {true  // Placeholder condition, replace with actual state check
+                ? 'Reading vehicle activities...'
+                : true  // Another placeholder condition
+                  ? 'Drop vehicle activities spreadsheet here.'
+                  : <div style={{ flexGrow: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                    <div>Found {numeral(([] || []).length).format('0,0')} Vehicle Activities</div>
+                    {true  // Placeholder condition
+                      ? <div>Successfully created {numeral(([] || 0).length).format('0,0')} Work Orders</div>
+                      : <React.Fragment />
+                    }
+                  </div>
+              }
+            </div>
+
+            {/* Button to create work records */}
+            <div style={{ alignItems: 'center', justifyContent: 'center', display: 'flex' }}>
+              <Button
+                style={{ flexGrow: 1 }}
+                onClick={() => console.log('Create Work Orders')}  // Replace with your actual function
+                variant="contained"
+                disabled={true}  // Replace with actual condition
+              >
+                Create Work Records from GPS Tracks (PoC)
+              </Button>
+            </div>
+          </div>
+        )}
+        {!isVisible && (
+          <div style={{ padding: '5px' }}>
+            <Slider
+              value={state.sliderValue}
+              onChange={handleSliderChange}
+              aria-labelledby="input-slider"
+              min={0.001}
+              max={1}
+              step={0.001}
+            />
+          </div>
+
+        )}
+        {!isVisible && (
+          <div style={{ padding: '5px' }}>
+            <Select
+              value={selectedDate}
+              onChange={handleChangeDate}
+              displayEmpty
+              style={{ marginRight: '50px', marginLeft: '30px' }} // Add spacing between the two Select components
+            >
+              <MenuItem value="" disabled>Select Date</MenuItem>
+              {actions.getDateList().map(date => (
+                <MenuItem key={date} value={date}>
+                  {date}
+                </MenuItem>
+              ))}
+            </Select>
+
+            <Select
+              value={selectedVehicle}
+              onChange={handleChangeVehicle}
+              displayEmpty
+              style={{ marginRight: '10px' }} // Add spacing between the two Select components
+            >
+              <MenuItem value="" disabled>Select Vehicle</MenuItem>
+              {vehicleList.map(vehicle => (
+                <MenuItem key={vehicle.vehicleId} value={vehicle.vehicleId}>
+                  {vehicle.vehicleId} ({numeral(vehicle.count).format('0,0')} points)
+                </MenuItem>
+              ))}
+            </Select>
+          </div>
+        )}
+        {!isVisible && (
+          <div style={{ padding: '4px', marginLeft: '15px' }}>
+            {selectedVehicle && (
+              <div>
+                Computed Drive Hrs: {vehicleList.find(v => v.vehicleId === selectedVehicle)?.computedHrs.toFixed(2)},
+                Reported Drive Hrs: {vehicleList.find(v => v.vehicleId === selectedVehicle)?.totalHrs.toFixed(2)}
+              </div>
+            )}
+          </div>
+        )}
+        {!isVisible && (
+          <div style={{ height: '180px', overflow: 'auto', marginLeft: '15px' }}>
+            <TableContainer component={Paper}>
+              <Table sx={{ minWidth: 350 }} size="small" aria-label="a dense table">
+                <TableHead>
+                  <TableRow>
+                    <TableCell style={{ border: '1px solid #ddd', padding: '5px', textAlign: 'left' }}>Segment Name</TableCell>
+                    <TableCell style={{ border: '1px solid #ddd', padding: '5px', textAlign: 'left' }}>Computed Hrs</TableCell>
+                    <TableCell style={{ border: '1px solid #ddd', padding: '5px', textAlign: 'left' }}>Reported Hrs</TableCell>
+                    <TableCell style={{ border: '1px solid #ddd', padding: '5px', textAlign: 'left' }}>Selected Track</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {roadSegments
+                    .filter(track => track.vid.toString() === selectedVehicle && track.day === selectedDate)
+                    .map((track, index) => (
+                      <TableRow>
+                        <TableCell style={{ border: '1px solid #ddd', padding: '5px', textAlign: 'left' }}>{track.seg}</TableCell>
+                        <TableCell style={{ border: '1px solid #ddd', padding: '5px', textAlign: 'left' }}>{track.ctime.toFixed(2)}</TableCell>
+                        <TableCell style={{ border: '1px solid #ddd', padding: '5px', textAlign: 'left' }}>{track.rtime.toFixed(2)}</TableCell>
+                        <TableCell style={{ border: '1px solid #ddd', padding: '5px', textAlign: 'left' }}>
+                          <input
+                            type="radio"
+                            name="selectedSegment"
+                            onChange={() => {
+                              actions.updateCsegment(track.seg);
+                              actions.getRoadSegPoints();
+                            }}
+                            checked={state.csegment === track.seg}
+                          />
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                </TableBody>
+              </Table>
+          </TableContainer>
           </div>
         )}
       </div>
