@@ -132,10 +132,11 @@ export const Map = observer(function Map() {
   const interactiveLayerIds = [];
   if (roads) interactiveLayerIds.push('roads');
   if (milemarkers) interactiveLayerIds.push('milemarkers');
-  if (tracks) interactiveLayerIds.push('tracks');
+  if (tracks && !troadSegPoints) interactiveLayerIds.push('tracks');
   if (troadSegPoints) interactiveLayerIds.push('troadSegPoints')
 
-  console.log('AAAAAA', troadSegPoints, tracks);
+  console.log('Map.tsx: troadSegPoints = ', troadSegPoints, ', and interactiveLayerIds = ', interactiveLayerIds);
+  console.log('Map.tsx: tracks = ', tracks, ', and interactiveLayerIds = ', interactiveLayerIds);
 
   return (
     <ReactMapGl
@@ -171,7 +172,7 @@ export const Map = observer(function Map() {
       }
 
       {
-        !tracks ? (
+        !tracks || troadSegPoints? (
           <React.Fragment />
         ) : (
           <Source type="geojson" data={tracks as any} lineMetrics={true}>
@@ -204,11 +205,11 @@ export const Map = observer(function Map() {
         )
       }
 
-      {troadSegPoints ? <React.Fragment /> :
+      {!troadSegPoints ? <React.Fragment /> :
         <Source type="geojson" data={troadSegPoints as any}>
           <Layer id="troadSegPoints" type="line" paint={{
-            'line-color': 'black',
-            'line-width': 15,
+            'line-color': 'purple',
+            'line-width': 50,
           }} />
         </Source>
 

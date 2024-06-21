@@ -74,10 +74,10 @@ export const ConfigPane = observer(function ConfigPane() {
         switch (filetype) {
           case 'tracks':
             actions.parsingInProgress(true);
-            actions.loadDayTracks(files[0]!);
+            actions.loadDayTracks({ file: files[0]! });
             break;
           case 'workorders':
-            actions.loadKnownWorkorders(files[0]!);
+            actions.loadKnownWorkorders({ file: files[0]! });
             break;
           case 'vehicleactivities':
             actions.loadVehicleActivities(files[0]!);

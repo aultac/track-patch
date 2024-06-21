@@ -176,18 +176,28 @@ let _daytracksGeojson: FeatureCollection | null = null;
 export function daytracksGeoJSON() { return _daytracksGeojson; }
 
 // This populates both _daytracks and _daytracksGeojson
-export const loadDayTracks = action('loadDayTracks', async (file: File) => {
+export const loadDayTracks = action('loadDayTracks', async ({file, jsonstr }: { file?: File, jsonstr?: string }) => {
+  if (!file && !jsonstr) throw new Error('ERROR: did not pass either file or json to loadDayTracks');
+  if (!file) {
+    file = new File([""], "ProcessedTracks.json");
+  }
+  let filesize = file.size;
+  if (jsonstr) filesize = jsonstr.length;
   parsingInProgress(true);
-  parsingEstimatedRows(file.size / 240); // seems to be around 240 bytes/record
+  parsingEstimatedRows(filesize / 240); // seems to be around 240 bytes/record
+
 
   // Read the already-processes JSON tracks
-  if (file.name.match(/\.json$/)) {
+  if (file.name.match(/\.json$/) || jsonstr) {
     info('Parsing input file', file.name, 'as JSON...');
     parsingState('preprocessed');
     parsingInProgress(true);
-    const f = new FileReader(file);
     try {
-      const resultstr = await f.readAsText();
+      let resultstr = jsonstr;
+      if (!resultstr) {
+        const f = new FileReader(file);
+        resultstr = await f.readAsText();
+      }
       const result = JSON.parse(resultstr);
       if (!result || typeof result.daytracks !== 'object') {
         throw new Error('No daytracks present.');
@@ -257,10 +267,14 @@ export const exportProcessedTracks = action('exportProcessedTracks', async () =>
 let _knownWorkorders: WorkOrder[] | null = null;
 export function knownWorkorders() { return _knownWorkorders };
 export function numKnownWorkorders() { return _knownWorkorders ? _knownWorkorders.length : 0 }
-export const loadKnownWorkorders = action('loadKnownWorkorders', async (file: File) => {
+export const loadKnownWorkorders = action('loadKnownWorkorders', async ({file, arraybuffer}: { file?: File, arraybuffer?: ArrayBuffer }) => {
+  if (!file && !arraybuffer) throw new Error('ERROR: did not pass either file or arraybuffer to loadKnownWorkorders');
+  if (file) {
+    arraybuffer = await file.arrayBuffer();
+  }
   knownWorkOrdersParsing(true);
   info('Reading workorders file...');
-  const wb = xlsx.read(await file.arrayBuffer());
+  const wb = xlsx.read(arraybuffer);
   info('sheet_to_json workorders...');
   const records = xlsx.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { raw: false });
   info('assert proper workorders...');
@@ -285,7 +299,8 @@ let _filteredknownWorkorders: WorkOrder[] | null = null;
 let _roadSegTracksForVOnD: VehicleDayTrackSeg [] = [];
 export function roadSegTracksForVOnD() { return _roadSegTracksForVOnD};
 
-export const validateWorkorders = action('validateWorkorders', async () => {
+export const validateWorkorders = action('validateWorkorders', async (opts?: { nosave?: true }) => {
+  opts = opts || {};
   if (!_knownWorkorders) throw new Error('No work orders to validate');
 
   //console.log(_knownWorkorders)
@@ -335,7 +350,9 @@ export const validateWorkorders = action('validateWorkorders', async () => {
     info('WE ACTUALLY HAVE A COMPUTED HOURS!!!', computedHours);
   }
   _filteredknownWorkorders = _knownWorkorders.filter(w => w.computedHours && +(w.computedHours) > 0)
-  saveWorkorders('validated-workorders.xlsx', _knownWorkorders.filter(w => w.computedHours && +(w.computedHours) > 0));
+  if (!opts.nosave) {
+    saveWorkorders('validated-workorders.xlsx', _knownWorkorders.filter(w => w.computedHours && +(w.computedHours) > 0));
+  }
 });
 
 
@@ -538,9 +555,16 @@ let _roadSegPoints: FeatureCollection | null = null;
 export function roadSegPoints() { return _roadSegPoints; }
 export const getRoadSegPoints = action('getRoadSegPoints', () => {
 
-  let froadSegments = _roadSegTracksForVOnD.filter(item => item.day === state.chosenDate);
-  froadSegments = froadSegments.filter(item => item.vid.toString() === state.chosenVehicleID);
-  froadSegments = froadSegments.filter(item => item.seg === state.csegment);
+  let froadSegments = _roadSegTracksForVOnD;
+  if (state.chosenDate) {
+    froadSegments = froadSegments.filter(item => item.day === state.chosenDate);
+  }
+  if (state.chosenVehicleID) {
+    froadSegments = froadSegments.filter(item => item.vid.toString() === state.chosenVehicleID);
+  }
+  if (state.csegment) {
+    froadSegments = froadSegments.filter(item => item.seg === state.csegment);
+  }
   const roadSegPoints: FeatureCollection = {
     type: 'FeatureCollection',
     features: [],

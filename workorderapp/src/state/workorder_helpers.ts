@@ -198,7 +198,7 @@ export async function computePointsOnRoadSegmentForVehicleOnDay({ seg, vehicleid
       if (endpost.number === pointmax.post.number && endoffset > pointmax.offset) continue;
       // Otherwise, the point itself and its offsets must be between this segment's start/end posts and offsets
     }
-    computedPoints.push([point.lat, point.lon])
+    computedPoints.push([point.lon, point.lat])
     if (index === 0){
       startTime = point.time.toString();
     }
