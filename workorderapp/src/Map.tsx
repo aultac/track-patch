@@ -209,7 +209,7 @@ export const Map = observer(function Map() {
         <Source type="geojson" data={troadSegPoints as any}>
           <Layer id="troadSegPoints" type="line" paint={{
             'line-color': 'purple',
-            'line-width': 50,
+            'line-width': 5,
           }} />
         </Source>
 
