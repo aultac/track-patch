@@ -166,7 +166,7 @@ export const ConfigPane = observer(function ConfigPane() {
           variant="contained"
           disabled={!actions.knownWorkorders() || !actions.daytracks()}
         >
-          Validate Work Orders (PoC)
+          Validate Work Orders
         </Button>
       </div>
 

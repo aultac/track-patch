@@ -15,6 +15,14 @@
     "End Post": "0",
     "End Offset": "0.971"
   },
+  "SR 827-0--0.0009-2-0.5462": {
+    "Inventory Asset": "23-7-204",
+    "Route (Ref)": "SR 827",
+    "Start Post": "0",
+    "Start Offset": "-0.0009",
+    "End Post": "2",
+    "End Offset": "0.5462"
+  },
   "US 41-98-0.6678-105-0.2": {
     "Inventory Asset": "11-01-12.",
     "Route (Ref)": "US 41",
