@@ -3,6 +3,7 @@ import type * as mainlib from '../../browser/index.js';
 
 import roadamesTest from '../roadnames.test.js';
 import gps2roadTest from '../gps2road.test.js';
+import anugunjTest from '../anugunj.test.js';
 
 const { info, error } = log.get('browser#test');
 
@@ -14,6 +15,10 @@ localStorage.debug = '*';
 
 document.addEventListener('DOMContentLoaded', async() => {
   const libsundertest = (window as unknown as WindowWithLibs).libsundertest;
+
+  if (window.location.hostname === 'localhost') {
+    libsundertest.setBaseUrl(window.location.protocol + '//' + window.location.host);
+  }
 
   const root = document.getElementById("root");
   if (!root) {
@@ -28,7 +33,10 @@ document.addEventListener('DOMContentLoaded', async() => {
 
       info('gps2road tests');
       await gps2roadTest(libsundertest);
-      
+
+      info('anugunj tests');
+      await anugunjTest(libsundertest);
+
       info('All tests successful');
     } catch(e: any) {
       info('FAILED: tests threw exception: ', e);

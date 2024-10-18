@@ -1,20 +1,23 @@
 import debug from 'debug';
 import 'dotenv/config'; // loads all environment variables found in .env in project root
 import { Command } from 'commander';
+import * as gps2road from '../../gps2road/dist/node/index.js';
+
+/*
 import { csvToDayTracksJSON, writeToJSON, loadFromJSON } from './load.js';
 import { writeFile, mkdir } from 'fs/promises';
-import { splitGeohashRoads } from './split-geohash-roads.js';
+//import { splitGeohashRoads } from './split-geohash-roads.js';
 import { splitDayTracks } from './split-day-tracks.js';
 import { geo2csv } from './geo2csv.js';
 import fgdb from 'fgdb';
- 
+*/ 
 const info = debug('trackpatch/cli:info');
 const warn = debug('trackpatch/cli:warn');
 
 (async () => {
 const program = new Command();
 program.name('Track-Patch Command-line Interface');
-
+/*
 program.command('split-day-tracks')
   .description('Split an INDOT archive CSV file of vehicle tracks into one file per week')
   .requiredOption('-f, --file <input_file>', 'input CSV file')
@@ -27,7 +30,6 @@ program.command('split-geohash-roads')
   .option('-f, --file <input_file>', 'single file to convert')
   .option('-o, --output', 'output directory to accumulate geohash-based geojson files', '../workorderapp/public/roads-by-geohash')
   .action(splitGeohashRoads);
-
 
 program.command('geo2csv')
   .description('Get a CSV of all the properties of a geojson feature collection')
@@ -95,6 +97,12 @@ program.command('cl-fromgdb')
     info('Writing result to', outputfile);
     await writeFile(outputfile, JSON.stringify(centerlines, null, '  '));
     print(centerlines);
+  });
+*/
+program.command('gps2road')
+  .description('Anugunj\'s playground for gps2road')
+  .action(async () => {
+    info('I am running the gps2road stuff');
   });
 
 

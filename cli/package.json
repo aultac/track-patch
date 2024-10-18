@@ -17,6 +17,7 @@
     "@oada/client": "^4.0.1",
     "@overleaf/o-error": "^3.4.0",
     "@track-patch/lib": "workspace:^",
+    "@track-patch/gps2road": "workspace:^",
     "@tsconfig/node16": "^1.0.2",
     "@turf/turf": "^6.5.0",
     "@types/debug": "^4.1.7",
