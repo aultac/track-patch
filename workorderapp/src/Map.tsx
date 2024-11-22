@@ -5,15 +5,10 @@ import ReactMapGl, { Source, Layer, MapLayerMouseEvent, Marker, MapRef } from 'r
 import { context } from './state';
 import { MapHoverInfo } from './MapHoverInfo';
 import type { GeoJSON, FeatureCollection, LineString, Position } from 'geojson';
-import { VehicleDayTrackSeg } from './state/state';
 
-
-const { info, warn } = log.get('map');
 
 const MAPBOX_TOKEN = 'pk.eyJ1IjoiYXVsdGFjIiwiYSI6ImNsMXA4MzU3NTAzbzUzZW55ajhiM2FsOGwifQ.8Umhtpm98ty92vbos4kM3Q';
 
-const bad = { color: 'red' };
-const good = { color: 'green' };
 
 export let mapRef: React.MutableRefObject<MapRef | undefined> | null = null;
 export const Map = observer(function Map() {
@@ -46,67 +41,6 @@ export const Map = observer(function Map() {
     tracks = null;
   }
 
-  let troadSegPoints: FeatureCollection | null = actions.roadSegPoints();
-  if (state.roadSegPoints.rev < 1 || !troadSegPoints) {
-    troadSegPoints = null;
-  }
-
-  const [lastTrackCoordinate, setLastTrackCoordinate] = React.useState([-86.8, 39.8]);
-  const [firstTrackCoordinate, setFirstTrackCoordinate] = React.useState([-86.8, 39.8]);
-
-  React.useEffect(() => {
-    if (tracks && tracks.features.length > 0) {
-      const allCoordinates = tracks.features.reduce((acc, feature) => {
-        const coordinates = (feature.geometry as LineString).coordinates;
-        return acc.concat(coordinates);
-      }, [] as Position[]);
-
-      const minLongitude = Math.min(...allCoordinates.map(coord => coord[0]));
-      const maxLongitude = Math.max(...allCoordinates.map(coord => coord[0]));
-      const minLatitude = Math.min(...allCoordinates.map(coord => coord[1]));
-      const maxLatitude = Math.max(...allCoordinates.map(coord => coord[1]));
-
-      const padding = 50; // Adjust padding as necessary
-      const longitude = (minLongitude + maxLongitude) / 2;
-      const latitude = (minLatitude + maxLatitude) / 2;
-      const zoom = Math.max(
-        0,
-        Math.min(
-          20,
-          Math.log2(360 / ((maxLongitude - minLongitude) * Math.cos((maxLatitude + minLatitude) / 2 * Math.PI / 180))) - 1
-        )
-      );
-
-      actions.setViewport({
-        ...state.viewport,
-        longitude,
-        latitude,
-        zoom: Math.floor(zoom), // Adjust zoom level as necessary
-      });
-    }
-  }, [tracks]);
-
-
-
-  React.useEffect(() => {
-    if (tracks && tracks.features.length > 0) {
-      const firstTrack = tracks.features[0];
-      const firstCoordinate = (firstTrack.geometry as LineString).coordinates[0];
-      setFirstTrackCoordinate([firstCoordinate[0], firstCoordinate[1]]);
-    }
-  }, [tracks]);
-
-
-  React.useEffect(() => {
-    if (tracks && tracks.features.length > 0) {
-      const lastTrack = tracks.features[tracks.features.length - 1];
-      const total_coord = (lastTrack.geometry as LineString).coordinates.length
-      const lastCoordinate = (lastTrack.geometry as LineString).coordinates[total_coord - 1];
-      setLastTrackCoordinate([lastCoordinate[0], lastCoordinate[1]]);
-    }
-  }, [tracks]);
-
-
   //------------------------------------------------------------
   // Mouse Events:
   const onHover = React.useCallback((evt: MapLayerMouseEvent) => {
@@ -132,12 +66,7 @@ export const Map = observer(function Map() {
   const interactiveLayerIds = [];
   if (roads) interactiveLayerIds.push('roads');
   if (milemarkers) interactiveLayerIds.push('milemarkers');
-  if (tracks && !troadSegPoints) interactiveLayerIds.push('tracks');
-  if (troadSegPoints) interactiveLayerIds.push('troadSegPoints')
-
-  console.log('Map.tsx: troadSegPoints = ', troadSegPoints, ', and interactiveLayerIds = ', interactiveLayerIds);
-  console.log('Map.tsx: tracks = ', tracks, ', and interactiveLayerIds = ', interactiveLayerIds);
-
+  
   return (
     <ReactMapGl
       mapboxAccessToken={MAPBOX_TOKEN}
@@ -172,9 +101,8 @@ export const Map = observer(function Map() {
       }
 
       {
-        !tracks || troadSegPoints? (
-          <React.Fragment />
-        ) : (
+        !tracks ?  <React.Fragment />
+        : (
           <Source type="geojson" data={tracks as any} lineMetrics={true}>
             <Layer
               id="tracks"
@@ -204,29 +132,6 @@ export const Map = observer(function Map() {
           </Source>
         )
       }
-
-      {!troadSegPoints ? <React.Fragment /> :
-        <Source type="geojson" data={troadSegPoints as any}>
-          <Layer id="troadSegPoints" type="line" paint={{
-            'line-color': 'purple',
-            'line-width': 5,
-          }} />
-        </Source>
-
-      }
-
-
-      {firstTrackCoordinate && (
-        <Marker longitude={firstTrackCoordinate[0]} latitude={firstTrackCoordinate[1]}>
-          <div style={{ backgroundColor: 'pink', borderRadius: '50%', width: '10px', height: '10px', border: '3px solid white' }} />
-        </Marker>
-      )}
-
-      {lastTrackCoordinate && (
-        <Marker longitude={lastTrackCoordinate[0]} latitude={lastTrackCoordinate[1]}>
-          <div style={{ backgroundColor: 'blue', borderRadius: '50%', width: '10px', height: '10px', border: '3px solid white' }} />
-        </Marker>
-      )}
 
     </ReactMapGl>
   );
