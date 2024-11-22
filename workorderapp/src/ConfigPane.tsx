@@ -100,18 +100,18 @@ export const ConfigPane = observer(function ConfigPane() {
                                     ? <div>Identifying roads: {numeral(numrows).format('0,0')} Points</div>
                                     : state.parsing.state === 'preprocessed'
                                         ? <div>Loading preprocessd tracks...</div>
-                                        : <div>Loaded {numeral(numrows).format('0,0')} Points ({state.parsing.state})</div>
+                                        : <div style={{ fontSize: '12px' }}>Loaded {numeral(numrows).format('0,0')} Points ({state.parsing.state})</div>
                                 }
 
                                 {state.parsing.state !== 'preprocessed'
-                                    ? <div style={{ flexGrow: 1, width: '100%' }}>
+                                    ? <div style={{ flexGrow: 1, width: '80%' }}>
                                         <LinearProgress variant="determinate" value={100 * numrows / (state.parsing.estimatedRows || 1)} />
                                     </div>
                                     : <React.Fragment />
                                 }
 
                                 {state.parsing.inprogress ? <React.Fragment /> :
-                                    <Button onClick={() => actions.exportProcessedTracks()}>Export Processed Tracks</Button>
+                                    <Button onClick={() => actions.exportProcessedTracks()} style={{ fontSize: '12px' }}>Export Processed Tracks</Button>
                                 }
                             </div>
                     }
