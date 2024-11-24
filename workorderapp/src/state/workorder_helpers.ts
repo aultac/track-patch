@@ -41,12 +41,13 @@ export async function computeSecondsForVehicleOnDay({ vehicleid, day }: { vehicl
         if (index >= dt.track.length - 1) {
             continue;
         }
+        if(!point.road) continue;
         // TODO: should actually compute (using speed, or estimated speed from lat/lon/time of next point)
         // when the vehicle would cross the start or end offset boundary, rather than attribute all the time
         // to the road segment of the point itself
         const next = dt.track[index + 1]!;
         let duration = next.time.unix() - point.time.unix();
-        if (duration > 10 * 60) continue;
+        if (duration > 15 * 60) continue;
         computedSeconds += duration;
     }
     return computedSeconds;
@@ -330,7 +331,7 @@ export async function computeSecondsOnRoadSegmentForVehicleOnDay({ seg, vehiclei
         // to the road segment of the point itself
         const next = dt.track[index + 1]!;
         let duration = next.time.unix() - point.time.unix();
-        if (duration > 5 * 60) duration = 5 * 60;
+        if (duration > 10 * 60) continue;
         computedSeconds += duration;
     }
     return computedSeconds;

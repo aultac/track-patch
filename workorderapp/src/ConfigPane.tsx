@@ -9,6 +9,14 @@ import numeral from 'numeral';
 
 const { info, warn } = log.get('config-pane');
 
+export function fHrsToHrsMin(hoursString: string): string {
+    const totalMinutes = Math.round(parseFloat(hoursString) * 60);
+    const hours = Math.floor(totalMinutes / 60);
+    const minutes = totalMinutes % 60;
+    return `${hours}:${minutes.toString().padStart(2, '0')}`;
+}
+
+
 export const ConfigPane = observer(function ConfigPane() {
     const { state, actions } = React.useContext(context);
 
@@ -78,11 +86,25 @@ export const ConfigPane = observer(function ConfigPane() {
         }
     };
 
+    const selectedVehicleComputedHrs = vehicleList.find(v => v.vehicleId === selectedVehicle)?.computedHrs || 0;
+
+
     const tableData = actions.getAnalysisData({
         vehicleid: state.chosenVehicleID as string,
         date: state.chosenDate as string,
     });
+
+    const totals = (tableData || []).reduce(
+        (acc, row) => {
+            acc.computedHours += isNaN(Number(row.computedHours)) ? 0 : Number(row.computedHours);
+            acc.reportedHours += isNaN(Number(row.reportedHours)) ? 0 : Number(row.reportedHours);
+            return acc;
+        },
+        { computedHours: selectedVehicleComputedHrs, reportedHours: 0 } // Initialize with selected vehicle's computedHrs
+    );
     const numrows = state.parsing.currentNumRows;
+
+
 
 
     return (
@@ -189,7 +211,7 @@ export const ConfigPane = observer(function ConfigPane() {
 
             </div>
 
-            <div style={{ padding: '5px' }}>
+            <div style={{ paddingLeft: '35px', paddingRight: '35px' }}>
                 <Slider
                     value={state.sliderValue}
                     onChange={handleSliderChange}
@@ -242,7 +264,7 @@ export const ConfigPane = observer(function ConfigPane() {
                 </Select>
             </div>
 
-            <div style={{ padding: '5px' }}>
+            <div style={{ padding: '15px' }}>
                 <TableContainer sx={{
                     border: '1px solid #e0e0e0',
                     borderRadius: '8px',
@@ -264,15 +286,37 @@ export const ConfigPane = observer(function ConfigPane() {
                                 <TableRow key={index}>
                                     <TableCell>{row.routeRef}</TableCell>
                                     <TableCell>{row.inventoryAsset}</TableCell>
-                                    <TableCell>{row.computedHours}</TableCell>
-                                    <TableCell>{row.reportedHours}</TableCell>
+                                    <TableCell>{fHrsToHrsMin(row.computedHours.toString())}</TableCell>
+                                    <TableCell>{fHrsToHrsMin(row.reportedHours.toString())}</TableCell>
                                 </TableRow>
                             ))}
+                            <TableRow>
+                                <TableCell colSpan={2}>
+                                    In Garage or Ideal
+                                </TableCell>
+                                <TableCell>
+                                    {fHrsToHrsMin(selectedVehicleComputedHrs.toFixed(2))}
+                                </TableCell>
+                                <TableCell>
+                                    NA
+                                </TableCell>
+                            </TableRow>
+                            <TableRow>
+                                <TableCell colSpan={2} sx={{ fontWeight: 'bold', backgroundColor: '#f5f5f5' }}>
+                                    Total
+                                </TableCell>
+                                <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#f5f5f5' }}>
+                                    {fHrsToHrsMin(totals.computedHours.toFixed(2))}
+                                </TableCell>
+                                <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#f5f5f5' }}>
+                                    {fHrsToHrsMin(totals.reportedHours.toFixed(2))}
+                                </TableCell>
+                            </TableRow>
                         </TableBody>
                     </Table>
                 </TableContainer>
             </div>
-        </div>
+        </div >
     );
 });
 
