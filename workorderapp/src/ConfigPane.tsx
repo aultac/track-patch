@@ -104,9 +104,6 @@ export const ConfigPane = observer(function ConfigPane() {
     );
     const numrows = state.parsing.currentNumRows;
 
-
-
-
     return (
         <div style={{ width: '48vw', height: '90vh', padding: '3px', overflow: 'auto' }}>
 
