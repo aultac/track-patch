@@ -85,6 +85,7 @@ export function roadNameToType(geofulladdress) {
     }
     else {
         ret.type = 'LOCAL';
+        ret.number = 0; // no meaning
     }
     return ret;
 }

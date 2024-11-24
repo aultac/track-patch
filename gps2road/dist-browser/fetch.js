@@ -111,6 +111,14 @@ export async function fetchIndexedMileMarkers() {
                 number: +(postnum),
             });
         }
+        if (!milemarkers['LOCAL'])
+            milemarkers['LOCAL'] = [];
+        milemarkers['LOCAL'].push({
+            lon: 86.9212,
+            lat: 40.4237,
+            name: 'LOCAL',
+            number: 0,
+        });
         for (const [name, markers] of Object.entries(milemarkers)) {
             markers.sort((a, b) => a.number - b.number);
         }
@@ -121,9 +129,12 @@ export async function fetchIndexedMileMarkers() {
 }
 export async function fetchMileMarkersForRoad({ road }) {
     const mm = await fetchIndexedMileMarkers();
-    if (road.type !== 'STATE' && road.type !== 'INTERSTATE')
-        return []; // no mile markers for local roads
-    let name = `${road.type === 'STATE' ? 'S' : 'I'}_${road.number}`;
-    return mm[name] || [];
+    if (road.type === 'STATE' || road.type == 'INTERSTATE') {
+        let name = `${road.type === 'STATE' ? 'S' : 'I'}_${road.number}`;
+        return mm[name] || [];
+    }
+    else {
+        return mm['LOCAL'] || [];
+    }
 }
 //# sourceMappingURL=fetch.js.map

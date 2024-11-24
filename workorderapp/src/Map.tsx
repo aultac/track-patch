@@ -5,6 +5,7 @@ import ReactMapGl, { Source, Layer, MapLayerMouseEvent, Marker, MapRef } from 'r
 import { context } from './state';
 import { MapHoverInfo } from './MapHoverInfo';
 import type { GeoJSON, FeatureCollection, LineString, Position } from 'geojson';
+import { DayTracks } from '@track-patch/lib';
 
 
 const MAPBOX_TOKEN = 'pk.eyJ1IjoiYXVsdGFjIiwiYSI6ImNsMXA4MzU3NTAzbzUzZW55ajhiM2FsOGwifQ.8Umhtpm98ty92vbos4kM3Q';
@@ -38,6 +39,8 @@ export const Map = observer(function Map() {
     //-------------------------------------------------------------
     // show tracks if loaded
     let tracks: FeatureCollection | null = actions.filteredGeoJSON();
+    
+    
     if (state.filteredGeoJSON.rev < 1 || !tracks) {
         tracks = null;
     }

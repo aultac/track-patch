@@ -206,6 +206,7 @@ export const loadDayTracks = action('loadDayTracks', async ({ file, jsonstr }: {
                 throw new Error('No daytracksGeoJSON present.');
             }
             _daytracks = result.daytracks as DayTracks;
+
             _daytracksGeojson = result.daytracksGeoJSON as FeatureCollection;
             // Count number of points from VehicleDayTracks
             let numpoints = 0;
@@ -294,15 +295,16 @@ export const knownWorkOrdersParsing = action('knownWorkOrdersParsing', async (va
     state.knownWorkorders.parsing = val;
 });
 
-let _filteredknownWorkorders: WorkOrder[] | null = null;
-let _roadSegTracksForVOnD: VehicleDayTrackSeg[] = [];
-export function roadSegTracksForVOnD() { return _roadSegTracksForVOnD };
+//-----------------------------------------------------------
+// Validate Work Orders (spreadsheet):
+//-----------------------------------------------------------
 
+let _filteredknownWorkorders: WorkOrder[] | null = null;
+export function filteredknownWorkorders() { return _filteredknownWorkorders };
 export const validateWorkorders = action('validateWorkorders', async (opts?: { nosave?: true }) => {
     opts = opts || {};
     if (!_knownWorkorders) throw new Error('No work orders to validate');
 
-    //console.log(_knownWorkorders)
     for (const r of _knownWorkorders) {
 
         if (r['Resource Type'] !== 'Equipment') {
@@ -332,16 +334,10 @@ export const validateWorkorders = action('validateWorkorders', async (opts?: { n
             continue; // invalid dates don't work either
         }
         const day = workorderday.format('YYYY-MM-DD');
-        const computedSeconds = await computeSecondsOnRoadSegmentForVehicleOnDay({ seg: r, vehicleid: vid, day });
-        const computedPoints = await computePointsOnRoadSegmentForVehicleOnDay({ seg: r, vehicleid: vid, day });
+        const computedSeconds = await computeSecondsOnRoadSegmentForVehicleOnDay({ seg: r, vehicleid: vid, day: day, mode: 'V' });
         const computedDrivingHrs = await computeSecondsForVehicleOnDay({ vehicleid: vid, day })
         const computedHours = computedSeconds / 3600;
         const match = computedHours ? reported_hours / computedHours : 0;
-        if (computedPoints !== null && computedHours > 0) {
-            computedPoints.ctime = computedHours;
-            computedPoints.rtime = reported_hours;
-            _roadSegTracksForVOnD?.push(computedPoints);
-        }
         r.match = numeral(match).format('0,0.00%');
         r.computedHours = numeral(computedHours).format('0,0.00');
         r.differenceHours = numeral(reported_hours - computedHours).format('0,0.00');
@@ -397,6 +393,10 @@ export const filterGeoJSON = action('filterGeoJSON', ({ vid, day }: { vid: strin
     runInAction(() => { state.filteredGeoJSON.rev++ });
     recenterMapOnFilteredGeoJSON();
 });
+
+//-----------------------------------------------------------
+// Update Side Panel for Work Orders:
+//-----------------------------------------------------------
 
 export const getDateList = action(() => {
     if (!_daytracks) return [];
@@ -484,9 +484,13 @@ let _vehicleActivities: VehicleActivity[] | null = null;
 export const vehicleActivities = action('vehicleActivities', () => {
     return _vehicleActivities;
 });
-export const loadVehicleActivities = action('loadVehicleActivities', async (file: File) => {
+export const loadVehicleActivities = action('loadVehicleActivities', async ({ file, arraybuffer }: { file?: File, arraybuffer?: ArrayBuffer }) => {
+    if (!file && !arraybuffer) throw new Error('ERROR: did not pass either file or arraybuffer to loadKnownWorkorders');
+    if (file) {
+        arraybuffer = await file.arrayBuffer();
+    }
     runInAction(() => { state.createdWorkOrders.parsing = true; });
-    const wb = xlsx.read(await file.arrayBuffer());
+    const wb = xlsx.read(arraybuffer);
     const records = xlsx.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { raw: false });
     _vehicleActivities = records.filter((r, index) => {
         try {
@@ -503,7 +507,8 @@ export const loadVehicleActivities = action('loadVehicleActivities', async (file
 
 let _createdWorkOrders: WorkOrder[] | null = null;
 export const createdWorkOrders = action('createdWorkOrders', () => _createdWorkOrders);
-export const createWorkOrders = action('createWorkorders', async () => {
+export const createWorkOrders = action('createWorkorders', async (opts?: { nosave?: true }) => {
+    opts = opts || {};
     if (!_vehicleActivities) {
         info('createWorkorders: No vehicleActivities to work with');
         return;
@@ -520,12 +525,13 @@ export const createWorkOrders = action('createWorkorders', async () => {
 
         for (const seg of Object.values(allRoadSegments)) {
             assertRoadSegment(seg);
-            const computedSeconds = await computeSecondsOnRoadSegmentForVehicleOnDay({ seg, vehicleid, day });
+            const computedSeconds = await computeSecondsOnRoadSegmentForVehicleOnDay({ seg: seg, vehicleid: vehicleid, day: day, mode: 'C' });
+            
             if (computedSeconds) {
                 _createdWorkOrders.push({
                     ...va,
                     ...seg,
-                    'Total Hrs': '' + (computedSeconds / 3600.0),
+                    'computedHours': '' + (computedSeconds / 3600.0).toFixed(2),
                     'Measurement Unit': 'MHR - WORK HR',
                     'Resource Type': 'Equipment',
                     'Asset Type': 'Snow Route', // I think this probably should have been with the road segment originally.  Hardcoding for now.  TODO
@@ -536,6 +542,61 @@ export const createWorkOrders = action('createWorkorders', async () => {
     }
     info('Created work orders: ', _createdWorkOrders);
     runInAction(() => state.createdWorkOrders.workorders.rev++);
-    saveWorkorders('created-workorders.xlsx', _createdWorkOrders);
+    if (!opts.nosave) {
+        saveWorkorders('created-workorders.xlsx', _createdWorkOrders);
+    }
 });
 
+//-----------------------------------------------------------
+// Making Analysis Table for Work Orders:
+//-----------------------------------------------------------
+
+interface WorkOrderData {
+    routeRef: string;
+    inventoryAsset: string;
+    computedHours: string | number;
+    reportedHours: string | number;
+}
+
+export const getAnalysisData = action('getAnalysisData', ({ vehicleid, date }: { vehicleid: string, date: string }) => {
+    const createWorkOrderData = createdWorkOrders();
+    const filteredknownWorkorderData = filteredknownWorkorders();
+    
+    if (createWorkOrderData && filteredknownWorkorderData && createWorkOrderData.length > 0 && filteredknownWorkorderData.length > 0) {
+        const mergedData : WorkOrderData[] = [];
+
+        const processWorkOrder = ({ workorder, source }: { workorder: WorkOrder | null, source: string }) => {
+            if (
+                workorder && dayjs(workorder['Work Date'], 'M/D/YY').format('YYYY-MM-DD') === date &&
+                vehicleidFromResourceName(workorder['Resource Name']) === ~~vehicleid
+            ) {
+                mergedData.push({
+                    routeRef: workorder['Route (Ref)'] || 'NA',
+                    inventoryAsset: workorder['Inventory Asset'] || 'NA',
+                    computedHours: source === 'created' ? workorder['computedHours'] || 'NA' : 'NA',
+                    reportedHours: workorder['Total Hrs'] || 'NA',
+                });
+            }
+        };
+
+        filteredknownWorkorderData.forEach((workorder) => processWorkOrder({ workorder: workorder, source: 'known' }));
+        createWorkOrderData.forEach((workorder) => processWorkOrder({ workorder: workorder, source: 'created' }));
+
+        const inventorySet = new Set(mergedData.map((item) => item.inventoryAsset));
+        const finalData = Array.from(inventorySet).map((inventoryAsset) => {
+            const rowsForAsset = mergedData.filter(
+                (item) => item.inventoryAsset === inventoryAsset
+            );
+            return {
+                routeRef: rowsForAsset[0]?.routeRef || 'NA',
+                inventoryAsset: inventoryAsset,
+                computedHours: rowsForAsset.find((item) => item.computedHours !== 'NA')?.computedHours || 'NA',
+                reportedHours: rowsForAsset.find((item) => item.reportedHours !== 'NA')?.reportedHours || 'NA',
+            };
+        });
+        return finalData;
+
+    } else {
+        info("Something is wrong. Either created workorders or validated work order is empty!")
+    }
+});

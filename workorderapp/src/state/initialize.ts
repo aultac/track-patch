@@ -16,21 +16,29 @@ export const initialize = action('initialize', async () => {
     let response = await fetch('/ProcessedTracks.json');
     if (response.status >= 400) throw new Error(`Failed to fetch data from /ProcessedTracks.json`);
     const jsonstr = await response.text();
+    await actions.loadDayTracks({ jsonstr});
     info('Have processed tracks');
 
     info('Loading workorders as arraybuffer')
     response = await fetch('/WorkOrders.xlsx');
     if (response.status >= 400) throw new Error(`Failed to fetch data from /WorkOrders.xlsx`);
     const arraybuffer = await response.arrayBuffer();
+    await actions.loadKnownWorkorders({arraybuffer});
     info('Loaded workorders as arraybuffer, loading them all into state');
 
-    await actions.loadDayTracks({ jsonstr});
-    await actions.loadKnownWorkorders({arraybuffer});
+    info('Loading vehicle activities as arraybuffer')
+    response = await fetch('/VehicleActivities.xlsx');
+    if (response.status >= 400) throw new Error(`Failed to fetch data from /WorkOrders.xlsx`);
+    const arraybufferc = await response.arrayBuffer();
+    await actions.loadVehicleActivities({arraybuffer: arraybufferc})
+    info('Loaded workorders as arraybuffer, loading them all into state');
+    
     await actions.validateWorkorders({ nosave: true });
+    await actions.createWorkOrders({ nosave: true });
 
     info('State loaded, choosing date and vehicle');
     actions.updateChosenDate("2020-12-21");
-    actions.updateChosenVehicleID("64005");
+    actions.updateChosenVehicleID("64264");
   }
   // Loads some hard-coded roads
   // await loadRoads('dp7t9.json');

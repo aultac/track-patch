@@ -2,9 +2,9 @@ import React from 'react';
 import { observer } from 'mobx-react-lite';
 import log from './log';
 import { context } from './state';
-import { Button, LinearProgress, Select, Autocomplete } from '@mui/material';
-import { MenuItem, TextField, SelectChangeEvent, Slider } from '@mui/material';
-import { Paper, Table, TableContainer, TableCell, TableBody, TableRow, TableHead } from '@mui/material';
+import { Button, LinearProgress, Select } from '@mui/material';
+import { MenuItem, SelectChangeEvent, Slider } from '@mui/material';
+import { Table, TableHead, TableBody, TableRow, TableCell, TableContainer, Paper } from '@mui/material';
 import numeral from 'numeral';
 
 const { info, warn } = log.get('config-pane');
@@ -22,7 +22,6 @@ export const ConfigPane = observer(function ConfigPane() {
     const [selectedVehicle, setSelectedVehicle] = React.useState<string | null>(state.chosenVehicleID);
 
     const vehicleList = actions.getVehicleIDsForDate(selectedDate || '');
-    const roadSegments = actions.roadSegTracksForVOnD();
 
     const handleChangeDate = (event: SelectChangeEvent<string | null>) => {
         const selectedDate = event.target.value as string;
@@ -73,12 +72,16 @@ export const ConfigPane = observer(function ConfigPane() {
                         actions.loadKnownWorkorders({ file: files[0]! });
                         break;
                     case 'vehicleactivities':
-                        actions.loadVehicleActivities(files[0]!);
+                        actions.loadVehicleActivities({ file: files[0]! });
                         break;
                 }
         }
     };
 
+    const tableData = actions.getAnalysisData({
+        vehicleid: state.chosenVehicleID as string,
+        date: state.chosenDate as string,
+    });
     const numrows = state.parsing.currentNumRows;
 
 
@@ -129,7 +132,7 @@ export const ConfigPane = observer(function ConfigPane() {
                             : !state.knownWorkorders.orders.rev
                                 ? 'Drop work orders.'
                                 : <div style={{ flexGrow: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-                                    <div>Loaded {numeral(actions.numKnownWorkorders()).format('0,0')} Work Orders</div>
+                                    <div style={{ fontSize: '12px' }}>Loaded {numeral(actions.numKnownWorkorders()).format('0,0')} Work Orders</div>
                                 </div>
                     }
                 </div>
@@ -146,9 +149,9 @@ export const ConfigPane = observer(function ConfigPane() {
                             : !state.createdWorkOrders.vehicleActivities.rev
                                 ? 'Drop vehicle activities.'
                                 : <div style={{ flexGrow: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-                                    <div>Found {numeral((actions.vehicleActivities() || []).length).format('0,0')} Vehicle Activities</div>
+                                    <div style={{ fontSize: '12px' }}>Found {numeral((actions.vehicleActivities() || []).length).format('0,0')} Vehicle Activities</div>
                                     {state.createdWorkOrders.workorders.rev > 0
-                                        ? <div>Successfully created {numeral(actions.createdWorkOrders()?.length || 0).format('0,0')} Work Orders</div>
+                                        ? <div style={{ fontSize: '11px' }}>Successfully created {numeral(actions.createdWorkOrders()?.length || 0).format('0,0')} Work Orders</div>
                                         : <React.Fragment />
                                     }
                                 </div>
@@ -237,6 +240,37 @@ export const ConfigPane = observer(function ConfigPane() {
                         </MenuItem>
                     ))}
                 </Select>
+            </div>
+
+            <div style={{ padding: '5px' }}>
+                <TableContainer sx={{
+                    border: '1px solid #e0e0e0',
+                    borderRadius: '8px',
+                    boxShadow: 'none', // Removes shadow
+                    overflow: 'hidden',
+                }}
+                >
+                    <Table>
+                        <TableHead>
+                            <TableRow>
+                                <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#f5f5f5' }}>Route Ref</TableCell>
+                                <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#f5f5f5' }}>Inventory Asset</TableCell>
+                                <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#f5f5f5' }}>Computed Hours</TableCell>
+                                <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#f5f5f5' }}>Reported Hours</TableCell>
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                            {(tableData || []).map((row, index) => (
+                                <TableRow key={index}>
+                                    <TableCell>{row.routeRef}</TableCell>
+                                    <TableCell>{row.inventoryAsset}</TableCell>
+                                    <TableCell>{row.computedHours}</TableCell>
+                                    <TableCell>{row.reportedHours}</TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                </TableContainer>
             </div>
         </div>
     );
