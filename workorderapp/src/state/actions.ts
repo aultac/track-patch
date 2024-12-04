@@ -10,10 +10,16 @@ import dayjs from 'dayjs';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
 import { FileReader } from '@tanker/file-reader';
 import { downloadBlob } from './downloadBlob';
-import { assertRoadSegment, computePointsOnRoadSegmentForVehicleOnDay, computeSecondsOnRoadSegmentForVehicleOnDay, saveWorkorders, vehicleidFromResourceName, computeSecondsForVehicleOnDay } from './workorder_helpers';
-import { geohash } from '@track-patch/gps2road';
+import {
+    assertRoadSegment,
+    computePointsOnRoadSegmentForVehicleOnDay,
+    computeSecondsOnRoadSegmentForVehicleOnDay,
+    saveWorkorders, vehicleidFromResourceName,
+    computeIdealTimeForVehicleOnDay,
+    computeIdealPointsForVehicleOnDay
+
+} from './workorder_helpers';
 import allRoadSegments from './workorder_roadsegments.json';
-import uniqolor from 'uniqolor';
 import { LineString } from '@turf/turf';
 import { mapRef } from '../Map';
 
@@ -334,14 +340,14 @@ export const validateWorkorders = action('validateWorkorders', async (opts?: { n
             continue; // invalid dates don't work either
         }
         const day = workorderday.format('YYYY-MM-DD');
-        const computedSeconds = await computeSecondsOnRoadSegmentForVehicleOnDay({ seg: r, vehicleid: vid, day: day, mode: 'V' });
-        const computedDrivingHrs = await computeSecondsForVehicleOnDay({ vehicleid: vid, day })
+        const computedSeconds = await computeSecondsOnRoadSegmentForVehicleOnDay({ seg: r, vehicleid: vid, day: day });
+        const computedIdealHrs = await computeIdealTimeForVehicleOnDay({ vehicleid: vid, day })
         const computedHours = computedSeconds / 3600;
         const match = computedHours ? reported_hours / computedHours : 0;
         r.match = numeral(match).format('0,0.00%');
         r.computedHours = numeral(computedHours).format('0,0.00');
         r.differenceHours = numeral(reported_hours - computedHours).format('0,0.00');
-        r.computedDriveHours = numeral(computedDrivingHrs / 3600).format('0,0.00');
+        r.computedIdealHrs = numeral(computedIdealHrs / 3600).format('0,0.00');
         info('WE ACTUALLY HAVE A COMPUTED HOURS!!!', computedHours);
     }
     _filteredknownWorkorders = _knownWorkorders.filter(w => w.computedHours && +(w.computedHours) > 0)
@@ -417,7 +423,7 @@ export const getVehicleIDsForDate = action((date: string) => {
 
         wordersForDate.forEach(wo => {
             const vehicleId = vehicleidFromResourceName(wo['Resource Name'] || '').toString();
-            const computedHrs = parseFloat(wo.computedDriveHours || '0');
+            const computedHrs = parseFloat(wo.computedIdealHrs || '0');
             const totalHrs = parseFloat(wo['Total Hrs'] || '0');
 
             if (!vehicleDataMap.has(vehicleId)) {
@@ -463,6 +469,10 @@ export const updateChosenVehicleID = action('updateChosenVehicleID', (vehicleID:
     state.chosenVehicleID = vehicleID;
 });
 
+export const updateSegment = action('updateSegment', (segment: string | null) => {
+    state.chosenSegment = segment;
+});
+
 //---------------------------------------------------------------------
 // Creating work orders from a list of vehicles with activity and day
 //---------------------------------------------------------------------
@@ -505,8 +515,51 @@ export const loadVehicleActivities = action('loadVehicleActivities', async ({ fi
     runInAction(() => { state.createdWorkOrders.parsing = false; });
 });
 
+export const getSegmentGeoJSON = action('getSegmentGeoJSON', (input: VehicleDayTrackSeg, color: string): FeatureCollection => {
+    if (!input || !input.track || !Array.isArray(input.track)) {
+        throw new Error("Invalid input format.");
+    }
+
+    const featureCollection: FeatureCollection = {
+        type: "FeatureCollection",
+        features: [
+            {
+                type: "Feature",
+                properties: {
+                    vid: String(input.vid),
+                    day: input.day,
+                    color: color ? color : '#ff0000',
+                },
+                geometry: {
+                    type: "LineString",
+                    coordinates: input.track,
+                },
+            },
+        ],
+    };
+
+    return featureCollection;
+});
+
+let _segPointsMap: Map<string, FeatureCollection> = new Map<string, FeatureCollection>();
+export const segPointMap = action('segPointMap', (input: string | null): FeatureCollection => {
+    if (input){
+        const featureCollection = _segPointsMap.get(input);
+        if (!featureCollection) {
+            throw new Error(`No feature collection found for input: ${input}`);
+        }
+        return featureCollection;
+    }
+    else {
+        throw new Error("Input inventory string is null")
+        
+    }
+});
+
+
 let _createdWorkOrders: WorkOrder[] | null = null;
 export const createdWorkOrders = action('createdWorkOrders', () => _createdWorkOrders);
+
 export const createWorkOrders = action('createWorkorders', async (opts?: { nosave?: true }) => {
     opts = opts || {};
     if (!_vehicleActivities) {
@@ -522,12 +575,20 @@ export const createWorkOrders = action('createWorkorders', async (opts?: { nosav
             continue; // invalid dates don't work
         }
         const day = date.format('YYYY-MM-DD');
-
+        const computedIdealPoints = await computeIdealPointsForVehicleOnDay({ vehicleid: vehicleid, day: day });
+        if (computedIdealPoints) {
+            _segPointsMap?.set(String(vehicleid) + '-' + String(day) + '-' + 'IDEAL', getSegmentGeoJSON(computedIdealPoints, '#ff0000'));
+        }
         for (const seg of Object.values(allRoadSegments)) {
             assertRoadSegment(seg);
-            const computedSeconds = await computeSecondsOnRoadSegmentForVehicleOnDay({ seg: seg, vehicleid: vehicleid, day: day, mode: 'C' });
-            
+
+            const computedSeconds = await computeSecondsOnRoadSegmentForVehicleOnDay({ seg: seg, vehicleid: vehicleid, day: day });
+
             if (computedSeconds) {
+                const computedPoints = await computePointsOnRoadSegmentForVehicleOnDay({ seg: seg, vehicleid: vehicleid, day: day });
+                if (computedPoints){
+                    _segPointsMap?.set(String(vehicleid) + '-' + String(day) + '-' + seg['Inventory Asset'], getSegmentGeoJSON(computedPoints, '#ff0000'))
+                }
                 _createdWorkOrders.push({
                     ...va,
                     ...seg,
@@ -561,9 +622,9 @@ interface WorkOrderData {
 export const getAnalysisData = action('getAnalysisData', ({ vehicleid, date }: { vehicleid: string, date: string }) => {
     const createWorkOrderData = createdWorkOrders();
     const filteredknownWorkorderData = filteredknownWorkorders();
-    
+
     if (createWorkOrderData && filteredknownWorkorderData && createWorkOrderData.length > 0 && filteredknownWorkorderData.length > 0) {
-        const mergedData : WorkOrderData[] = [];
+        const mergedData: WorkOrderData[] = [];
 
         const processWorkOrder = ({ workorder, source }: { workorder: WorkOrder | null, source: string }) => {
             if (

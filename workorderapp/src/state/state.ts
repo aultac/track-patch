@@ -14,10 +14,6 @@ export type VehicleDayTrackSeg = {
     vid: number;
     seg: string;
     track: number[][];
-    startTime: string,
-    endTime: string,
-    ctime: number,
-    rtime: number
 };
 
 export type BigData = { rev: number };
@@ -73,7 +69,7 @@ export type State = {
     daytracksGeoJSON: BigData,
     roads: BigData,
     milemarkers: BigData,
-    roadSegPoints: BigData,
+    segPointsMap: BigData,
 
     geojsonviz: {
         selectedFile: string,
@@ -89,6 +85,7 @@ export type State = {
         active: boolean,
     },
 
+    chosenSegment: string | null
     chosenDate: string | null, // Type can be adjusted based on the actual type of dates in day tracks
     chosenVehicleID: string | null, // Type can be adjusted based on the actual type of vehicle IDs in day tracks
 
@@ -140,7 +137,7 @@ export const state = observable<State>({
     filteredGeoJSON: { rev: 0 },
     daytracks: { rev: 0 },
     daytracksGeoJSON: { rev: 0 },
-    roadSegPoints: { rev: 0 },
+    segPointsMap: { rev: 0 },
     hover: {
         x: 0,
         y: 0,
@@ -156,6 +153,7 @@ export const state = observable<State>({
 
     chosenDate: '',
     chosenVehicleID: '',
+    chosenSegment: '',
     sliderValue: 1.0,
     checkbox: false,
     csegment: 'NA',

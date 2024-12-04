@@ -39,6 +39,7 @@ export const initialize = action('initialize', async () => {
     info('State loaded, choosing date and vehicle');
     actions.updateChosenDate("2020-12-21");
     actions.updateChosenVehicleID("64264");
+    actions.updateSegment("64264-2020-12-21-IDEAL")
   }
   // Loads some hard-coded roads
   // await loadRoads('dp7t9.json');

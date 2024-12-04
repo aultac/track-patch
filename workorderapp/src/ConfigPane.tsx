@@ -11,10 +11,18 @@ const { info, warn } = log.get('config-pane');
 
 export function fHrsToHrsMin(hoursString: string): string {
     const totalMinutes = Math.round(parseFloat(hoursString) * 60);
+    if (isNaN(totalMinutes)) {
+        return '-';
+    }
     const hours = Math.floor(totalMinutes / 60);
     const minutes = totalMinutes % 60;
+    if (isNaN(hours) || isNaN(minutes)) {
+        return '-';
+    }
+
     return `${hours}:${minutes.toString().padStart(2, '0')}`;
 }
+
 
 
 export const ConfigPane = observer(function ConfigPane() {
@@ -28,6 +36,7 @@ export const ConfigPane = observer(function ConfigPane() {
 
     const [selectedDate, setSelectedDate] = React.useState(state.chosenDate);
     const [selectedVehicle, setSelectedVehicle] = React.useState<string | null>(state.chosenVehicleID);
+    const [selectedSegment, setSelectedSegment] = React.useState<string | null>(state.chosenSegment);
 
     const vehicleList = actions.getVehicleIDsForDate(selectedDate || '');
 
@@ -39,6 +48,9 @@ export const ConfigPane = observer(function ConfigPane() {
         // Reset selected vehicle when date changes
         setSelectedVehicle('');
         actions.updateChosenVehicleID('');
+
+        setSelectedSegment('');
+        actions.updateSegment('');
     };
 
     const handleChangeVehicle = (event: SelectChangeEvent<string | null>) => {
@@ -46,11 +58,20 @@ export const ConfigPane = observer(function ConfigPane() {
         setSelectedVehicle(selectedVehicle);
         actions.updateChosenVehicleID(selectedVehicle); // Update chosenVehicleID in state
 
+        setSelectedSegment('');
+        actions.updateSegment('');
+
         if (state.chosenDate !== null && state.chosenVehicleID != null) {
             actions.filterDayTracks({ vehicleid: state.chosenVehicleID, day: state.chosenDate });
             actions.filterGeoJSON({ vid: state.chosenVehicleID, day: state.chosenDate })
             //actions.updateMap();
         }
+    };
+
+    const handleCheckboxChange = (inventoryAsset: string) => {
+        const selectedSegment = `${state.chosenVehicleID}-${state.chosenDate}-${inventoryAsset}`;
+        setSelectedSegment(selectedSegment);
+        actions.updateSegment(selectedSegment);
     };
 
     const handleFile = ({ filetype, eventtype, inout }: { filetype: 'tracks' | 'workorders' | 'vehicleactivities', eventtype: 'drop' | 'drag', inout?: boolean }): React.DragEventHandler => async (evt) => {
@@ -272,6 +293,7 @@ export const ConfigPane = observer(function ConfigPane() {
                     <Table>
                         <TableHead>
                             <TableRow>
+                                <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#f5f5f5' }}>Select</TableCell>
                                 <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#f5f5f5' }}>Route Ref</TableCell>
                                 <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#f5f5f5' }}>Inventory Asset</TableCell>
                                 <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#f5f5f5' }}>Computed Hours</TableCell>
@@ -281,6 +303,16 @@ export const ConfigPane = observer(function ConfigPane() {
                         <TableBody>
                             {(tableData || []).map((row, index) => (
                                 <TableRow key={index}>
+                                    <TableCell>
+                                        <input
+                                            type="checkbox"
+                                            checked={
+                                                selectedSegment ===
+                                                `${state.chosenVehicleID}-${state.chosenDate}-${row.inventoryAsset}`
+                                            }
+                                            onChange={() => handleCheckboxChange(row.inventoryAsset)}
+                                        />
+                                    </TableCell>
                                     <TableCell>{row.routeRef}</TableCell>
                                     <TableCell>{row.inventoryAsset}</TableCell>
                                     <TableCell>{fHrsToHrsMin(row.computedHours.toString())}</TableCell>
@@ -288,6 +320,16 @@ export const ConfigPane = observer(function ConfigPane() {
                                 </TableRow>
                             ))}
                             <TableRow>
+                                <TableCell>
+                                    <input
+                                        type="checkbox"
+                                        checked={
+                                            selectedSegment ===
+                                            `${state.chosenVehicleID}-${state.chosenDate}-IDEAL`
+                                        }
+                                        onChange={() => handleCheckboxChange('IDEAL')}
+                                    />
+                                </TableCell>
                                 <TableCell colSpan={2}>
                                     In Garage or Ideal
                                 </TableCell>
@@ -295,11 +337,11 @@ export const ConfigPane = observer(function ConfigPane() {
                                     {fHrsToHrsMin(selectedVehicleComputedHrs.toFixed(2))}
                                 </TableCell>
                                 <TableCell>
-                                    NA
+                                    -
                                 </TableCell>
                             </TableRow>
                             <TableRow>
-                                <TableCell colSpan={2} sx={{ fontWeight: 'bold', backgroundColor: '#f5f5f5' }}>
+                                <TableCell colSpan={3} sx={{ fontWeight: 'bold', backgroundColor: '#f5f5f5' }}>
                                     Total
                                 </TableCell>
                                 <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#f5f5f5' }}>

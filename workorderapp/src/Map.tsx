@@ -16,35 +16,27 @@ export let mapRef: React.MutableRefObject<MapRef | undefined> | null = null;
 export const Map = observer(function Map() {
     mapRef = React.useRef<MapRef>()!;
     const { state, actions } = React.useContext(context);
-    //-------------------------------------------------------------------
-    // Filter any roads/milemarkers if available:
-    // Access the rev so we are updated when it changes.  Have to access it BEFORE !geojson or it might not re-render
-    let roads: FeatureCollection | null = actions.roads() as FeatureCollection;
-    let milemarkers: GeoJSON | null = actions.milemarkers();
-
-    if (state.roads.rev < 1 || !roads) {
-        roads = null;
-    }
-    if (state.milemarkers.rev < 1 || !milemarkers) {
-        milemarkers = null;
-    }
-    // filter features to include only those that match the search:
-    if (roads && state.search) {
-        roads = {
-            ...roads,
-            features: roads.features.filter(f => JSON.stringify(f.properties).match(state.search)),
-        };
-    }
 
     //-------------------------------------------------------------
     // show tracks if loaded
     let tracks: FeatureCollection | null = actions.filteredGeoJSON();
-    
-    
     if (state.filteredGeoJSON.rev < 1 || !tracks) {
         tracks = null;
     }
 
+    let roadSegPoints = React.useMemo(() => {
+        if (state.chosenSegment && state.chosenSegment.trim() !== '') {
+            try {
+                return actions.segPointMap(state.chosenSegment);
+            } catch (error) {
+                console.error('Error fetching segment points:', error);
+                return null;
+            }
+        }
+        return null;
+    }, [state.chosenSegment]); // Reactively recompute when chosenSegment changes
+
+    console.log(JSON.stringify(roadSegPoints, null, 2))
     //------------------------------------------------------------
     // Mouse Events:
     const onHover = React.useCallback((evt: MapLayerMouseEvent) => {
@@ -67,9 +59,8 @@ export const Map = observer(function Map() {
         await navigator.clipboard.writeText(`{ lon: ${evt.lngLat.lng}, lat: ${evt.lngLat.lat} }`);
     }
 
-    const interactiveLayerIds = [];
-    if (roads) interactiveLayerIds.push('roads');
-    if (milemarkers) interactiveLayerIds.push('milemarkers');
+    const dataToPlot = state.chosenSegment ? roadSegPoints : tracks;
+    const isIdealSegment = state.chosenSegment?.includes('IDEAL'); // Check for 'IDEAL' in the chosenSegment
 
     return (
         <ReactMapGl
@@ -80,34 +71,13 @@ export const Map = observer(function Map() {
             onClick={onClick}
             onMouseMove={onHover}
             onMouseLeave={onLeave}
-            interactiveLayerIds={interactiveLayerIds}
         >
-
-            {!roads ? <React.Fragment /> :
-                <Source type="geojson" data={roads as any}>
-                    <Layer id="roads" type="line" paint={{
-                        'line-color': '#FF0000',
-                        'line-width': 2,
-                    }} />
-                </Source>
-            }
-
             <MapHoverInfo />
 
-            {!milemarkers ? <React.Fragment /> :
-                <Source type="geojson" data={milemarkers as any}>
-                    <Layer id="milemarkers" type="circle" paint={{
-                        'circle-radius': 2,
-                        'circle-color': '#FF00FF',
-                        'circle-stroke-width': 1,
-                    }} />
-                </Source>
-            }
-
             {
-                !tracks ? <React.Fragment />
+                !dataToPlot ? <React.Fragment />
                     : (
-                        <Source type="geojson" data={tracks as any} lineMetrics={true}>
+                        <Source type="geojson" data={dataToPlot as any} lineMetrics={true}>
                             <Layer
                                 id="tracks"
                                 type="line"
@@ -136,9 +106,6 @@ export const Map = observer(function Map() {
                         </Source>
                     )
             }
-
         </ReactMapGl>
     );
 });
-
-
