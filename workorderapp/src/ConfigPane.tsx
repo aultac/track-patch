@@ -331,7 +331,7 @@ export const ConfigPane = observer(function ConfigPane() {
                                     />
                                 </TableCell>
                                 <TableCell colSpan={2}>
-                                    In Garage or Ideal
+                                    Inactive Time
                                 </TableCell>
                                 <TableCell>
                                     {fHrsToHrsMin(selectedVehicleComputedHrs.toFixed(2))}

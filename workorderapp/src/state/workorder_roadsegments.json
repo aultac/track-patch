@@ -8808,7 +8808,7 @@
     "End Offset": "0.96"
   },
   "LOCAL": {
-    "Inventory Asset": "00-0-0",
+    "Inventory Asset": "00-00-00",
     "Route (Ref)": "LOCAL ROADS",
     "Start Post": "0",
     "Start Offset": "0.0",

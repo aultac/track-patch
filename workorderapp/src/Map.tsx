@@ -60,10 +60,10 @@ export const Map = observer(function Map() {
     }
 
     const dataToPlot = state.chosenSegment ? roadSegPoints : tracks;
-    const isIdealSegment = state.chosenSegment?.includes('IDEAL'); // Check for 'IDEAL' in the chosenSegment
 
     return (
         <ReactMapGl
+            key={state.chosenSegment?.includes('IDEAL') ? 'scatter-mode' : 'line-mode'}
             mapboxAccessToken={MAPBOX_TOKEN}
             initialViewState={state.viewport}
             style={{ width: '52vw', height: '90vh' }}
@@ -75,37 +75,55 @@ export const Map = observer(function Map() {
             <MapHoverInfo />
 
             {
-                !dataToPlot ? <React.Fragment />
-                    : (
-                        <Source type="geojson" data={dataToPlot as any} lineMetrics={true}>
+                state.chosenSegment?.includes('IDEAL')
+                    ? (
+                        <Source type="geojson" data={dataToPlot as any}>
                             <Layer
-                                id="tracks"
-                                type="line"
+                                id="scatter-points"
+                                type="circle"
                                 paint={{
-                                    'line-color': 'red',
-                                    'line-width': [
-                                        'interpolate',
-                                        ['linear'],
-                                        ['line-progress'],
-                                        0,
-                                        5
-                                    ],
-                                    'line-gradient': [
-                                        'interpolate',
-                                        ['linear'],
-                                        ['line-progress'],
-                                        0,
-                                        'red', // Start at red
-                                        state.sliderValue,
-                                        'blue', // Continue with red until the slider value
-                                        state.sliderValue + 0.01,
-                                        'rgba(0, 0, 0, 0)', // Transition to transparent immediately after slider value
-                                    ],
+                                    'circle-radius': 6,
+                                    'circle-color': 'red',
+                                    'circle-opacity': 0.8,
                                 }}
                             />
                         </Source>
                     )
+                    : (
+                        dataToPlot
+                            ? (
+                                <Source type="geojson" data={dataToPlot as any} lineMetrics={true}>
+                                    <Layer
+                                        id="tracks"
+                                        type="line"
+                                        paint={{
+                                            'line-color': 'red',
+                                            'line-width': [
+                                                'interpolate',
+                                                ['linear'],
+                                                ['line-progress'],
+                                                0,
+                                                5,
+                                            ],
+                                            'line-gradient': [
+                                                'interpolate',
+                                                ['linear'],
+                                                ['line-progress'],
+                                                0,
+                                                'red',
+                                                state.sliderValue,
+                                                'blue',
+                                                state.sliderValue + 0.01,
+                                                'rgba(0, 0, 0, 0)',
+                                            ],
+                                        }}
+                                    />
+                                </Source>
+                            )
+                            : <React.Fragment />
+                    )
             }
         </ReactMapGl>
+
     );
 });
