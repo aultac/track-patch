@@ -1,20 +1,18 @@
 import React from 'react';
 import { observer } from 'mobx-react-lite';
-import log from './log';
-import ReactMapGl, { Source, Layer, MapLayerMouseEvent, Marker, MapRef } from 'react-map-gl';
+import ReactMapGl, { Source, Layer, MapLayerMouseEvent, MapRef } from 'react-map-gl';
 import { context } from './state';
 import { MapHoverInfo } from './MapHoverInfo';
-import type { GeoJSON, FeatureCollection, LineString, Position } from 'geojson';
-import { DayTracks } from '@track-patch/lib';
+import type { FeatureCollection, } from 'geojson';
 
 
 const MAPBOX_TOKEN = 'pk.eyJ1IjoiYXVsdGFjIiwiYSI6ImNsMXA4MzU3NTAzbzUzZW55ajhiM2FsOGwifQ.8Umhtpm98ty92vbos4kM3Q';
 
 
-export let mapRef: React.MutableRefObject<MapRef | undefined> | null = null;
+export let mapRef: React.MutableRefObject<MapRef | null> | null = null;
 
 export const Map = observer(function Map() {
-    mapRef = React.useRef<MapRef>()!;
+    mapRef = React.useRef<MapRef | null>(null);
     const { state, actions } = React.useContext(context);
 
     //-------------------------------------------------------------
@@ -37,93 +35,96 @@ export const Map = observer(function Map() {
     }, [state.chosenSegment]); // Reactively recompute when chosenSegment changes
 
     console.log(JSON.stringify(roadSegPoints, null, 2))
-    //------------------------------------------------------------
-    // Mouse Events:
-    const onHover = React.useCallback((evt: MapLayerMouseEvent) => {
-        const active = evt.features && evt.features.length > 0 || false;
-        actions.hover({
-            x: evt.point.x,
-            y: evt.point.y,
-            lat: evt.lngLat.lat,
-            lon: evt.lngLat.lng,
-            features: (((evt.features as unknown) || []) as any[]),
-            active,
-        });
-    }, []);
-
-    const onLeave = () => {
-        actions.hover({ x: 0, y: 0, lat: 0, lon: 0, features: [], active: false });
-    }
-
-    const onClick = async (evt: MapLayerMouseEvent) => {
-        await navigator.clipboard.writeText(`{ lon: ${evt.lngLat.lng}, lat: ${evt.lngLat.lat} }`);
-    }
 
     const dataToPlot = state.chosenSegment ? roadSegPoints : tracks;
 
+    if (mapRef?.current && dataToPlot && dataToPlot.features?.length > 0) {
+        const firstFeature = dataToPlot.features[0];
+        if (firstFeature && firstFeature.geometry) {
+            const { geometry } = firstFeature;
+
+            if (geometry.type === 'Point') {
+                console.log('Auto-zooming to Point:', geometry.coordinates);
+                const [lon, lat] = geometry.coordinates;
+                mapRef.current.flyTo({ center: [lon, lat], zoom: 10, essential: true });
+            } else if (geometry.type === 'LineString') {
+                console.log('Auto-zooming to LineString');
+                const [lon, lat] = geometry.coordinates[0];
+                mapRef.current.flyTo({ center: [lon, lat], zoom: 10, essential: true });
+                console.log(lon, lat, state.chosenSegment);
+            } else if (geometry.type === 'Polygon') {
+                console.log('Auto-zooming to Polygon');
+                const [lon, lat] = geometry.coordinates[0][0];
+                mapRef.current.flyTo({ center: [lon, lat], zoom: 10, essential: true });
+            } else {
+                console.warn('Unsupported geometry type:', geometry.type);
+            }
+        } else {
+            console.warn('No valid geometry in firstFeature:', firstFeature);
+        }
+    } else {
+        console.log('Zoom conditions not met');
+        console.log('mapRef:', mapRef?.current);
+        console.log('dataToPlot:', dataToPlot);
+    }
+
+
+
     return (
         <ReactMapGl
-            key={state.chosenSegment?.includes('IDEAL') ? 'scatter-mode' : 'line-mode'}
+            ref={mapRef}
             mapboxAccessToken={MAPBOX_TOKEN}
             initialViewState={state.viewport}
             style={{ width: '52vw', height: '90vh' }}
             mapStyle="mapbox://styles/mapbox/satellite-streets-v11"
-            onClick={onClick}
-            onMouseMove={onHover}
-            onMouseLeave={onLeave}
         >
             <MapHoverInfo />
 
-            {
-                state.chosenSegment?.includes('IDEAL')
-                    ? (
-                        <Source type="geojson" data={dataToPlot as any}>
-                            <Layer
-                                id="scatter-points"
-                                type="circle"
-                                paint={{
-                                    'circle-radius': 6,
-                                    'circle-color': 'red',
-                                    'circle-opacity': 0.8,
-                                }}
-                            />
-                        </Source>
-                    )
-                    : (
-                        dataToPlot
-                            ? (
-                                <Source type="geojson" data={dataToPlot as any} lineMetrics={true}>
-                                    <Layer
-                                        id="tracks"
-                                        type="line"
-                                        paint={{
-                                            'line-color': 'red',
-                                            'line-width': [
-                                                'interpolate',
-                                                ['linear'],
-                                                ['line-progress'],
-                                                0,
-                                                5,
-                                            ],
-                                            'line-gradient': [
-                                                'interpolate',
-                                                ['linear'],
-                                                ['line-progress'],
-                                                0,
-                                                'red',
-                                                state.sliderValue,
-                                                'blue',
-                                                state.sliderValue + 0.01,
-                                                'rgba(0, 0, 0, 0)',
-                                            ],
-                                        }}
-                                    />
-                                </Source>
-                            )
-                            : <React.Fragment />
-                    )
-            }
+            {state.chosenSegment?.includes('IDEAL') ? (
+                <Source key="scatter-source" type="geojson" data={dataToPlot as any}>
+                    <Layer
+                        id="scatter-points"
+                        type="circle"
+                        paint={{
+                            'circle-radius': 5,
+                            'circle-color': 'red',
+                            'circle-opacity': 0.8,
+                        }}
+                    />
+                </Source>
+            ) : dataToPlot ? (
+                <Source key="line-source" type="geojson" data={dataToPlot as any} lineMetrics={true}>
+                    <Layer
+                        id="tracks"
+                        type="line"
+                        paint={{
+                            'line-color': 'red',
+                            'line-width': [
+                                'interpolate',
+                                ['linear'],
+                                ['line-progress'],
+                                5,
+                                5,
+                            ],
+                            'line-gradient': [
+                                'interpolate',
+                                ['linear'],
+                                ['line-progress'],
+                                0,
+                                'red',
+                                state.sliderValue,
+                                'blue',
+                                state.sliderValue + 0.01,
+                                'rgba(0, 0, 0, 0)',
+                            ],
+                        }}
+                    />
+                </Source>
+            ) : (
+                <React.Fragment />
+            )}
         </ReactMapGl>
+
 
     );
 });
