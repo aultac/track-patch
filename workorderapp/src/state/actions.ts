@@ -542,13 +542,28 @@ export const getSegmentGeoJSON = action('getSegmentGeoJSON', (input: VehicleDayT
 });
 
 let _segPointsMap: Map<string, FeatureCollection> = new Map<string, FeatureCollection>();
-export const segPointMap = action('segPointMap', (input: string | null): FeatureCollection => {
+export const segPointsMap = action('segPointsMap', (input: string | null): FeatureCollection => {
     if (input){
         const featureCollection = _segPointsMap.get(input);
         if (!featureCollection) {
             throw new Error(`No feature collection found for input: ${input}`);
         }
         return featureCollection;
+    }
+    else {
+        throw new Error("Input inventory string is null")
+        
+    }
+});
+
+let _segPointsTime: Map<string, string> = new Map<string, string>();
+export const segPointsTime = action('segPointsTime', (input: string | null): string => {
+    if (input){
+        const time = _segPointsTime.get(input);
+        if (!time) {
+            throw new Error(`No time found for input: ${input}`);
+        }
+        return time;
     }
     else {
         throw new Error("Input inventory string is null")
@@ -588,6 +603,9 @@ export const createWorkOrders = action('createWorkorders', async (opts?: { nosav
                 const computedPoints = await computePointsOnRoadSegmentForVehicleOnDay({ seg: seg, vehicleid: vehicleid, day: day });
                 if (computedPoints){
                     _segPointsMap?.set(String(vehicleid) + '-' + String(day) + '-' + seg['Inventory Asset'], getSegmentGeoJSON(computedPoints, '#ff0000'))
+                    if(computedPoints.st && computedPoints.et){
+                        _segPointsTime?.set(String(vehicleid) + '-' + String(day) + '-' + seg['Inventory Asset'], computedPoints.st.format('HH:mm:ss') + '-' +  computedPoints.et.format('HH:mm:ss'))
+                    }
                 }
                 _createdWorkOrders.push({
                     ...va,

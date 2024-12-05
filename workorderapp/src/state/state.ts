@@ -1,3 +1,4 @@
+import { Dayjs } from 'dayjs';
 import { observable } from 'mobx';
 import log from '../log';
 import geojsonvizfiles from './geojsonvizfiles.json';
@@ -14,6 +15,8 @@ export type VehicleDayTrackSeg = {
     vid: number;
     seg: string;
     track: number[][];
+    st?: Dayjs | null;
+    et?: Dayjs | null
 };
 
 export type BigData = { rev: number };

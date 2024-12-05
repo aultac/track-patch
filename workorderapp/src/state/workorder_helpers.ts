@@ -5,7 +5,7 @@ import { roadNameToType } from '@track-patch/gps2road/dist/roadnames';
 import { fetchMileMarkersForRoad, MileMarker } from '@track-patch/gps2road';
 import { daytracks } from './actions';
 
-import dayjs from 'dayjs';
+import dayjs, { Dayjs } from 'dayjs';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
 dayjs.extend(customParseFormat);
 
@@ -203,7 +203,16 @@ export async function computePointsOnRoadSegmentForVehicleOnDay({ seg, vehicleid
     let computedPoints = [];
     // A vehicle is considerd to be on a part of a road from the current point until the next point unless the next point is more than 5 mins away.
 
+    let st: Dayjs | null = null;
+    let et: Dayjs | null = null;
+
     for (const [index, point] of dt.track.entries()) {
+        if (index === 0){
+            st = point.time;
+        }
+        if (index === dt.track.length - 1){
+            et = point.time;
+        }
         if (!point.road) continue; // cannot contribute working time if this point was not on a known road.
 
         // Is this point on the road section of interest?
@@ -233,7 +242,9 @@ export async function computePointsOnRoadSegmentForVehicleOnDay({ seg, vehicleid
         day: day,
         vid: vehicleid,
         seg: seg['Route (Ref)'],
-        track: computedPoints
+        track: computedPoints,
+        st: st,
+        et: et
     }
     return retData;
 }

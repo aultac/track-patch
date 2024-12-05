@@ -25,7 +25,7 @@ export const Map = observer(function Map() {
     let roadSegPoints = React.useMemo(() => {
         if (state.chosenSegment && state.chosenSegment.trim() !== '') {
             try {
-                return actions.segPointMap(state.chosenSegment);
+                return actions.segPointsMap(state.chosenSegment);
             } catch (error) {
                 console.error('Error fetching segment points:', error);
                 return null;
@@ -33,8 +33,6 @@ export const Map = observer(function Map() {
         }
         return null;
     }, [state.chosenSegment]); // Reactively recompute when chosenSegment changes
-
-    console.log(JSON.stringify(roadSegPoints, null, 2))
 
     const dataToPlot = state.chosenSegment ? roadSegPoints : tracks;
 
@@ -44,16 +42,12 @@ export const Map = observer(function Map() {
             const { geometry } = firstFeature;
 
             if (geometry.type === 'Point') {
-                console.log('Auto-zooming to Point:', geometry.coordinates);
                 const [lon, lat] = geometry.coordinates;
                 mapRef.current.flyTo({ center: [lon, lat], zoom: 10, essential: true });
             } else if (geometry.type === 'LineString') {
-                console.log('Auto-zooming to LineString');
                 const [lon, lat] = geometry.coordinates[0];
                 mapRef.current.flyTo({ center: [lon, lat], zoom: 10, essential: true });
-                console.log(lon, lat, state.chosenSegment);
             } else if (geometry.type === 'Polygon') {
-                console.log('Auto-zooming to Polygon');
                 const [lon, lat] = geometry.coordinates[0][0];
                 mapRef.current.flyTo({ center: [lon, lat], zoom: 10, essential: true });
             } else {
