@@ -5691,6 +5691,7 @@ const RAW_RUNTIME_STATE =
           ["@track-patch/cli", "workspace:cli"],\
           ["@oada/client", "npm:4.5.0"],\
           ["@overleaf/o-error", "npm:3.4.0"],\
+          ["@track-patch/gps2road", "workspace:gps2road"],\
           ["@track-patch/lib", "workspace:lib"],\
           ["@tsconfig/node16", "npm:1.0.3"],\
           ["@turf/turf", "npm:6.5.0"],\
@@ -16234,6 +16235,15 @@ const RAW_RUNTIME_STATE =
         "linkType": "HARD"\
       }]\
     ]],\
+    ["javascript-lp-solver", [\
+      ["npm:0.4.24", {\
+        "packageLocation": "./.yarn/cache/javascript-lp-solver-npm-0.4.24-918c1fc7b5-c95637696b.zip/node_modules/javascript-lp-solver/",\
+        "packageDependencies": [\
+          ["javascript-lp-solver", "npm:0.4.24"]\
+        ],\
+        "linkType": "HARD"\
+      }]\
+    ]],\
     ["jest", [\
       ["npm:27.5.1", {\
         "packageLocation": "./.yarn/cache/jest-npm-27.5.1-bacad4fe2a-a1435098e1.zip/node_modules/jest/",\
@@ -25782,6 +25792,7 @@ const RAW_RUNTIME_STATE =
           ["debug", "virtual:ac3d8e680759ce54399273724d44e041d6c9b73454d191d411a8c44bb27e22f02aaf6ed9d3ad0ac1c298eac4833cff369c9c7b84c573016112c4f84be2cd8543#npm:4.3.4"],\
           ["gh-pages", "npm:4.0.0"],\
           ["isomorphic-fetch", "npm:3.0.0"],\
+          ["javascript-lp-solver", "npm:0.4.24"],\
           ["log", "npm:6.3.1"],\
           ["mapbox-gl", "npm:2.13.0"],\
           ["mobx", "npm:6.8.0"],\

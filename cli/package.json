@@ -11,13 +11,14 @@
     "summary": "yarn cli summary",
     "tojson": "yarn cli tojson",
     "cl-fromgdb": "yarn cli cl-fromgdb",
-    "split-day-tracks": "DEBUG=\"*\" yarn cli split-day-tracks -f \"/Users/aultac/Work/2023-PU/Projects/INDOT/Datasets/20220804_IndotGpsData_Winter/20220804 AVL GPS Data for Purdue v2 csv/20220804 AVL GPS Data for Purdue v2.csv\" -o /Users/aultac/Work/2023-PU/Projects/INDOT/Datasets/TracksByWeek"
+    "split-day-tracks": "DEBUG=\"*\" yarn cli split-day-tracks -f \"/Users/aultac/Work/2023-PU/Projects/INDOT/Datasets/20220804_IndotGpsData_Winter/20220804 AVL GPS Data for Purdue v2 csv/20220804 AVL GPS Data for Purdue v2.csv\" -o /Users/aultac/Work/2023-PU/Projects/INDOT/Datasets/TracksByWeek",
+    "milp-server": "node dist/milp-server.js"
   },
   "dependencies": {
     "@oada/client": "^4.0.1",
     "@overleaf/o-error": "^3.4.0",
-    "@track-patch/lib": "workspace:^",
     "@track-patch/gps2road": "workspace:^",
+    "@track-patch/lib": "workspace:^",
     "@tsconfig/node16": "^1.0.2",
     "@turf/turf": "^6.5.0",
     "@types/debug": "^4.1.7",

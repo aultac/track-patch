@@ -3426,6 +3426,7 @@ __metadata:
   dependencies:
     "@oada/client": "npm:^4.0.1"
     "@overleaf/o-error": "npm:^3.4.0"
+    "@track-patch/gps2road": "workspace:^"
     "@track-patch/lib": "workspace:^"
     "@tsconfig/node16": "npm:^1.0.2"
     "@turf/turf": "npm:^6.5.0"
@@ -12367,6 +12368,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"javascript-lp-solver@npm:^0.4.24":
+  version: 0.4.24
+  resolution: "javascript-lp-solver@npm:0.4.24"
+  checksum: 10/c95637696ba519881b411c3b631f1988eb5c3ca9d096f96fb0709c2bb388793a9e520b54434bd12f5d96165ee728f0c88a88057b9f82fc44ef5ed0a228496d66
+  languageName: node
+  linkType: hard
+
 "jest-changed-files@npm:^27.5.1":
   version: 27.5.1
   resolution: "jest-changed-files@npm:27.5.1"
@@ -20015,6 +20023,7 @@ __metadata:
     debug: "npm:^4.3.4"
     gh-pages: "npm:^4.0.0"
     isomorphic-fetch: "npm:^3.0.0"
+    javascript-lp-solver: "npm:^0.4.24"
     log: "npm:^6.3.1"
     mapbox-gl: "npm:^2.11.1"
     mobx: "npm:^6.7.0"
