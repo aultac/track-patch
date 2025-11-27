@@ -4,12 +4,13 @@ import { VehicleDayTrackSeg } from './state';
 import { roadNameToType } from '@track-patch/gps2road/dist/roadnames';
 import { fetchMileMarkersForRoad, MileMarker } from '@track-patch/gps2road';
 import { daytracks } from './actions';
-
 import dayjs, { Dayjs } from 'dayjs';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
+import log from '../log';
+import { distanceInMeters, vehicleidFromResourceName } from './workorder_utils';
+
 dayjs.extend(customParseFormat);
 
-import log from '../log';
 const { info } = log.get("workorder_helpers");
 
 // Core function to compute how long a vehicle was on a road segment:
@@ -35,20 +36,19 @@ export async function computeIdealTimeForVehicleOnDay({ vehicleid, day }: { vehi
     const dt = daytracks()?.[day]?.[vehicleid];
     if (!dt) return 0;
     let computedSeconds = 0;
-    // A vehicle is considerd to be on a part of a road from the current point until the next point unless the next point is more than 5 mins away.
-
+    const MAX_IDLE_GAP_SECONDS = 15 * 60;
+    const SPEED_THRESHOLD_MPH = 2;
+    const DISTANCE_THRESHOLD_METERS = 15;
     for (const [index, point] of dt.track.entries()) {
-        if (index >= dt.track.length - 1) {
-            continue;
-        }
-        if(point.road) continue;
-        // TODO: should actually compute (using speed, or estimated speed from lat/lon/time of next point)
-        // when the vehicle would cross the start or end offset boundary, rather than attribute all the time
-        // to the road segment of the point itself
+        if (index >= dt.track.length - 1) continue;
         const next = dt.track[index + 1]!;
-        let duration = next.time.unix() - point.time.unix();
-        if (duration > 15 * 60) continue;
-        computedSeconds += duration;
+        const duration = next.time.unix() - point.time.unix();
+        if (duration <= 0 || duration > MAX_IDLE_GAP_SECONDS) continue;
+        const slowEnough = (point.speed ?? 0) < SPEED_THRESHOLD_MPH && (next.speed ?? 0) < SPEED_THRESHOLD_MPH;
+        const movedVeryLittle = distanceInMeters(point.lat, point.lon, next.lat, next.lon) < DISTANCE_THRESHOLD_METERS;
+        if (slowEnough || movedVeryLittle) {
+            computedSeconds += duration;
+        }
     }
     return computedSeconds;
 }
@@ -58,19 +58,24 @@ export async function computeIdealPointsForVehicleOnDay({ vehicleid, day }: { ve
 
     const dt = daytracks()?.[day]?.[vehicleid];
     if (!dt) return retData;;
-    let computedPoints = [];
-    // A vehicle is considerd to be on a part of a road from the current point until the next point unless the next point is more than 5 mins away.
+    let computedPoints: number[][] = [];
+    const SPEED_THRESHOLD_MPH = 2;
+    const DISTANCE_THRESHOLD_METERS = 15;
+    const MAX_IDLE_GAP_SECONDS = 15 * 60;
 
     for (const [index, point] of dt.track.entries()) {
-        if (index >= dt.track.length - 1) {
-            continue;
+        if (index >= dt.track.length - 1) continue;
+        const next = dt.track[index + 1]!;
+        const duration = next.time.unix() - point.time.unix();
+        if (duration <= 0 || duration > MAX_IDLE_GAP_SECONDS) continue;
+        const slowEnough = (point.speed ?? 0) < SPEED_THRESHOLD_MPH && (next.speed ?? 0) < SPEED_THRESHOLD_MPH;
+        const movedVeryLittle = distanceInMeters(point.lat, point.lon, next.lat, next.lon) < DISTANCE_THRESHOLD_METERS;
+        if (slowEnough || movedVeryLittle) {
+            computedPoints.push([point.lon, point.lat]);
+            computedPoints.push([next.lon, next.lat]);
         }
-        if(point.road) continue;
-        // TODO: should actually compute (using speed, or estimated speed from lat/lon/time of next point)
-        // when the vehicle would cross the start or end offset boundary, rather than attribute all the time
-        // to the road segment of the point itself
-        computedPoints.push([point.lon, point.lat])
     }
+    if (computedPoints.length === 0) return retData;
     retData = {
         day: day,
         vid: vehicleid,
@@ -78,13 +83,6 @@ export async function computeIdealPointsForVehicleOnDay({ vehicleid, day }: { ve
         track: computedPoints
     }
     return retData;
-}
-
-
-export function vehicleidFromResourceName(name: string): number {
-    const vid = +(name?.split('-')[0]?.trim().replace(/^0+/, '')); // no leading zeros
-    if (isNaN(vid)) return 0;
-    return vid;
 }
 
 export async function saveWorkorders(filename: string, workorders: WorkOrder[]) {

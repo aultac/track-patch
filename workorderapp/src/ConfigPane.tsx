@@ -74,6 +74,7 @@ export const ConfigPane = observer(function ConfigPane() {
         actions.updateSegment(selectedSegment);
     };
 
+
     const handleFile = ({ filetype, eventtype, inout }: { filetype: 'tracks' | 'workorders' | 'vehicleactivities', eventtype: 'drop' | 'drag', inout?: boolean }): React.DragEventHandler => async (evt) => {
         evt.preventDefault();
         evt.stopPropagation();
@@ -114,6 +115,17 @@ export const ConfigPane = observer(function ConfigPane() {
         vehicleid: state.chosenVehicleID as string,
         date: state.chosenDate as string,
     });
+
+    React.useEffect(() => {
+        if (!tableData || tableData.length < 1) return;
+        if (!state.chosenVehicleID || !state.chosenDate) return;
+        if (selectedSegment && selectedSegment.includes(`${state.chosenVehicleID}-${state.chosenDate}`)) return;
+        const defaultAsset = tableData[0]?.inventoryAsset;
+        if (!defaultAsset) return;
+        const defaultSegment = `${state.chosenVehicleID}-${state.chosenDate}-${defaultAsset}`;
+        setSelectedSegment(defaultSegment);
+        actions.updateSegment(defaultSegment);
+    }, [tableData, state.chosenVehicleID, state.chosenDate]);
 
     const totals = (tableData || []).reduce(
         (acc, row) => {
@@ -221,7 +233,12 @@ export const ConfigPane = observer(function ConfigPane() {
                             actions.createWorkOrders()
                         }}
                         variant="contained"
-                        disabled={!actions.vehicleActivities() || !actions.daytracks() || state.createdWorkOrders.parsing || state.createdWorkOrders.workorders.rev > 0}
+                        disabled={
+                            !actions.vehicleActivities()
+                            || !actions.daytracks()
+                            || state.createdWorkOrders.parsing
+                            || state.createdWorkOrders.processing
+                        }
                     >
                         Create Work Records
                     </Button>
@@ -297,6 +314,8 @@ export const ConfigPane = observer(function ConfigPane() {
                                 <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#f5f5f5' }}>Route Ref</TableCell>
                                 <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#f5f5f5' }}>Inventory Asset</TableCell>
                                 <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#f5f5f5' }}>Computed Hours</TableCell>
+                                <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#f5f5f5' }}>Pred. Start</TableCell>
+                                <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#f5f5f5' }}>Pred. End</TableCell>
                                 <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#f5f5f5' }}>Reported Hours</TableCell>
                             </TableRow>
                         </TableHead>
@@ -316,6 +335,8 @@ export const ConfigPane = observer(function ConfigPane() {
                                     <TableCell>{row.routeRef}</TableCell>
                                     <TableCell>{row.inventoryAsset}</TableCell>
                                     <TableCell>{fHrsToHrsMin(row.computedHours.toString())}</TableCell>
+                                    <TableCell>{row.computedStart || '-'}</TableCell>
+                                    <TableCell>{row.computedEnd || '-'}</TableCell>
                                     <TableCell>{fHrsToHrsMin(row.reportedHours.toString())}</TableCell>
                                 </TableRow>
                             ))}
@@ -336,6 +357,8 @@ export const ConfigPane = observer(function ConfigPane() {
                                 <TableCell>
                                     {fHrsToHrsMin(selectedVehicleComputedHrs.toFixed(2))}
                                 </TableCell>
+                                <TableCell>-</TableCell>
+                                <TableCell>-</TableCell>
                                 <TableCell>
                                     -
                                 </TableCell>
@@ -346,6 +369,9 @@ export const ConfigPane = observer(function ConfigPane() {
                                 </TableCell>
                                 <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#f5f5f5' }}>
                                     {fHrsToHrsMin(totals.computedHours.toFixed(2))}
+                                </TableCell>
+                                <TableCell colSpan={2} sx={{ fontWeight: 'bold', backgroundColor: '#f5f5f5' }}>
+                                    &nbsp;
                                 </TableCell>
                                 <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#f5f5f5' }}>
                                     {fHrsToHrsMin(totals.reportedHours.toFixed(2))}
@@ -358,5 +384,3 @@ export const ConfigPane = observer(function ConfigPane() {
         </div >
     );
 });
-
-

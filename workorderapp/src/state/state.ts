@@ -62,6 +62,7 @@ export type State = {
 
     createdWorkOrders: {
         parsing: boolean,
+        processing: boolean,
         vehicleActivities: BigData,
         workorders: BigData,
     }
@@ -127,6 +128,7 @@ export const state = observable<State>({
     },
     createdWorkOrders: {
         parsing: false,
+        processing: false,
         vehicleActivities: { rev: 0 },
         workorders: { rev: 0 },
     },
@@ -161,4 +163,3 @@ export const state = observable<State>({
     checkbox: false,
     csegment: 'NA',
 });
-

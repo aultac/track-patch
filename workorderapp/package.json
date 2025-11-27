@@ -25,6 +25,7 @@
     "debug": "^4.3.4",
     "gh-pages": "^4.0.0",
     "isomorphic-fetch": "^3.0.0",
+    "javascript-lp-solver": "^0.4.24",
     "log": "^6.3.1",
     "mapbox-gl": "^2.11.1",
     "mobx": "^6.7.0",
