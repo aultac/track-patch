@@ -52,6 +52,7 @@ type VehicleMilpResult = {
     timelines: Map<WorkOrder, MilpTimeline>;
     gpsHours: number;
     assignedHours: number;
+    reportedMatchedHours: number;
 };
 
 export async function assignMilpTimelines({
@@ -87,6 +88,7 @@ export async function assignMilpTimelines({
 
     let totalGpsHours = 0;
     let totalAssigned = 0;
+    let totalReportedMatched = 0;
     const backendEnabled = isMilpBackendAvailable();
     const hardwareCores = typeof navigator !== 'undefined' && navigator.hardwareConcurrency ? navigator.hardwareConcurrency : 4;
     const concurrency = backendEnabled ? Math.max(1, Math.min(byVehicle.size, hardwareCores)) : 1;
@@ -103,13 +105,14 @@ export async function assignMilpTimelines({
     results.forEach((result) => {
         totalGpsHours += result.gpsHours;
         totalAssigned += result.assignedHours;
+        totalReportedMatched += result.reportedMatchedHours;
         result.timelines.forEach((timeline, wo) => assignments.set(wo, timeline));
     });
 
     return {
         assignments,
         summary: {
-            totalReportedHours: totalReported,
+            totalReportedHours: totalReportedMatched || totalReported,
             totalGpsHours,
             assignedHours: totalAssigned,
         },
@@ -119,7 +122,7 @@ export async function assignMilpTimelines({
 function solveVehicleMilp(vehicleId: number, orders: ParsedOrder[], getTrack: VehicleDayTrackProvider): VehicleMilpResult {
     const timelines = new Map<WorkOrder, MilpTimeline>();
     if (!orders.length) {
-        return { timelines, gpsHours: 0, assignedHours: 0 };
+        return { timelines, gpsHours: 0, assignedHours: 0, reportedMatchedHours: 0 };
     }
     const requiredDays = new Set<string>();
     orders.forEach((order) => {
@@ -133,15 +136,15 @@ function solveVehicleMilp(vehicleId: number, orders: ParsedOrder[], getTrack: Ve
         getTrack,
     });
     if (!intervals.length) {
-        return { timelines, gpsHours: 0, assignedHours: 0 };
+        return { timelines, gpsHours: 0, assignedHours: 0, reportedMatchedHours: 0 };
     }
     const model = buildModel(orders, intervals);
     if (!model) {
-        return { timelines, gpsHours: sumIntervalHours(intervals), assignedHours: 0 };
+        return { timelines, gpsHours: sumIntervalHours(intervals), assignedHours: 0, reportedMatchedHours: 0 };
     }
     const solution = solver.Solve(model.model);
     if (!solution || !solution.feasible) {
-        return { timelines, gpsHours: sumIntervalHours(intervals), assignedHours: 0 };
+        return { timelines, gpsHours: sumIntervalHours(intervals), assignedHours: 0, reportedMatchedHours: 0 };
     }
     const segmentsPerOrder = new Map<string, SegmentUsage[]>();
     Object.entries(solution).forEach(([name, value]) => {
@@ -169,13 +172,14 @@ function solveVehicleMilp(vehicleId: number, orders: ParsedOrder[], getTrack: Ve
         timelines,
         gpsHours: sumIntervalHours(intervals),
         assignedHours: assignedSeconds / 3600,
+        reportedMatchedHours: sumMatchedReportedHours(orders, timelines),
     };
 }
 
 async function solveVehicleViaBackend(vehicleId: number, orders: ParsedOrder[], getTrack: VehicleDayTrackProvider): Promise<VehicleMilpResult> {
     const timelines = new Map<WorkOrder, MilpTimeline>();
     if (!orders.length) {
-        return { timelines, gpsHours: 0, assignedHours: 0 };
+        return { timelines, gpsHours: 0, assignedHours: 0, reportedMatchedHours: 0 };
     }
     const requiredDays = new Set<string>();
     orders.forEach((order) => {
@@ -189,7 +193,7 @@ async function solveVehicleViaBackend(vehicleId: number, orders: ParsedOrder[], 
         getTrack,
     });
     if (!intervals.length) {
-        return { timelines, gpsHours: 0, assignedHours: 0 };
+        return { timelines, gpsHours: 0, assignedHours: 0, reportedMatchedHours: 0 };
     }
     const orderMap = new Map<string, ParsedOrder>();
     orders.forEach((order) => orderMap.set(order.id, order));
@@ -228,6 +232,7 @@ async function solveVehicleViaBackend(vehicleId: number, orders: ParsedOrder[], 
             timelines,
             gpsHours: sumIntervalHours(intervals),
             assignedHours: assignedSeconds / 3600,
+            reportedMatchedHours: sumMatchedReportedHours(orders, timelines),
         };
     } catch (error) {
         console.warn(`MILP backend failed for vehicle ${vehicleId}, falling back to browser solver`, error);
@@ -395,4 +400,15 @@ function hoursFromWorkOrder(workorder: WorkOrder): number {
     const cleaned = `${candidate}`.replace(/,/g, '').trim();
     const value = parseFloat(cleaned);
     return Number.isFinite(value) ? value : 0;
+}
+
+function sumMatchedReportedHours(orders: ParsedOrder[], timelines: Map<WorkOrder, MilpTimeline>): number {
+    if (!orders.length || timelines.size < 1) return 0;
+    const orderCapacityByWorkorder = new Map<WorkOrder, number>();
+    orders.forEach((order) => orderCapacityByWorkorder.set(order.workOrder, order.capacity));
+    let total = 0;
+    timelines.forEach((_, workorder) => {
+        total += orderCapacityByWorkorder.get(workorder) || 0;
+    });
+    return total;
 }

@@ -654,7 +654,7 @@ async function applyMilpToWorkorders(target: WorkOrder[] | null, label: string) 
         workorder['Computed Start Time'] = timeline.start ? timeline.start.format('YYYY-MM-DD HH:mm:ss') : '';
         workorder['Computed End Time'] = timeline.end ? timeline.end.format('YYYY-MM-DD HH:mm:ss') : '';
     });
-    if (summary.totalReportedHours > 0 || summary.totalGpsHours > 0) {
+    if (label === 'validated' && (summary.totalReportedHours > 0 || summary.totalGpsHours > 0)) {
         const workCoverage = summary.totalReportedHours > 0 ? (summary.assignedHours / summary.totalReportedHours) * 100 : 0;
         const gpsCoverage = summary.totalGpsHours > 0 ? (summary.assignedHours / summary.totalGpsHours) * 100 : 0;
         activity(`MILP (${label}) coverage: ${workCoverage.toFixed(1)}% of reported hours, ${gpsCoverage.toFixed(1)}% of GPS availability`);
